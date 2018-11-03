@@ -37,6 +37,19 @@
 // Identifier
 #define T_ID            29
 
+// Integer Constants    ||   #define T_ICONST        30
+//#define T_DECCONST		30
+//#define T_HEXCONST		31
+//#define T_OCTCONST		32
+//#define T_BINCONST		33
+
+// Float Constants    ||   #define T_FCONST        31
+//#define T_FDECCONST		34
+//#define T_FHEXCONST		35
+//#define T_FOCTCONST		36
+//#define T_FBINCONST		37
+
+
 // Basic Constants
 #define T_ICONST        30
 #define T_FCONST        31
@@ -51,7 +64,7 @@
 #define T_ADDOP         38
 #define T_MULOP         39
 #define T_NOTOP         40
-#define T_INCDEC        41
+#define T_INCDEC        41   // ++ -- ?
 #define T_SIZEOP        42
 
 // List Items
@@ -74,3 +87,8 @@
 #define T_INP           57
 #define T_OUT           58
 #define T_EOF            0
+
+
+
+#define MAX_ERRORS       5
+#define MAX_STR_CONST  256
