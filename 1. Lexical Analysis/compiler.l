@@ -33,6 +33,7 @@ void yyerror(char *message);
 
 /* Initial States */
 %x STATE_COMMENT
+%x STATE_INLINE_COMMENT
 %x STATE_STRING
 
 LETTER				[a-zA-Z]
@@ -244,6 +245,9 @@ C(AD*|D+)R												{printf("TOKEN FOUND: %s | TOKEN NUMBER: %d | LINE: %d\n",
 <STATE_COMMENT>.										{}
 <STATE_COMMENT><<EOF>> 									{printf("Unterminated comment");return 0;}
 
+"//" 													{BEGIN(STATE_INLINE_COMMENT);}
+<STATE_INLINE_COMMENT>"\n" 								{BEGIN(INITIAL);lineno++;}
+<STATE_INLINE_COMMENT><<EOF>> 							{printf("Unterminated comment");return 0;}
 
  /* Strings */
 \"														{str_buf_ptr = str_buf; BEGIN(STATE_STRING);}
