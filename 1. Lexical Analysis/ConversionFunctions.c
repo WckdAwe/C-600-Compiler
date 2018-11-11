@@ -28,11 +28,11 @@ int main(){
 	assertConv(BinToInt, "0B10110", 22);
 	assertConv(BinToInt, "0B10011", 19);
 	
-	assertFloatConv(HexToFloat, "0XA.9", 10.9); //? How do we calc these (Floats ->)
+	assertFloatConv(HexToFloat, "0XA.9", 0); //? How do we calc these (Floats ->)
 	//assertFloat(HexToFloat, "",  );
-	assertFloatConv(OctToFloat, "0O3.617",  3.399);
+	assertFloatConv(OctToFloat, "0O3.617",  0);
 	//assertFloat(OctToFloat, "",  );
-	assertFloatConv(BinToFloat, "0B1.0010", 1.2);
+	assertFloatConv(BinToFloat, "0B1.0010", 0);
 	//assertFloat(BinToFloat, "",  );
 	
 	

@@ -14,6 +14,11 @@
 #include <math.h>
 #include <string.h>
 
+#ifndef FLEX_DEBUG
+#define FLEX_DEBUG 1
+#define FPRINT(x, y) printf("TOKEN FOUND: %s | TOKEN NUMBER: %d | LINE: %d\n", yytext, T_TYPEDEF, lineno);
+#endif
+
 int lineno=1; // Program's line number
 int error_count = 0; // Program's total errors
                      // TODO: + on the ID? Probably wrong REGEX!
@@ -243,11 +248,10 @@ C(AD*|D+)R                                              {printf("TOKEN FOUND: %s
 <STATE_COMMENT>"*/"                                     {BEGIN(INITIAL);}
 <STATE_COMMENT>"\n"                                     {lineno++;}
 <STATE_COMMENT>.                                        {}
-<STATE_COMMENT><<EOF>>                                  {printf("Unterminated comment");return 0;}
+<STATE_COMMENT><<EOF>>                                  {yyerror("Unterminated comment"); return 0;}
 
 "//"                                                    {BEGIN(STATE_INLINE_COMMENT);}
 <STATE_INLINE_COMMENT>"\n"                              {BEGIN(INITIAL);lineno++;}
-<STATE_INLINE_COMMENT><<EOF>>                           {printf("Unterminated comment");return 0;}
 
  /* Strings */
 \"                                                      {str_buf_ptr = str_buf; BEGIN(STATE_STRING);}
@@ -262,7 +266,8 @@ C(AD*|D+)R                                              {printf("TOKEN FOUND: %s
 <STATE_STRING>\\b                                       {*str_buf_ptr++ = '\b';}
 <STATE_STRING>\\v                                       {*str_buf_ptr++ = '\v';}
 <STATE_STRING>\\\n                                      {lineno++;}
-
+<STATE_STRING>\\										{*str_buf_ptr--;lineno++;}
+<STATE_STRING><<EOF>>                                   {yyerror("Unterminated comment"); return 0;}
 
 
 {WHITESPACE}                                            {}
