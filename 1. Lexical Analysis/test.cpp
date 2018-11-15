@@ -40,6 +40,9 @@ void mystery_class::__try_it() {
    }
    x.i[0] = u.a = 0x33202036;
    x.i[1] = 0o2762.3;
+   x.i[2] = 0x2762.3;
+   x.i[3] = 0x276F.A;
+   x.i[4] = 0xA.F;
 }
 int main() {
 int z,j; string y[100];
@@ -50,4 +53,13 @@ for (x=1;(x<x[10,g[y+x]])&&(length(y)<x);x++)
    cin >> x[i] >> i >> x[i] >> y[i];
 y = !x[i*sizeof(char)];
 u.b[3] = '\n';
+char str123[100] = "This\n is \" \A \\STEST";
+char str2[100] = "This is also a \
+String\n\
+CHARACTERS \\ AT THE END OF THE LINE \
+EXTENDS STRING IN THE NEXT LINE\nYES!";
+1Boring
+3Weird
+_6Something
+8elif
 }

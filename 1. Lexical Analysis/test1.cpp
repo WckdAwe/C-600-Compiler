@@ -26,7 +26,8 @@ class mystery_class : t {
 };
 void mystery_class::__try_it(int& n, days list d) {
 /*
-** no comment
+** no comment **
+** Maybe some
 **/
    ar z;
    t x;

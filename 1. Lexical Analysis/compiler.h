@@ -37,19 +37,6 @@
 // Identifier
 #define T_ID            29
 
-// Integer Constants    ||   #define T_ICONST        30
-//#define T_DECCONST        30
-//#define T_HEXCONST        31
-//#define T_OCTCONST        32
-//#define T_BINCONST        33
-
-// Float Constants    ||   #define T_FCONST        31
-//#define T_FDECCONST       34
-//#define T_FHEXCONST       35
-//#define T_FOCTCONST       36
-//#define T_FBINCONST       37
-
-
 // Basic Constants
 #define T_ICONST        30
 #define T_FCONST        31
@@ -90,5 +77,13 @@
 
 
 
-#define MAX_ERRORS       5
+#define MAX_ERRORS       0
 #define MAX_STR_CONST  256
+
+#ifndef FLEX_DEBUG
+#define FLEX_DEBUG      1
+#define SHOW_TOKENS     1
+#define SHOW_COMMENTS   1
+#define SHOW_NUMERIC    1
+#define SHOW_STRINGS    1
+#endif
