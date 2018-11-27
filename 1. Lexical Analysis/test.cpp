@@ -58,8 +58,4 @@ char str2[100] = "This is also a \
 String\n\
 CHARACTERS \\ AT THE END OF THE LINE \
 EXTENDS STRING IN THE NEXT LINE\nYES!";
-1Boring
-3Weird
-_6Something
-8elif
 }
