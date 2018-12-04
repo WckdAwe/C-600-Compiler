@@ -86,6 +86,8 @@ ID                  \_*{LETTER}{ALPHANUM}*(_{ALPHANUM}+)*_?
                                                             return T_PROTECTED;}
 "PUBLIC"                                                {TPRINT(T_PUBLIC);
                                                             return T_PUBLIC;}
+"VOID"                                                  {TPRINT(T_VOID);
+                                                            return T_VOID;}
 "STATIC"                                                {TPRINT(T_STATIC);
                                                             return T_STATIC;}
 "UNION"                                                 {TPRINT(T_UNION);

@@ -10,9 +10,16 @@
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
+#include "settings.h"
 #include "hashtbl.h"
-#define MAX_ERRORS       0
-#define MAX_STR_CONST  256
+
+
+/** Extern from Flex **/
+extern int lineno, 
+           line_init;
+
+extern char str_buf[MAX_STR_CONST];    
+extern char* str_buf_ptr;
 
 extern int yylex();
 extern char *yytext;
@@ -21,14 +28,24 @@ extern FILE *yyin;
 extern void yyterminate();
 
 
-extern int lineno;
-extern int line_init;
-extern int error_count; 
-extern char str_buf[MAX_STR_CONST];    
-extern char* str_buf_ptr;
+/** Bison specific variables **/
+int error_count=0; 
+int flag_err_type=0; // 0: Token Error (YYTEXT) || 1: String Error (STRBUF)
 
-void yyerror(char* str);
+HASHTBL *hashtbl;
+
+/** Bison specific functions **/
+void yyerror(const char *message);
+
+
+/** TODO: Order of Operations: https://en.wikipedia.org/wiki/Order_of_operations **/
+/** TODO: Explain why UMINUS **/
+/** TODO: Explain Order of Operations **/
+/** TODO: Verify %type **/
 %}
+
+
+%error-verbose
 
 %union{
 	int intval;
@@ -36,25 +53,49 @@ void yyerror(char* str);
     char *strval;
 }
 
-%token<intval> T_INT T_ENUM T_LENGTH T_ICONST 
-%token<doubleval> T_FCONST
-%token<strval> T_TYPEDEF T_CHAR T_STRING T_SCONST 
-%token<strval> T_CLASS T_PRIVATE T_PROTECTED T_PUBLIC T_STATIC T_UNION T_LIST T_CONTINUE T_BREAK T_IF T_ELSE T_WHILE T_FOR
-%token<strval> T_SWITCH T_DEFAULT T_RETURN T_NEW T_CIN T_COUT T_MAIN T_THIS T_ID T_OROP T_ANDOP T_EQUIOP T_ADDOP T_MULOP T_INCDEC
-%token<strval> T_SIZEOP T_LISTFUNC T_LPAREN T_RPAREN T_SEMI T_DOT T_COMMA T_ASSING T_COLON T_LBRACK T_RBRACK T_REFER T_LBRACE 
-%token<strval> T_RBRACE T_METH T_INP T_OUT T_EOF 
-%token<strval> T_ASSIGN T_CASE T_CCONST T_EQUOP T_FLOAT T_NOTOP T_RELOP T_VOID
+%token <intval> T_ICONST 
+%token <doubleval> T_FCONST
+%token <strval> T_TYPEDEF T_CHAR T_STRING T_SCONST T_INT T_ENUM T_LENGTH
+%token <strval> T_CLASS T_PRIVATE T_PROTECTED T_PUBLIC T_STATIC T_UNION T_LIST T_CONTINUE T_BREAK T_IF T_ELSE T_WHILE T_FOR
+%token <strval> T_SWITCH T_DEFAULT T_RETURN T_NEW T_CIN T_COUT T_MAIN T_THIS T_ID T_OROP T_ANDOP T_EQUOP T_ADDOP T_MULOP T_INCDEC
+%token <strval> T_SIZEOP T_LISTFUNC T_LPAREN T_RPAREN T_SEMI T_DOT T_COMMA T_COLON T_LBRACK T_RBRACK T_REFER T_LBRACE 
+%token <strval> T_RBRACE T_METH T_INP T_OUT
+%token <strval> T_ASSIGN T_CASE T_CCONST T_FLOAT T_NOTOP T_RELOP T_VOID
+%token <strval> T_EOF 0 "end of file"
 
-%left T_OROP T_ANDOP
-%left T_ADDOP T
 
+%type <strval> program global_declaration global_declarations typedef_declaration typename standard_type listspec dims dim enum_declaration
+%type <strval> enum_body id_list initializer init_value expression variable general_expression assignment expression_list constant listexpression
+%type <strval> init_values class_declaration class_body parent members_methods access member_or_method member var_declaration variabledefs variabledef 
+%type <strval> anonymous_union union_body fields field method short_func_declaration short_par_func_header func_header_start parameter_types 
+%type <strval> pass_list_dims nopar_func_header union_declaration global_var_declaration init_variabledefs init_variabledef func_declaration full_func_declaration 
+%type <strval> full_par_func_header class_func_header_start func_class parameter_list pass_variabledef nopar_class_func_header decl_statements declarations decltype 
+%type <strval> statements statement expression_statement if_statement if_tail while_statement for_statement optexpr switch_statement switch_tail decl_cases 
+%type <strval> casestatements casestatement single_casestatement return_statement io_statement in_list in_item out_list out_item comp_statement main_function main_header
+
+%left T_COMMA
+%right T_ASSIGN 
+%left T_OROP
+%left T_ANDOP
+%left T_EQUOP
+%left T_RELOP
+%left T_ADDOP
+%left T_MULOP 
+%left T_NOTOP T_REFER T_SIZEOP T_INCDEC UMINUS
+%left T_LPAREN T_RPAREN T_LBRACK T_RBRACK T_DOT T_METH
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc T_ELSE
+
+
+                        
 %start program 
 
 %%
 program:                  global_declarations main_function
                         ;
 global_declarations:      global_declarations global_declaration
-                        |/* ε */
+                        | %empty {}
                         ;
 global_declaration:       typedef_declaration
                         | enum_declaration
@@ -63,7 +104,7 @@ global_declaration:       typedef_declaration
                         | global_var_declaration
                         | func_declaration
                         ;
-typedef_declaration:      T_TYPEDEF typename listspec T_ID dims T_SEMI
+typedef_declaration:      T_TYPEDEF typename listspec T_ID dims T_SEMI {printf("TYPEDEF FOUND HAHA!\n");}
                         ;
 typename:                 standard_type
                         | T_ID
@@ -75,10 +116,10 @@ standard_type:            T_CHAR
                         | T_VOID
                         ;
 listspec:                 T_LIST 
-                        |/* ε */
+                        | %empty {}
                         ;
 dims:                     dims dim
-                        |/* ε */
+                        | %empty {}
                         ;
 dim:                      T_LBRACK T_ICONST T_RBRACK 
                         | T_LBRACK T_RBRACK
@@ -91,7 +132,7 @@ id_list:                  id_list T_COMMA T_ID initializer
                         | T_ID initializer
                         ;
 initializer:              T_ASSIGN init_value
-                        |/* ε */
+                        | %empty {}
 init_value:               expression
                         | T_LBRACE init_values T_RBRACE
                         ;
@@ -102,7 +143,7 @@ expression:               expression T_OROP expression
                         | expression T_ADDOP expression
                         | expression T_MULOP expression
                         | T_NOTOP expression
-                        | T_ADDOP expression
+                        | T_ADDOP expression %prec UMINUS
                         | T_SIZEOP expression
                         | T_INCDEC variable
                         | variable T_INCDEC
@@ -128,7 +169,7 @@ assignment:               variable T_ASSIGN assignment
                         | expression
                         ;
 expression_list:          general_expression
-                        |/* ε */
+                        | %empty {}
                         ;
 constant:                 T_CCONST 
                         | T_ICONST 
@@ -145,7 +186,7 @@ class_declaration:        T_CLASS T_ID class_body T_SEMI
 class_body:               parent T_LBRACE members_methods T_RBRACE
                         ;
 parent:                   T_COLON T_ID 
-                        |/* ε */
+                        | %empty {}
                         ;
 members_methods:          members_methods access member_or_method
                         | access member_or_method
@@ -153,7 +194,7 @@ members_methods:          members_methods access member_or_method
 access:                   T_PRIVATE T_COLON 
                         | T_PROTECTED T_COLON 
                         | T_PUBLIC T_COLON 
-                        |/* ε */
+                        | %empty {}
                         ;
 member_or_method:         member
                         | method
@@ -228,13 +269,13 @@ nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN
 decl_statements:          declarations statements
                         | declarations
                         | statements
-                        |/* ε */
+                        | %empty {}
                         ;
 declarations:             declarations decltype typename variabledefs T_SEMI
                         | decltype typename variabledefs T_SEMI
                         ;
 decltype:                 T_STATIC 
-                        |/* ε */
+                        | %empty {}
                         ;
 statements:               statements statement
                         | statement
@@ -256,14 +297,14 @@ expression_statement:     general_expression T_SEMI
 if_statement:             T_IF T_LPAREN general_expression T_RPAREN statement if_tail
                         ;
 if_tail:                  T_ELSE statement
-                        |/* ε */
+                        | %empty %prec LOWER_THAN_ELSE {}
                         ;
 while_statement:          T_WHILE T_LPAREN general_expression T_RPAREN statement
                         ;
 for_statement:            T_FOR T_LPAREN optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement
                         ;
 optexpr:                  general_expression
-                        |/* ε */
+                        | %empty {}
                         ;
 switch_statement:         T_SWITCH T_LPAREN general_expression T_RPAREN switch_tail
                         ;
@@ -273,7 +314,7 @@ switch_tail:              T_LBRACE decl_cases T_RBRACE
 decl_cases:               declarations casestatements
                         | declarations
                         | casestatements
-                        |/* ε */
+                        | %empty {}
                         ;
 casestatements:           casestatements casestatement
                         | casestatement
@@ -308,3 +349,42 @@ main_header:              T_INT T_MAIN T_LPAREN T_RPAREN
                         ;
 %%
 
+int main(int argc, char *argv[]){
+
+    if(!(hashtbl = hashtbl_create(10, NULL))) {
+		fprintf(stderr, "ERROR: hashtbl_create() failed\n");
+		exit(EXIT_FAILURE);
+	}
+    
+    if(argc > 1){
+        yyin = fopen(argv[1], "r");
+        if (yyin == NULL){
+            perror ("Error opening file"); return -1;
+        }
+    }
+
+    yyparse();
+    
+    hashtbl_destroy(hashtbl);
+    fclose(yyin);
+    return 0;
+}
+
+
+void yyerror(const char *message)
+{
+    error_count++;
+    
+    if(flag_err_type==0){
+		printf("-> ERROR at line %d caused by %s : %s\n", lineno, yytext, message);
+    }else if(flag_err_type==1){
+		//*str_buf_ptr = '\0'; // String or Comment Error. Cleanup old chars stored in buffer.
+		printf("-> ERROR at line %d near \"%s\": %s\n", lineno, str_buf, message);
+    }
+    flag_err_type = 0; // Reset flag_err_type to default.
+    if(MAX_ERRORS <= 0) return;
+    if(error_count == MAX_ERRORS){
+        printf("Max errors detected\n");
+        exit(-1);
+    }
+}

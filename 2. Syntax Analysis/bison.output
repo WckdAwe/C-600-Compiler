@@ -1,27 +1,6 @@
-Terminals unused in grammar
-
-   T_EQUIOP
-   T_ASSING
-   T_EOF
-   T
-
-
-State 166 conflicts: 3 shift/reduce
-State 168 conflicts: 6 shift/reduce
-State 175 conflicts: 6 shift/reduce
-State 241 conflicts: 3 shift/reduce
-State 242 conflicts: 3 shift/reduce
-State 243 conflicts: 3 shift/reduce
-State 244 conflicts: 6 shift/reduce
-State 245 conflicts: 6 shift/reduce
-State 246 conflicts: 6 shift/reduce
-State 251 conflicts: 1 shift/reduce
-State 304 conflicts: 1 shift/reduce
-
-
 Grammar
 
-    0 $accept: program $end
+    0 $accept: program "end of file"
 
     1 program: global_declarations main_function
 
@@ -282,17 +261,17 @@ Grammar
 
 Terminals, with rules where they appear
 
-$end (0) 0
+"end of file" (0) 0
 error (256)
-T_INT (258) 14 175
-T_ENUM (259) 24
-T_LENGTH (260) 45
-T_ICONST (261) 22 63
-T_FCONST (262) 64
-T_TYPEDEF (263) 10
-T_CHAR (264) 13
-T_STRING (265) 16
-T_SCONST (266) 65
+T_ICONST (258) 22 63
+T_FCONST (259) 64
+T_TYPEDEF (260) 10
+T_CHAR (261) 13
+T_STRING (262) 16
+T_SCONST (263) 65
+T_INT (264) 14 175
+T_ENUM (265) 24
+T_LENGTH (266) 45
 T_CLASS (267) 69
 T_PRIVATE (268) 75
 T_PROTECTED (269) 76
@@ -317,7 +296,7 @@ T_THIS (287) 55
 T_ID (288) 10 12 24 26 27 52 54 69 71 86 96 102 114 115 119
 T_OROP (289) 32
 T_ANDOP (290) 33
-T_EQUIOP (291)
+T_EQUOP (291) 34
 T_ADDOP (292) 36 39
 T_MULOP (293) 37
 T_INCDEC (294) 41 42
@@ -331,202 +310,200 @@ T_SEMI (299) 10 24 69 83 87 93 94 102 103 125 126 139 140 141 142 147
     164 165 166
 T_DOT (300) 52
 T_COMMA (301) 26 56 67 84 97 104 116
-T_ASSING (302)
-T_COLON (303) 71 75 76 77 159 160 161 162 163
-T_LBRACK (304) 22 23 51 66
-T_RBRACK (305) 22 23 51 66
-T_REFER (306) 99 119
-T_LBRACE (307) 25 31 70 88 109 110 111 151 173 174
-T_RBRACE (308) 25 31 70 88 109 110 111 151 173 174
-T_METH (309) 115
-T_INP (310) 165 167
-T_OUT (311) 166 170
-T_EOF (312)
-T_ASSIGN (313) 28 58
-T_CASE (314) 159 160 162 163
-T_CCONST (315) 62
-T_EQUOP (316) 34
-T_FLOAT (317) 15
-T_NOTOP (318) 38
-T_RELOP (319) 35
-T_VOID (320) 17
-T (321)
+T_COLON (302) 71 75 76 77 159 160 161 162 163
+T_LBRACK (303) 22 23 51 66
+T_RBRACK (304) 22 23 51 66
+T_REFER (305) 99 119
+T_LBRACE (306) 25 31 70 88 109 110 111 151 173 174
+T_RBRACE (307) 25 31 70 88 109 110 111 151 173 174
+T_METH (308) 115
+T_INP (309) 165 167
+T_OUT (310) 166 170
+T_ASSIGN (311) 28 58
+T_CASE (312) 159 160 162 163
+T_CCONST (313) 62
+T_FLOAT (314) 15
+T_NOTOP (315) 38
+T_RELOP (316) 35
+T_VOID (317) 17
+UMINUS (318)
+LOWER_THAN_ELSE (319)
 
 
 Nonterminals, with rules where they appear
 
-$accept (67)
+$accept (65)
     on left: 0
-program (68)
+program (66)
     on left: 1, on right: 0
-global_declarations (69)
+global_declarations (67)
     on left: 2 3, on right: 1 2
-global_declaration (70)
+global_declaration (68)
     on left: 4 5 6 7 8 9, on right: 2
-typedef_declaration (71)
+typedef_declaration (69)
     on left: 10, on right: 4
-typename (72)
+typename (70)
     on left: 11 12, on right: 10 83 96 97 98 103 114 116 117 125 126
-standard_type (73)
+standard_type (71)
     on left: 13 14 15 16 17, on right: 11 49
-listspec (74)
+listspec (72)
     on left: 18 19, on right: 10 86 96 100 114
-dims (75)
+dims (73)
     on left: 20 21, on right: 10 20 86 100
-dim (76)
+dim (74)
     on left: 22 23, on right: 20
-enum_declaration (77)
+enum_declaration (75)
     on left: 24, on right: 5
-enum_body (78)
+enum_body (76)
     on left: 25, on right: 24
-id_list (79)
+id_list (77)
     on left: 26 27, on right: 25 26
-initializer (80)
+initializer (78)
     on left: 28 29, on right: 26 27 106
-init_value (81)
+init_value (79)
     on left: 30 31, on right: 28 67 68
-expression (82)
+expression (80)
     on left: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49
     50, on right: 30 32 33 34 35 36 37 38 39 40 59
-variable (83)
+variable (81)
     on left: 51 52 53 54 55, on right: 41 42 43 44 51 52 58 169
-general_expression (84)
+general_expression (82)
     on left: 56 57, on right: 45 46 48 51 53 56 60 142 143 146 148
     150 172
-assignment (85)
+assignment (83)
     on left: 58 59, on right: 57 58
-expression_list (86)
+expression_list (84)
     on left: 60 61, on right: 44 66
-constant (87)
+constant (85)
     on left: 62 63 64 65, on right: 47 159 160 162 163
-listexpression (88)
+listexpression (86)
     on left: 66, on right: 50
-init_values (89)
+init_values (87)
     on left: 67 68, on right: 31 67
-class_declaration (90)
+class_declaration (88)
     on left: 69, on right: 6
-class_body (91)
+class_body (89)
     on left: 70, on right: 69
-parent (92)
+parent (90)
     on left: 71 72, on right: 70
-members_methods (93)
+members_methods (91)
     on left: 73 74, on right: 70 73
-access (94)
+access (92)
     on left: 75 76 77 78, on right: 73 74
-member_or_method (95)
+member_or_method (93)
     on left: 79 80, on right: 73 74
-member (96)
+member (94)
     on left: 81 82, on right: 79
-var_declaration (97)
+var_declaration (95)
     on left: 83, on right: 81 91
-variabledefs (98)
+variabledefs (96)
     on left: 84 85, on right: 83 84 125 126
-variabledef (99)
+variabledef (97)
     on left: 86, on right: 84 85 106 118
-anonymous_union (100)
+anonymous_union (98)
     on left: 87, on right: 82
-union_body (101)
+union_body (99)
     on left: 88, on right: 87 102
-fields (102)
+fields (100)
     on left: 89 90, on right: 88 89
-field (103)
+field (101)
     on left: 91, on right: 89 90
-method (104)
+method (102)
     on left: 92, on right: 80
-short_func_declaration (105)
+short_func_declaration (103)
     on left: 93 94, on right: 92 107
-short_par_func_header (106)
+short_par_func_header (104)
     on left: 95, on right: 93
-func_header_start (107)
+func_header_start (105)
     on left: 96, on right: 95 101 113
-parameter_types (108)
+parameter_types (106)
     on left: 97 98, on right: 95 97
-pass_list_dims (109)
+pass_list_dims (107)
     on left: 99 100, on right: 97 98
-nopar_func_header (110)
+nopar_func_header (108)
     on left: 101, on right: 94 111
-union_declaration (111)
+union_declaration (109)
     on left: 102, on right: 7
-global_var_declaration (112)
+global_var_declaration (110)
     on left: 103, on right: 8
-init_variabledefs (113)
+init_variabledefs (111)
     on left: 104 105, on right: 103 104
-init_variabledef (114)
+init_variabledef (112)
     on left: 106, on right: 104 105
-func_declaration (115)
+func_declaration (113)
     on left: 107 108, on right: 9
-full_func_declaration (116)
+full_func_declaration (114)
     on left: 109 110 111, on right: 108
-full_par_func_header (117)
+full_par_func_header (115)
     on left: 112 113, on right: 109
-class_func_header_start (118)
+class_func_header_start (116)
     on left: 114, on right: 112 120
-func_class (119)
+func_class (117)
     on left: 115, on right: 114
-parameter_list (120)
+parameter_list (118)
     on left: 116 117, on right: 112 113 116
-pass_variabledef (121)
+pass_variabledef (119)
     on left: 118 119, on right: 116 117
-nopar_class_func_header (122)
+nopar_class_func_header (120)
     on left: 120, on right: 110
-decl_statements (123)
+decl_statements (121)
     on left: 121 122 123 124, on right: 109 110 111 173 174
-declarations (124)
+declarations (122)
     on left: 125 126, on right: 121 122 125 153 154
-decltype (125)
+decltype (123)
     on left: 127 128, on right: 54 125 126
-statements (126)
+statements (124)
     on left: 129 130, on right: 121 123 129 160 161
-statement (127)
+statement (125)
     on left: 131 132 133 134 135 136 137 138 139 140 141, on right:
     129 130 143 144 146 147 163
-expression_statement (128)
+expression_statement (126)
     on left: 142, on right: 131
-if_statement (129)
+if_statement (127)
     on left: 143, on right: 132
-if_tail (130)
+if_tail (128)
     on left: 144 145, on right: 143
-while_statement (131)
+while_statement (129)
     on left: 146, on right: 133
-for_statement (132)
+for_statement (130)
     on left: 147, on right: 134
-optexpr (133)
+optexpr (131)
     on left: 148 149, on right: 147 164
-switch_statement (134)
+switch_statement (132)
     on left: 150, on right: 135
-switch_tail (135)
+switch_tail (133)
     on left: 151 152, on right: 150
-decl_cases (136)
+decl_cases (134)
     on left: 153 154 155 156, on right: 151
-casestatements (137)
+casestatements (135)
     on left: 157 158, on right: 153 155 157
-casestatement (138)
+casestatement (136)
     on left: 159 160 161, on right: 157 158 159
-single_casestatement (139)
+single_casestatement (137)
     on left: 162 163, on right: 152 162
-return_statement (140)
+return_statement (138)
     on left: 164, on right: 136
-io_statement (141)
+io_statement (139)
     on left: 165 166, on right: 137
-in_list (142)
+in_list (140)
     on left: 167 168, on right: 165 167
-in_item (143)
+in_item (141)
     on left: 169, on right: 167 168
-out_list (144)
+out_list (142)
     on left: 170 171, on right: 166 170
-out_item (145)
+out_item (143)
     on left: 172, on right: 170 171
-comp_statement (146)
+comp_statement (144)
     on left: 173, on right: 138
-main_function (147)
+main_function (145)
     on left: 174, on right: 1
-main_header (148)
+main_header (146)
     on left: 175, on right: 174
 
 
 State 0
 
-    0 $accept: . program $end
+    0 $accept: . program "end of file"
 
     $default  reduce using rule 3 (global_declarations)
 
@@ -536,9 +513,9 @@ State 0
 
 State 1
 
-    0 $accept: program . $end
+    0 $accept: program . "end of file"
 
-    $end  shift, and go to state 3
+    "end of file"  shift, and go to state 3
 
 
 State 2
@@ -546,11 +523,11 @@ State 2
     1 program: global_declarations . main_function
     2 global_declarations: global_declarations . global_declaration
 
-    T_INT      shift, and go to state 4
-    T_ENUM     shift, and go to state 5
-    T_TYPEDEF  shift, and go to state 6
-    T_CHAR     shift, and go to state 7
-    T_STRING   shift, and go to state 8
+    T_TYPEDEF  shift, and go to state 4
+    T_CHAR     shift, and go to state 5
+    T_STRING   shift, and go to state 6
+    T_INT      shift, and go to state 7
+    T_ENUM     shift, and go to state 8
     T_CLASS    shift, and go to state 9
     T_UNION    shift, and go to state 10
     T_ID       shift, and go to state 11
@@ -580,55 +557,55 @@ State 2
 
 State 3
 
-    0 $accept: program $end .
+    0 $accept: program "end of file" .
 
     $default  accept
 
 
 State 4
 
-   14 standard_type: T_INT .
-  175 main_header: T_INT . T_MAIN T_LPAREN T_RPAREN
-
-    T_MAIN  shift, and go to state 33
-
-    $default  reduce using rule 14 (standard_type)
-
-
-State 5
-
-   24 enum_declaration: T_ENUM . T_ID enum_body T_SEMI
-
-    T_ID  shift, and go to state 34
-
-
-State 6
-
    10 typedef_declaration: T_TYPEDEF . typename listspec T_ID dims T_SEMI
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 11
     T_FLOAT   shift, and go to state 12
     T_VOID    shift, and go to state 13
 
-    typename       go to state 36
+    typename       go to state 34
     standard_type  go to state 17
 
 
-State 7
+State 5
 
    13 standard_type: T_CHAR .
 
     $default  reduce using rule 13 (standard_type)
 
 
-State 8
+State 6
 
    16 standard_type: T_STRING .
 
     $default  reduce using rule 16 (standard_type)
+
+
+State 7
+
+   14 standard_type: T_INT .
+  175 main_header: T_INT . T_MAIN T_LPAREN T_RPAREN
+
+    T_MAIN  shift, and go to state 35
+
+    $default  reduce using rule 14 (standard_type)
+
+
+State 8
+
+   24 enum_declaration: T_ENUM . T_ID enum_body T_SEMI
+
+    T_ID  shift, and go to state 36
 
 
 State 9
@@ -815,28 +792,12 @@ State 32
 
 State 33
 
-  175 main_header: T_INT T_MAIN . T_LPAREN T_RPAREN
-
-    T_LPAREN  shift, and go to state 52
-
-
-State 34
-
-   24 enum_declaration: T_ENUM T_ID . enum_body T_SEMI
-
-    T_LBRACE  shift, and go to state 53
-
-    enum_body  go to state 54
-
-
-State 35
-
    14 standard_type: T_INT .
 
     $default  reduce using rule 14 (standard_type)
 
 
-State 36
+State 34
 
    10 typedef_declaration: T_TYPEDEF typename . listspec T_ID dims T_SEMI
 
@@ -844,7 +805,23 @@ State 36
 
     $default  reduce using rule 19 (listspec)
 
-    listspec  go to state 55
+    listspec  go to state 52
+
+
+State 35
+
+  175 main_header: T_INT T_MAIN . T_LPAREN T_RPAREN
+
+    T_LPAREN  shift, and go to state 53
+
+
+State 36
+
+   24 enum_declaration: T_ENUM T_ID . enum_body T_SEMI
+
+    T_LBRACE  shift, and go to state 54
+
+    enum_body  go to state 55
 
 
 State 37
@@ -926,9 +903,9 @@ State 45
   101 nopar_func_header: func_header_start T_LPAREN . T_RPAREN
   113 full_par_func_header: func_header_start T_LPAREN . parameter_list T_RPAREN
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 11
     T_RPAREN  shift, and go to state 67
     T_FLOAT   shift, and go to state 12
@@ -951,10 +928,10 @@ State 47
 
   111 full_func_declaration: nopar_func_header T_LBRACE . decl_statements T_RBRACE
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -1006,10 +983,10 @@ State 48
 
   109 full_func_declaration: full_par_func_header T_LBRACE . decl_statements T_RBRACE
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -1062,9 +1039,9 @@ State 49
   112 full_par_func_header: class_func_header_start T_LPAREN . parameter_list T_RPAREN
   120 nopar_class_func_header: class_func_header_start T_LPAREN . T_RPAREN
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 11
     T_RPAREN  shift, and go to state 117
     T_FLOAT   shift, and go to state 12
@@ -1079,10 +1056,10 @@ State 50
 
   110 full_func_declaration: nopar_class_func_header T_LBRACE . decl_statements T_RBRACE
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -1134,10 +1111,10 @@ State 51
 
   174 main_function: main_header T_LBRACE . decl_statements T_RBRACE
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -1187,32 +1164,32 @@ State 51
 
 State 52
 
-  175 main_header: T_INT T_MAIN T_LPAREN . T_RPAREN
+   10 typedef_declaration: T_TYPEDEF typename listspec . T_ID dims T_SEMI
 
-    T_RPAREN  shift, and go to state 122
+    T_ID  shift, and go to state 122
 
 
 State 53
 
-   25 enum_body: T_LBRACE . id_list T_RBRACE
+  175 main_header: T_INT T_MAIN T_LPAREN . T_RPAREN
 
-    T_ID  shift, and go to state 123
-
-    id_list  go to state 124
+    T_RPAREN  shift, and go to state 123
 
 
 State 54
 
-   24 enum_declaration: T_ENUM T_ID enum_body . T_SEMI
+   25 enum_body: T_LBRACE . id_list T_RBRACE
 
-    T_SEMI  shift, and go to state 125
+    T_ID  shift, and go to state 124
+
+    id_list  go to state 125
 
 
 State 55
 
-   10 typedef_declaration: T_TYPEDEF typename listspec . T_ID dims T_SEMI
+   24 enum_declaration: T_ENUM T_ID enum_body . T_SEMI
 
-    T_ID  shift, and go to state 126
+    T_SEMI  shift, and go to state 126
 
 
 State 56
@@ -1240,9 +1217,9 @@ State 59
 
    88 union_body: T_LBRACE . fields T_RBRACE
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 11
     T_FLOAT   shift, and go to state 12
     T_VOID    shift, and go to state 13
@@ -1286,10 +1263,10 @@ State 63
 
    28 initializer: T_ASSIGN . init_value
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -1383,30 +1360,30 @@ State 70
 
 State 71
 
-   45 expression: T_LENGTH . T_LPAREN general_expression T_RPAREN
-
-    T_LPAREN  shift, and go to state 154
-
-
-State 72
-
    63 constant: T_ICONST .
 
     $default  reduce using rule 63 (constant)
 
 
-State 73
+State 72
 
    64 constant: T_FCONST .
 
     $default  reduce using rule 64 (constant)
 
 
-State 74
+State 73
 
    65 constant: T_SCONST .
 
     $default  reduce using rule 65 (constant)
+
+
+State 74
+
+   45 expression: T_LENGTH . T_LPAREN general_expression T_RPAREN
+
+    T_LPAREN  shift, and go to state 154
 
 
 State 75
@@ -1462,10 +1439,10 @@ State 82
 
   164 return_statement: T_RETURN . optexpr T_SEMI
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -1523,10 +1500,10 @@ State 87
 
    39 expression: T_ADDOP . expression
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -1566,10 +1543,10 @@ State 89
 
    40 expression: T_SIZEOP . expression
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -1603,13 +1580,13 @@ State 91
    48 expression: T_LPAREN . general_expression T_RPAREN
    49           | T_LPAREN . standard_type T_RPAREN
 
-    T_INT       shift, and go to state 35
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_CHAR      shift, and go to state 7
-    T_STRING    shift, and go to state 8
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_CHAR      shift, and go to state 5
+    T_STRING    shift, and go to state 6
+    T_SCONST    shift, and go to state 73
+    T_INT       shift, and go to state 33
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -1647,10 +1624,10 @@ State 93
 
    66 listexpression: T_LBRACK . expression_list T_RBRACK
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -1680,10 +1657,10 @@ State 94
 
   173 comp_statement: T_LBRACE . decl_statements T_RBRACE
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -1742,10 +1719,10 @@ State 96
 
    38 expression: T_NOTOP . expression
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -1779,9 +1756,9 @@ State 97
 
     T_OROP   shift, and go to state 176
     T_ANDOP  shift, and go to state 177
-    T_ADDOP  shift, and go to state 178
-    T_MULOP  shift, and go to state 179
-    T_EQUOP  shift, and go to state 180
+    T_EQUOP  shift, and go to state 178
+    T_ADDOP  shift, and go to state 179
+    T_MULOP  shift, and go to state 180
     T_RELOP  shift, and go to state 181
 
     $default  reduce using rule 59 (assignment)
@@ -1848,10 +1825,10 @@ State 104
   122                | declarations .
   125 declarations: declarations . decltype typename variabledefs T_SEMI
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -1902,9 +1879,9 @@ State 105
    54 variable: decltype . T_ID
   126 declarations: decltype . typename variabledefs T_SEMI
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 192
     T_FLOAT   shift, and go to state 12
     T_VOID    shift, and go to state 13
@@ -1918,10 +1895,10 @@ State 106
   123 decl_statements: statements .
   129 statements: statements . statement
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -2082,12 +2059,21 @@ State 121
 
 State 122
 
+   10 typedef_declaration: T_TYPEDEF typename listspec T_ID . dims T_SEMI
+
+    $default  reduce using rule 21 (dims)
+
+    dims  go to state 200
+
+
+State 123
+
   175 main_header: T_INT T_MAIN T_LPAREN T_RPAREN .
 
     $default  reduce using rule 175 (main_header)
 
 
-State 123
+State 124
 
    27 id_list: T_ID . initializer
 
@@ -2095,32 +2081,23 @@ State 123
 
     $default  reduce using rule 29 (initializer)
 
-    initializer  go to state 200
-
-
-State 124
-
-   25 enum_body: T_LBRACE id_list . T_RBRACE
-   26 id_list: id_list . T_COMMA T_ID initializer
-
-    T_COMMA   shift, and go to state 201
-    T_RBRACE  shift, and go to state 202
+    initializer  go to state 201
 
 
 State 125
 
-   24 enum_declaration: T_ENUM T_ID enum_body T_SEMI .
+   25 enum_body: T_LBRACE id_list . T_RBRACE
+   26 id_list: id_list . T_COMMA T_ID initializer
 
-    $default  reduce using rule 24 (enum_declaration)
+    T_COMMA   shift, and go to state 202
+    T_RBRACE  shift, and go to state 203
 
 
 State 126
 
-   10 typedef_declaration: T_TYPEDEF typename listspec T_ID . dims T_SEMI
+   24 enum_declaration: T_ENUM T_ID enum_body T_SEMI .
 
-    $default  reduce using rule 21 (dims)
-
-    dims  go to state 203
+    $default  reduce using rule 24 (enum_declaration)
 
 
 State 127
@@ -2176,9 +2153,9 @@ State 132
    88 union_body: T_LBRACE fields . T_RBRACE
    89 fields: fields . field
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 11
     T_RBRACE  shift, and go to state 211
     T_FLOAT   shift, and go to state 12
@@ -2234,10 +2211,10 @@ State 138
 
    31 init_value: T_LBRACE . init_values T_RBRACE
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2281,9 +2258,9 @@ State 140
 
     T_OROP   shift, and go to state 176
     T_ANDOP  shift, and go to state 177
-    T_ADDOP  shift, and go to state 178
-    T_MULOP  shift, and go to state 179
-    T_EQUOP  shift, and go to state 180
+    T_EQUOP  shift, and go to state 178
+    T_ADDOP  shift, and go to state 179
+    T_MULOP  shift, and go to state 180
     T_RELOP  shift, and go to state 181
 
     $default  reduce using rule 30 (init_value)
@@ -2380,9 +2357,9 @@ State 151
 
    97 parameter_types: parameter_types T_COMMA . typename pass_list_dims
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 11
     T_FLOAT   shift, and go to state 12
     T_VOID    shift, and go to state 13
@@ -2402,9 +2379,9 @@ State 153
 
   116 parameter_list: parameter_list T_COMMA . typename pass_variabledef
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 11
     T_FLOAT   shift, and go to state 12
     T_VOID    shift, and go to state 13
@@ -2417,10 +2394,10 @@ State 154
 
    45 expression: T_LENGTH T_LPAREN . general_expression T_RPAREN
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2462,10 +2439,10 @@ State 157
 
   143 if_statement: T_IF T_LPAREN . general_expression T_RPAREN statement if_tail
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2493,10 +2470,10 @@ State 158
 
   146 while_statement: T_WHILE T_LPAREN . general_expression T_RPAREN statement
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2524,10 +2501,10 @@ State 159
 
   147 for_statement: T_FOR T_LPAREN . optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2557,10 +2534,10 @@ State 160
 
   150 switch_statement: T_SWITCH T_LPAREN . general_expression T_RPAREN switch_tail
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2605,10 +2582,10 @@ State 163
 
    46 expression: T_NEW T_LPAREN . general_expression T_RPAREN
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2652,10 +2629,10 @@ State 165
 
   166 io_statement: T_COUT T_OUT . out_list T_SEMI
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2691,13 +2668,6 @@ State 166
    37           | expression . T_MULOP expression
    39           | T_ADDOP expression .
 
-    T_MULOP  shift, and go to state 179
-    T_EQUOP  shift, and go to state 180
-    T_RELOP  shift, and go to state 181
-
-    T_MULOP   [reduce using rule 39 (expression)]
-    T_EQUOP   [reduce using rule 39 (expression)]
-    T_RELOP   [reduce using rule 39 (expression)]
     $default  reduce using rule 39 (expression)
 
 
@@ -2723,19 +2693,6 @@ State 168
    37           | expression . T_MULOP expression
    40           | T_SIZEOP expression .
 
-    T_OROP   shift, and go to state 176
-    T_ANDOP  shift, and go to state 177
-    T_ADDOP  shift, and go to state 178
-    T_MULOP  shift, and go to state 179
-    T_EQUOP  shift, and go to state 180
-    T_RELOP  shift, and go to state 181
-
-    T_OROP    [reduce using rule 40 (expression)]
-    T_ANDOP   [reduce using rule 40 (expression)]
-    T_ADDOP   [reduce using rule 40 (expression)]
-    T_MULOP   [reduce using rule 40 (expression)]
-    T_EQUOP   [reduce using rule 40 (expression)]
-    T_RELOP   [reduce using rule 40 (expression)]
     $default  reduce using rule 40 (expression)
 
 
@@ -2743,10 +2700,10 @@ State 169
 
    53 variable: T_LISTFUNC T_LPAREN . general_expression T_RPAREN
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2820,19 +2777,6 @@ State 175
    37           | expression . T_MULOP expression
    38           | T_NOTOP expression .
 
-    T_OROP   shift, and go to state 176
-    T_ANDOP  shift, and go to state 177
-    T_ADDOP  shift, and go to state 178
-    T_MULOP  shift, and go to state 179
-    T_EQUOP  shift, and go to state 180
-    T_RELOP  shift, and go to state 181
-
-    T_OROP    [reduce using rule 38 (expression)]
-    T_ANDOP   [reduce using rule 38 (expression)]
-    T_ADDOP   [reduce using rule 38 (expression)]
-    T_MULOP   [reduce using rule 38 (expression)]
-    T_EQUOP   [reduce using rule 38 (expression)]
-    T_RELOP   [reduce using rule 38 (expression)]
     $default  reduce using rule 38 (expression)
 
 
@@ -2840,10 +2784,10 @@ State 176
 
    32 expression: expression T_OROP . expression
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2869,10 +2813,10 @@ State 177
 
    33 expression: expression T_ANDOP . expression
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2896,12 +2840,12 @@ State 177
 
 State 178
 
-   36 expression: expression T_ADDOP . expression
+   34 expression: expression T_EQUOP . expression
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2925,12 +2869,12 @@ State 178
 
 State 179
 
-   37 expression: expression T_MULOP . expression
+   36 expression: expression T_ADDOP . expression
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2954,12 +2898,12 @@ State 179
 
 State 180
 
-   34 expression: expression T_EQUOP . expression
+   37 expression: expression T_MULOP . expression
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -2985,10 +2929,10 @@ State 181
 
    35 expression: expression T_RELOP . expression
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -3021,10 +2965,10 @@ State 183
 
    44 expression: variable T_LPAREN . expression_list T_RPAREN
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -3061,10 +3005,10 @@ State 185
 
    51 variable: variable T_LBRACK . general_expression T_RBRACK
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -3092,10 +3036,10 @@ State 186
 
    58 assignment: variable T_ASSIGN . assignment
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -3129,10 +3073,10 @@ State 188
 
    56 general_expression: general_expression T_COMMA . general_expression
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -3168,9 +3112,9 @@ State 190
    54 variable: decltype . T_ID
   125 declarations: declarations decltype . typename variabledefs T_SEMI
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 192
     T_FLOAT   shift, and go to state 12
     T_VOID    shift, and go to state 13
@@ -3184,10 +3128,10 @@ State 191
   121 decl_statements: declarations statements .
   129 statements: statements . statement
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -3299,34 +3243,34 @@ State 199
 
 State 200
 
+   10 typedef_declaration: T_TYPEDEF typename listspec T_ID dims . T_SEMI
+   20 dims: dims . dim
+
+    T_SEMI    shift, and go to state 254
+    T_LBRACK  shift, and go to state 213
+
+    dim  go to state 214
+
+
+State 201
+
    27 id_list: T_ID initializer .
 
     $default  reduce using rule 27 (id_list)
 
 
-State 201
+State 202
 
    26 id_list: id_list T_COMMA . T_ID initializer
 
-    T_ID  shift, and go to state 254
-
-
-State 202
-
-   25 enum_body: T_LBRACE id_list T_RBRACE .
-
-    $default  reduce using rule 25 (enum_body)
+    T_ID  shift, and go to state 255
 
 
 State 203
 
-   10 typedef_declaration: T_TYPEDEF typename listspec T_ID dims . T_SEMI
-   20 dims: dims . dim
+   25 enum_body: T_LBRACE id_list T_RBRACE .
 
-    T_SEMI    shift, and go to state 255
-    T_LBRACK  shift, and go to state 213
-
-    dim  go to state 214
+    $default  reduce using rule 25 (enum_body)
 
 
 State 204
@@ -3369,9 +3313,9 @@ State 208
 
    74 members_methods: access . member_or_method
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_UNION   shift, and go to state 261
     T_ID      shift, and go to state 11
     T_FLOAT   shift, and go to state 12
@@ -3674,14 +3618,12 @@ State 241
    36           | expression . T_ADDOP expression
    37           | expression . T_MULOP expression
 
-    T_ADDOP  shift, and go to state 178
-    T_MULOP  shift, and go to state 179
-    T_EQUOP  shift, and go to state 180
+    T_ANDOP  shift, and go to state 177
+    T_EQUOP  shift, and go to state 178
+    T_ADDOP  shift, and go to state 179
+    T_MULOP  shift, and go to state 180
     T_RELOP  shift, and go to state 181
 
-    T_MULOP   [reduce using rule 32 (expression)]
-    T_EQUOP   [reduce using rule 32 (expression)]
-    T_RELOP   [reduce using rule 32 (expression)]
     $default  reduce using rule 32 (expression)
 
 
@@ -3695,64 +3637,15 @@ State 242
    36           | expression . T_ADDOP expression
    37           | expression . T_MULOP expression
 
-    T_ADDOP  shift, and go to state 178
-    T_MULOP  shift, and go to state 179
-    T_EQUOP  shift, and go to state 180
+    T_EQUOP  shift, and go to state 178
+    T_ADDOP  shift, and go to state 179
+    T_MULOP  shift, and go to state 180
     T_RELOP  shift, and go to state 181
 
-    T_MULOP   [reduce using rule 33 (expression)]
-    T_EQUOP   [reduce using rule 33 (expression)]
-    T_RELOP   [reduce using rule 33 (expression)]
     $default  reduce using rule 33 (expression)
 
 
 State 243
-
-   32 expression: expression . T_OROP expression
-   33           | expression . T_ANDOP expression
-   34           | expression . T_EQUOP expression
-   35           | expression . T_RELOP expression
-   36           | expression . T_ADDOP expression
-   36           | expression T_ADDOP expression .
-   37           | expression . T_MULOP expression
-
-    T_MULOP  shift, and go to state 179
-    T_EQUOP  shift, and go to state 180
-    T_RELOP  shift, and go to state 181
-
-    T_MULOP   [reduce using rule 36 (expression)]
-    T_EQUOP   [reduce using rule 36 (expression)]
-    T_RELOP   [reduce using rule 36 (expression)]
-    $default  reduce using rule 36 (expression)
-
-
-State 244
-
-   32 expression: expression . T_OROP expression
-   33           | expression . T_ANDOP expression
-   34           | expression . T_EQUOP expression
-   35           | expression . T_RELOP expression
-   36           | expression . T_ADDOP expression
-   37           | expression . T_MULOP expression
-   37           | expression T_MULOP expression .
-
-    T_OROP   shift, and go to state 176
-    T_ANDOP  shift, and go to state 177
-    T_ADDOP  shift, and go to state 178
-    T_MULOP  shift, and go to state 179
-    T_EQUOP  shift, and go to state 180
-    T_RELOP  shift, and go to state 181
-
-    T_OROP    [reduce using rule 37 (expression)]
-    T_ANDOP   [reduce using rule 37 (expression)]
-    T_ADDOP   [reduce using rule 37 (expression)]
-    T_MULOP   [reduce using rule 37 (expression)]
-    T_EQUOP   [reduce using rule 37 (expression)]
-    T_RELOP   [reduce using rule 37 (expression)]
-    $default  reduce using rule 37 (expression)
-
-
-State 245
 
    32 expression: expression . T_OROP expression
    33           | expression . T_ANDOP expression
@@ -3762,20 +3655,39 @@ State 245
    36           | expression . T_ADDOP expression
    37           | expression . T_MULOP expression
 
-    T_OROP   shift, and go to state 176
-    T_ANDOP  shift, and go to state 177
-    T_ADDOP  shift, and go to state 178
-    T_MULOP  shift, and go to state 179
-    T_EQUOP  shift, and go to state 180
+    T_ADDOP  shift, and go to state 179
+    T_MULOP  shift, and go to state 180
     T_RELOP  shift, and go to state 181
 
-    T_OROP    [reduce using rule 34 (expression)]
-    T_ANDOP   [reduce using rule 34 (expression)]
-    T_ADDOP   [reduce using rule 34 (expression)]
-    T_MULOP   [reduce using rule 34 (expression)]
-    T_EQUOP   [reduce using rule 34 (expression)]
-    T_RELOP   [reduce using rule 34 (expression)]
     $default  reduce using rule 34 (expression)
+
+
+State 244
+
+   32 expression: expression . T_OROP expression
+   33           | expression . T_ANDOP expression
+   34           | expression . T_EQUOP expression
+   35           | expression . T_RELOP expression
+   36           | expression . T_ADDOP expression
+   36           | expression T_ADDOP expression .
+   37           | expression . T_MULOP expression
+
+    T_MULOP  shift, and go to state 180
+
+    $default  reduce using rule 36 (expression)
+
+
+State 245
+
+   32 expression: expression . T_OROP expression
+   33           | expression . T_ANDOP expression
+   34           | expression . T_EQUOP expression
+   35           | expression . T_RELOP expression
+   36           | expression . T_ADDOP expression
+   37           | expression . T_MULOP expression
+   37           | expression T_MULOP expression .
+
+    $default  reduce using rule 37 (expression)
 
 
 State 246
@@ -3788,19 +3700,9 @@ State 246
    36           | expression . T_ADDOP expression
    37           | expression . T_MULOP expression
 
-    T_OROP   shift, and go to state 176
-    T_ANDOP  shift, and go to state 177
-    T_ADDOP  shift, and go to state 178
-    T_MULOP  shift, and go to state 179
-    T_EQUOP  shift, and go to state 180
-    T_RELOP  shift, and go to state 181
+    T_ADDOP  shift, and go to state 179
+    T_MULOP  shift, and go to state 180
 
-    T_OROP    [reduce using rule 35 (expression)]
-    T_ANDOP   [reduce using rule 35 (expression)]
-    T_ADDOP   [reduce using rule 35 (expression)]
-    T_MULOP   [reduce using rule 35 (expression)]
-    T_EQUOP   [reduce using rule 35 (expression)]
-    T_RELOP   [reduce using rule 35 (expression)]
     $default  reduce using rule 35 (expression)
 
 
@@ -3839,9 +3741,6 @@ State 251
    56 general_expression: general_expression . T_COMMA general_expression
    56                   | general_expression T_COMMA general_expression .
 
-    T_COMMA  shift, and go to state 188
-
-    T_COMMA   [reduce using rule 56 (general_expression)]
     $default  reduce using rule 56 (general_expression)
 
 
@@ -3869,6 +3768,13 @@ State 253
 
 State 254
 
+   10 typedef_declaration: T_TYPEDEF typename listspec T_ID dims T_SEMI .
+
+    $default  reduce using rule 10 (typedef_declaration)
+
+
+State 255
+
    26 id_list: id_list T_COMMA T_ID . initializer
 
     T_ASSIGN  shift, and go to state 63
@@ -3876,13 +3782,6 @@ State 254
     $default  reduce using rule 29 (initializer)
 
     initializer  go to state 296
-
-
-State 255
-
-   10 typedef_declaration: T_TYPEDEF typename listspec T_ID dims T_SEMI .
-
-    $default  reduce using rule 10 (typedef_declaration)
 
 
 State 256
@@ -3917,9 +3816,9 @@ State 260
 
    73 members_methods: members_methods access . member_or_method
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_UNION   shift, and go to state 261
     T_ID      shift, and go to state 11
     T_FLOAT   shift, and go to state 12
@@ -4055,10 +3954,10 @@ State 275
 
    67 init_values: init_values T_COMMA . init_value
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -4130,10 +4029,10 @@ State 282
 
   143 if_statement: T_IF T_LPAREN general_expression T_RPAREN . statement if_tail
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -4181,10 +4080,10 @@ State 283
 
   146 while_statement: T_WHILE T_LPAREN general_expression T_RPAREN . statement
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -4232,10 +4131,10 @@ State 284
 
   147 for_statement: T_FOR T_LPAREN optexpr T_SEMI . optexpr T_SEMI optexpr T_RPAREN statement
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -4312,10 +4211,10 @@ State 290
 
   170 out_list: out_list T_OUT . out_item
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -4411,9 +4310,9 @@ State 300
    95 short_par_func_header: func_header_start T_LPAREN . parameter_types T_RPAREN
   101 nopar_func_header: func_header_start T_LPAREN . T_RPAREN
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 11
     T_RPAREN  shift, and go to state 67
     T_FLOAT   shift, and go to state 12
@@ -4451,7 +4350,6 @@ State 304
 
     T_ELSE  shift, and go to state 317
 
-    T_ELSE    [reduce using rule 145 (if_tail)]
     $default  reduce using rule 145 (if_tail)
 
     if_tail  go to state 318
@@ -4494,9 +4392,9 @@ State 308
   162 single_casestatement: T_CASE . constant T_COLON single_casestatement
   163                     | T_CASE . constant T_COLON statement
 
-    T_ICONST  shift, and go to state 72
-    T_FCONST  shift, and go to state 73
-    T_SCONST  shift, and go to state 74
+    T_ICONST  shift, and go to state 71
+    T_FCONST  shift, and go to state 72
+    T_SCONST  shift, and go to state 73
     T_CCONST  shift, and go to state 95
 
     constant  go to state 327
@@ -4572,10 +4470,10 @@ State 317
 
   144 if_tail: T_ELSE . statement
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -4630,10 +4528,10 @@ State 319
 
   147 for_statement: T_FOR T_LPAREN optexpr T_SEMI optexpr T_SEMI . optexpr T_RPAREN statement
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_NEW       shift, and go to state 83
     T_THIS      shift, and go to state 86
@@ -4671,9 +4569,9 @@ State 321
   159 casestatement: T_CASE . constant T_COLON casestatement
   160              | T_CASE . constant T_COLON statements
 
-    T_ICONST  shift, and go to state 72
-    T_FCONST  shift, and go to state 73
-    T_SCONST  shift, and go to state 74
+    T_ICONST  shift, and go to state 71
+    T_FCONST  shift, and go to state 72
+    T_SCONST  shift, and go to state 73
     T_CCONST  shift, and go to state 95
 
     constant  go to state 331
@@ -4701,9 +4599,9 @@ State 323
 
   126 declarations: decltype . typename variabledefs T_SEMI
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 11
     T_FLOAT   shift, and go to state 12
     T_VOID    shift, and go to state 13
@@ -4765,10 +4663,10 @@ State 330
 
   161 casestatement: T_DEFAULT T_COLON . statements
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -4825,9 +4723,9 @@ State 332
 
   125 declarations: declarations decltype . typename variabledefs T_SEMI
 
-    T_INT     shift, and go to state 35
-    T_CHAR    shift, and go to state 7
-    T_STRING  shift, and go to state 8
+    T_CHAR    shift, and go to state 5
+    T_STRING  shift, and go to state 6
+    T_INT     shift, and go to state 33
     T_ID      shift, and go to state 11
     T_FLOAT   shift, and go to state 12
     T_VOID    shift, and go to state 13
@@ -4868,10 +4766,10 @@ State 336
   162 single_casestatement: T_CASE constant T_COLON . single_casestatement
   163                     | T_CASE constant T_COLON . statement
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -4921,10 +4819,10 @@ State 337
 
   147 for_statement: T_FOR T_LPAREN optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN . statement
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -4973,10 +4871,10 @@ State 338
   129 statements: statements . statement
   161 casestatement: T_DEFAULT T_COLON statements .
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -5026,10 +4924,10 @@ State 339
   159 casestatement: T_CASE constant T_COLON . casestatement
   160              | T_CASE constant T_COLON . statements
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77
@@ -5103,10 +5001,10 @@ State 343
   129 statements: statements . statement
   160 casestatement: T_CASE constant T_COLON statements .
 
-    T_LENGTH    shift, and go to state 71
-    T_ICONST    shift, and go to state 72
-    T_FCONST    shift, and go to state 73
-    T_SCONST    shift, and go to state 74
+    T_ICONST    shift, and go to state 71
+    T_FCONST    shift, and go to state 72
+    T_SCONST    shift, and go to state 73
+    T_LENGTH    shift, and go to state 74
     T_STATIC    shift, and go to state 75
     T_CONTINUE  shift, and go to state 76
     T_BREAK     shift, and go to state 77

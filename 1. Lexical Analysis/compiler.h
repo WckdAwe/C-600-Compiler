@@ -75,6 +75,9 @@
 #define T_OUT           58
 #define T_EOF            0
 
+// Forgotten.. Fix on the last Version
+#define T_VOID          59
+
 
 
 #define MAX_ERRORS       0
