@@ -17,4 +17,9 @@
 #define FLEX_SHOW_STRINGS    1
 #endif
 
+#ifndef HASHTBL_DEBUG
+#define HASHTBL_SHOW_INSERT  1
+#define HASHTBL_SHOW_GET     1
+#endif
+
 #endif
