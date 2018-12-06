@@ -38,18 +38,7 @@ HASHTBL *hashtbl;
 /** Bison specific functions **/
 void yyerror(const char *message);
 
-
-/** TODO: Order of Operations: https://en.wikipedia.org/wiki/Order_of_operations **/
-/** TODO: Explain why UMINUS **/
-/** TODO: Explain Order of Operations **/
-/** TODO: Verify %type **/
-/** TODO: 
-IF          || DONE
-WHILE       || DONE
-FOR         || DONE
-SWITCH      ||
-CASE        ||
-DEFAULT     ||**/
+/** TODO: Write why split T_ICONST/T_FCONST **/
 %}
 
 
@@ -61,16 +50,67 @@ DEFAULT     ||**/
     char *strval;
 }
 
-%token <intval> T_ICONST 
-%token <doubleval> T_FCONST
-%token <strval> T_TYPEDEF T_CHAR T_STRING T_SCONST T_INT T_ENUM T_LENGTH
-%token <strval> T_CLASS T_PRIVATE T_PROTECTED T_PUBLIC T_STATIC T_UNION T_LIST T_CONTINUE T_BREAK T_IF T_ELSE T_WHILE T_FOR
-%token <strval> T_SWITCH T_DEFAULT T_RETURN T_NEW T_CIN T_COUT T_MAIN T_THIS T_ID T_OROP T_ANDOP T_EQUOP T_ADDOP T_MULOP T_INCDEC
-%token <strval> T_SIZEOP T_LISTFUNC T_LPAREN T_RPAREN T_SEMI T_DOT T_COMMA T_COLON T_LBRACK T_REFER T_LBRACE 
-%token <strval> T_RBRACE T_METH T_INP T_OUT
-%token <strval> T_ASSIGN T_CASE T_CCONST T_FLOAT T_NOTOP T_RELOP T_VOID
-%token <strval> T_RBRACK "]"
-%token <strval> T_EOF 0 "end of file"
+%token <intval> T_ICONST            "integer constant"
+%token <doubleval> T_FCONST         "float constant"
+%token <strval> T_TYPEDEF           "typedef"
+%token <strval> T_CHAR              "char"
+%token <strval> T_STRING            "string"
+%token <strval> T_SCONST            "string const"
+%token <strval> T_CLASS             "class"
+%token <strval> T_PRIVATE           "private"
+%token <strval> T_PROTECTED         "protected"
+%token <strval> T_PUBLIC            "public"
+%token <strval> T_STATIC            "static"
+%token <strval> T_UNION             "union"
+%token <strval> T_LIST              "list"
+%token <strval> T_CONTINUE          "continue" 
+%token <strval> T_BREAK             "break"
+%token <strval> T_IF                "if"
+%token <strval> T_ELSE              "else"
+%token <strval> T_WHILE             "while"
+%token <strval> T_FOR               "for"
+%token <strval> T_SWITCH            "switch"
+%token <strval> T_DEFAULT           "default"
+%token <strval> T_RETURN            "return"
+%token <strval> T_NEW               "new"
+%token <strval> T_CIN               "cin"
+%token <strval> T_COUT              "cout"
+%token <strval> T_MAIN              "main"
+%token <strval> T_THIS              "this"
+%token <strval> T_ID                "id"
+%token <strval> T_OROP              "||"
+%token <strval> T_ANDOP             "&&"
+%token <strval> T_EQUOP             "== or !="
+%token <strval> T_ADDOP             "+ or -"
+%token <strval> T_MULOP             "* or / or %"
+%token <strval> T_INCDEC            "-- or ++"
+%token <strval> T_SIZEOP            "sizeof"
+%token <strval> T_LISTFUNC          "listfunc"
+%token <strval> T_LPAREN            "("
+%token <strval> T_RPAREN            ")"
+%token <strval> T_SEMI              ";"
+%token <strval> T_DOT               "."
+%token <strval> T_COMMA             ","
+%token <strval> T_COLON             ":"
+%token <strval> T_LBRACK            "["
+%token <strval> T_RBRACK            "]"
+%token <strval> T_REFER             "&"
+%token <strval> T_LBRACE            "{"
+%token <strval> T_RBRACE            "}"
+%token <strval> T_METH              "::"
+%token <strval> T_INP               "<<"
+%token <strval> T_OUT               ">>"
+%token <strval> T_ASSIGN            "="
+%token <strval> T_CASE              "case"
+%token <strval> T_CCONST            "char const"
+%token <strval> T_FLOAT             "float"
+%token <strval> T_NOTOP             "!"
+%token <strval> T_RELOP             "> or >= or < or <="
+%token <strval> T_VOID              "void"
+%token <strval> T_ENUM              "enum"
+%token <strval> T_INT               "int"
+%token <strval> T_LENGTH            "length"
+%token <strval> T_EOF 0             "end of file"
 
 
 %type <strval> program global_declaration global_declarations typedef_declaration typename standard_type listspec dims dim enum_declaration
@@ -323,6 +363,7 @@ if_tail:                  T_ELSE                                                
                         ;
 while_statement:          T_WHILE T_LPAREN											{scope++;} 
 							general_expression T_RPAREN statement					{hashtbl_get(hashtbl, scope);scope--;}
+                        | T_WHILE error general_expression T_RPAREN statement       {yyerror("CST_ERR | Missing '('");yyerrok;}
                         ;
 for_statement:            T_FOR T_LPAREN											{scope++;} 
 							optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement {hashtbl_get(hashtbl, scope);scope--;}
@@ -345,10 +386,13 @@ casestatements:           casestatements casestatement
                         | casestatement
                         ;
 casestatement:            T_CASE constant T_COLON casestatement
+                        | T_CASE constant error casestatement           {yyerror("CST_ERR | Missing ':'");yyerrok;}
                         | T_CASE constant T_COLON						{scope++;}
 							statements									{hashtbl_get(hashtbl, scope);scope--;}
+                        | T_CASE constant error statements	            {yyerror("CST_ERR | Missing ':'");yyerrok;}
                         | T_DEFAULT T_COLON								{scope++;} 
 							statements									{hashtbl_get(hashtbl, scope);scope--;}
+                        | T_DEFAULT error statements                    {yyerror("CST_ERR | Missing ':'");yyerrok;}
                         ;
 single_casestatement:     T_CASE constant T_COLON single_casestatement
                         | T_CASE constant T_COLON						{scope++;} 
@@ -357,7 +401,9 @@ single_casestatement:     T_CASE constant T_COLON single_casestatement
 return_statement:         T_RETURN optexpr T_SEMI
                         ;
 io_statement:             T_CIN T_INP in_list T_SEMI
+						| T_CIN T_INP in_list error									{yyerror("CST_ERR | Missing ';' or '<<'");yyerrok;}
                         | T_COUT T_OUT out_list T_SEMI
+                        | T_COUT T_OUT out_list error								{yyerror("CST_ERR | Missing ';' or '<<'");yyerrok;}
                         ;
 in_list:                  in_list T_INP in_item
                         | in_item
@@ -375,6 +421,10 @@ main_function:            main_header
                             T_LBRACE decl_statements T_RBRACE                         {hashtbl_get(hashtbl, scope);scope--;}
                         ;
 main_header:              T_INT T_MAIN T_LPAREN T_RPAREN                              {scope++;}
+                        | error T_MAIN T_LPAREN T_RPAREN                              {yyerror("Bad main init! Accepting only 'int main()'");yyerrok;}
+                        | T_INT error T_LPAREN T_RPAREN                               {yyerror("Bad main init! Accepting only 'int main()'");yyerrok;}
+                        | T_INT T_MAIN error T_RPAREN                                 {yyerror("Bad main init! Accepting only 'int main()'");yyerrok;}
+                        | T_INT T_MAIN T_LPAREN error                                 {yyerror("Bad main init! Accepting only 'int main()'");yyerrok;}
                         ;
 %%
 
@@ -421,7 +471,7 @@ void yyerror(const char *message)
     flag_err_type = 0; // Reset flag_err_type to default.
     if(MAX_ERRORS <= 0) return;
     if(error_count == MAX_ERRORS){
-        printf("Max errors detected\n");
+        printf("Max errors (%d) detected. ABORTING...\n", MAX_ERRORS);
         exit(-1);
     }
 }

@@ -50,4 +50,5 @@ for (x=1;(x<x[10,g[y+x]])&&(length(y)<x);x++)
    cin >> x[i] >> i >> x[i] >> y[i];
 y = !x[i*sizeof(char)];
 u.b[3] = '\n';
+
 }

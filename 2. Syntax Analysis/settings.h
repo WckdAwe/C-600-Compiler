@@ -6,7 +6,7 @@
 #ifndef SETTINGS_H_INCLUDE_GUARD
 #define SETTINGS_H_INCLUDE_GUARD
 
-#define MAX_ERRORS                  0
+#define MAX_ERRORS                  5
 #define MAX_STR_CONST               256
 
 #ifndef FLEX_DEBUG
@@ -18,7 +18,7 @@
 #endif
 
 #ifndef HASHTBL_DEBUG
-#define HASHTBL_DEBUG               1
+#define HASHTBL_DEBUG               0
 #define HASHTBL_SHOW_INSERT         1
 #define HASHTBL_SHOW_GET            1
 #define HASHTBL_SHOW_GET_AS_TABLE   0
