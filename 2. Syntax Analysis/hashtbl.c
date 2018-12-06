@@ -13,7 +13,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Retrieved from: http://en.literateprograms.org/Hash_table_(C)?oldid=19638
 */
 
-#include"hashtbl.h"
+/*
+    This Library has been modified slightly to allow some extra functions such as
+    debug information and printing the hashtable as table.
+*/
+
+#include "hashtbl.h"
+#include "settings.h"
 
 #include<string.h>
 #include<stdio.h>
@@ -77,7 +83,8 @@ int hashtbl_insert(HASHTBL *hashtbl, const char *key, void *data ,int scope)
 	struct hashnode_s *node;
 	hash_size hash=hashtbl->hashfunc(key)%hashtbl->size;
 
-	printf("HASHTBL_INSERT(): KEY = %s, HASH = %ld,  \tDATA = %s, SCOPE = %d\n", key, hash, (char*)data, scope);
+    if(HASHTBL_DEBUG && HASHTBL_SHOW_INSERT)
+        printf("HASHTBL_INSERT(): KEY = %s, HASH = %ld,  \tDATA = %s, SCOPE = %d\n", key, hash, (char*)data, scope);
 
 	node=hashtbl->nodes[hash];
 	while(node) {
@@ -128,11 +135,24 @@ void *hashtbl_get(HASHTBL *hashtbl, int scope)
 	hash_size n;
 	struct hashnode_s *node, *oldnode;
 		
+    int found = 0;
+        
 	for(n=0; n<hashtbl->size; ++n) {
 		node=hashtbl->nodes[n];
 		while(node) {
 			if(node->scope == scope) {
-				printf("HASHTBL_GET():\tSCOPE = %d, KEY = %s,  \tDATA = %s\n", node->scope, node->key, (char*)node->data);
+                if(HASHTBL_DEBUG && HASHTBL_SHOW_GET){
+                    if(HASHTBL_SHOW_GET_AS_TABLE){
+                        if(!found){
+                            printf("-------------- Scope %-2d ---------------\n", scope);
+                            printf("Name------------------ Value-----------\n");
+                            found++;
+                        }
+                        printf("%-22s %-16s\n", node->key, (char*)node->data);
+                    }else{
+                        printf("HASHTBL_GET():\tSCOPE = %d, KEY = %s,  \tDATA = %s\n", node->scope, node->key, (char*)node->data);
+                    }
+                }
 				oldnode = node;
 				node=node->next;
 				rem = hashtbl_remove(hashtbl, oldnode->key, scope);
@@ -141,7 +161,10 @@ void *hashtbl_get(HASHTBL *hashtbl, int scope)
 		}
 	}
 	
-	if (rem == -1)
+    if(HASHTBL_DEBUG && HASHTBL_SHOW_GET && HASHTBL_SHOW_GET_AS_TABLE && found){
+        printf("---------- End of Scope %-2d ------------\n\n", scope);
+    }
+	if (rem == -1 && HASHTBL_DEBUG && HASHTBL_SHOW_GET && !HASHTBL_SHOW_GET_AS_TABLE )
 		printf("HASHTBL_GET():\tThere are no elements in the hash table with this scope!\n\t\tSCOPE = %d\n", scope);
 	
 	return NULL;

@@ -94,7 +94,7 @@ void yyerror(const char *message);
 %start program 
 
 %%
-program:                  global_declarations main_function                         {scope++;}
+program:                  global_declarations main_function                        
                         ;
 global_declarations:      global_declarations global_declaration
                         | %empty {}
@@ -128,8 +128,8 @@ dim:                      T_LBRACK T_ICONST T_RBRACK
                         | T_LBRACK T_RBRACK
                         ;
 enum_declaration:         T_ENUM T_ID                                               {hashtbl_insert(hashtbl, $2, NULL, scope);scope++;}
-                            enum_body       
-                            T_SEMI								                    {hashtbl_get(hashtbl, scope);scope--;}
+                            enum_body                                               {hashtbl_get(hashtbl, scope);scope--;}
+                            T_SEMI								                    
                         ;
 enum_body:                T_LBRACE id_list T_RBRACE
                         ;
@@ -218,8 +218,8 @@ variabledefs:             variabledefs T_COMMA variabledef
 variabledef:              listspec T_ID dims								        {hashtbl_insert(hashtbl, $2, NULL, scope);}
                         ;
 anonymous_union:          T_UNION                                                   {scope++;}
-                            union_body 
-                            T_SEMI                                                  {hashtbl_get(hashtbl, scope);scope--;}
+                            union_body                                              {hashtbl_get(hashtbl, scope);scope--;}
+                            T_SEMI                                                  
                         ;
 union_body:               T_LBRACE fields T_RBRACE
                         ;
@@ -355,9 +355,10 @@ out_item:                 general_expression
                         ;
 comp_statement:           T_LBRACE decl_statements T_RBRACE
                         ;
-main_function:            main_header T_LBRACE decl_statements T_RBRACE                         {hashtbl_get(hashtbl, scope);scope--;}
+main_function:            main_header                                                  
+                            T_LBRACE decl_statements T_RBRACE                         {hashtbl_get(hashtbl, scope);scope--;}
                         ;
-main_header:              T_INT T_MAIN T_LPAREN T_RPAREN                                        {scope++;}
+main_header:              T_INT T_MAIN T_LPAREN T_RPAREN                              {scope++;}
                         ;
 %%
 
@@ -377,6 +378,8 @@ int main(int argc, char *argv[]){
 
     yyparse();
     
+    printf("FINAL_SCOPE %d\n", scope);
+    hashtbl_get(hashtbl, scope); // Retrieve the last table (Scope 0);
     hashtbl_destroy(hashtbl);
     fclose(yyin);
     
