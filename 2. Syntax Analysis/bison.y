@@ -43,6 +43,13 @@ void yyerror(const char *message);
 /** TODO: Explain why UMINUS **/
 /** TODO: Explain Order of Operations **/
 /** TODO: Verify %type **/
+/** TODO: 
+IF          || DONE
+WHILE       || DONE
+FOR         || DONE
+SWITCH      ||
+CASE        ||
+DEFAULT     ||**/
 %}
 
 
@@ -306,19 +313,25 @@ statement:                expression_statement
                         ;
 expression_statement:     general_expression T_SEMI
                         ;
-if_statement:             T_IF T_LPAREN general_expression T_RPAREN statement if_tail
+if_statement:             T_IF T_LPAREN                                             {scope++;}
+                            general_expression T_RPAREN statement                   {hashtbl_get(hashtbl, scope);scope--;}
+                            if_tail
                         ;
-if_tail:                  T_ELSE statement
-                        | %empty %prec LOWER_THAN_ELSE {}
+if_tail:                  T_ELSE                                                    {scope++;}
+                            statement                                               {hashtbl_get(hashtbl, scope);scope--;}
+                        | %empty %prec LOWER_THAN_ELSE                              {}
                         ;
-while_statement:          T_WHILE T_LPAREN general_expression T_RPAREN statement
+while_statement:          T_WHILE T_LPAREN											{scope++;} 
+							general_expression T_RPAREN statement					{hashtbl_get(hashtbl, scope);scope--;}
                         ;
-for_statement:            T_FOR T_LPAREN optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement
+for_statement:            T_FOR T_LPAREN											{scope++;} 
+							optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement {hashtbl_get(hashtbl, scope);scope--;}
                         ;
 optexpr:                  general_expression
                         | %empty {}
                         ;
-switch_statement:         T_SWITCH T_LPAREN general_expression T_RPAREN switch_tail
+switch_statement:         T_SWITCH T_LPAREN 							{scope++;}
+							general_expression T_RPAREN switch_tail		{hashtbl_get(hashtbl, scope);scope--;}
                         ;
 switch_tail:              T_LBRACE decl_cases T_RBRACE
                         | single_casestatement
@@ -332,11 +345,14 @@ casestatements:           casestatements casestatement
                         | casestatement
                         ;
 casestatement:            T_CASE constant T_COLON casestatement
-                        | T_CASE constant T_COLON statements
-                        | T_DEFAULT T_COLON statements
+                        | T_CASE constant T_COLON						{scope++;}
+							statements									{hashtbl_get(hashtbl, scope);scope--;}
+                        | T_DEFAULT T_COLON								{scope++;} 
+							statements									{hashtbl_get(hashtbl, scope);scope--;}
                         ;
 single_casestatement:     T_CASE constant T_COLON single_casestatement
-                        | T_CASE constant T_COLON statement
+                        | T_CASE constant T_COLON						{scope++;} 
+							statement									{hashtbl_get(hashtbl, scope);scope--;}
                         ;
 return_statement:         T_RETURN optexpr T_SEMI
                         ;
@@ -378,7 +394,6 @@ int main(int argc, char *argv[]){
 
     yyparse();
     
-    printf("FINAL_SCOPE %d\n", scope);
     hashtbl_get(hashtbl, scope); // Retrieve the last table (Scope 0);
     hashtbl_destroy(hashtbl);
     fclose(yyin);
