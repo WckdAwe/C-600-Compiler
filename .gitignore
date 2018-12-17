@@ -1,7 +1,5 @@
 ############ CUSTOM GITIGNORE ############
-*
 
-!*.*
 Stage2 - Syntax Analysis
 flex-bison-example-master
 
