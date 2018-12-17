@@ -2,10 +2,18 @@
 *
 
 !*.*
-lex.yy.c
-lexer_name
 Stage2 - Syntax Analysis
 flex-bison-example-master
+
+# Stage 1 - Lexical Analysis
+lex.yy.c
+lexer_name
+
+# Stage 2 - Syntax Analysis
+bison
+bison.tab.h
+bison.tab.c
+hashtbl.o
 
 ##########################################
 
