@@ -51,4 +51,8 @@ for (x=1;(x<x[10,g[y+x]])&&(length(y)<x);x++)
 y = !x[i*sizeof(char)];
 u.b[3] = '\n';
 
+cin >> something
+cin >> something2
+cin >> something3
+cin >> something4
 }

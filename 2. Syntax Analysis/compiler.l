@@ -17,8 +17,7 @@
 
 /** Extern from Bison **/
 extern int flag_err_type;
-extern void yyerror(char *message);    
-
+extern void yyerror(char *message);
 
 /** Flex specific variables **/
 int lineno=1; // Program's line number
