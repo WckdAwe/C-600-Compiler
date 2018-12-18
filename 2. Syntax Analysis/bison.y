@@ -403,7 +403,7 @@ single_casestatement:     T_CASE constant T_COLON single_casestatement
 return_statement:         T_RETURN optexpr T_SEMI
                         ;
 io_statement:             T_CIN T_INP in_list T_SEMI
-                        | T_CIN T_INP in_list error                                         {yyerror("CST_ERR | Missing ';' or '<<'");yyerrok;}
+                        | T_CIN T_INP in_list error                                         {yyerror("CST_ERR | Missing ';' or '>>'");yyerrok;}
                         | T_COUT T_OUT out_list T_SEMI
                         | T_COUT T_OUT out_list error                                       {yyerror("CST_ERR | Missing ';' or '<<'");yyerrok;}
                         ;

@@ -281,6 +281,7 @@ C(AD*|D+)R                                              {TPRINT(T_LISTFUNC); yyl
  /* Strings */
 \"                                                      {BEGIN(STATE_STRING); str_buf_ptr = str_buf;}
 <STATE_STRING>\"                                        {BEGIN(INITIAL); *str_buf_ptr = '\0';
+                                                            yylval.strval = strdup(str_buf);
                                                             if(FLEX_DEBUG && FLEX_SHOW_STRINGS)
                                                                 printf("STRING FOUND: %s | TOKEN NUMBER: %d | LINE: %d\n", str_buf, T_SCONST, lineno);
                                                             return T_SCONST;}
