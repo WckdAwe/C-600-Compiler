@@ -134,21 +134,21 @@ C(AD*|D+)R                                              {TPRINT(T_LISTFUNC); yyl
 {ID}                                                    {TPRINT(T_ID); yylval.strval = strdup(yytext);
                                                             return T_ID;}                                                       
  /* FLOAT HEX CONSTANT */
-(0X)([1-9A-F]{HEXDIGIT}*)?\.(0*[1-9A-F]+{HEXDIGIT}*|0)  {FPRINT(T_FCONST, 16); yylval.doubleval = BaseToFloat(yytext, 16);
+(0X)([1-9A-F]{HEXDIGIT}*)?\.(0*[1-9A-F]+{HEXDIGIT}*|0)  {FPRINT(T_FCONST, 16); yylval.floatval = BaseToFloat(yytext, 16);
                                                             return T_FCONST;}
  /* FLOAT OCT CONSTANT */
-(0O)([1-7]{OCTDIGIT}*)?\.(0*[1-7]+{OCTDIGIT}*|0)        {FPRINT(T_FCONST, 8); yylval.doubleval = BaseToFloat(yytext, 8);
+(0O)([1-7]{OCTDIGIT}*)?\.(0*[1-7]+{OCTDIGIT}*|0)        {FPRINT(T_FCONST, 8); yylval.floatval = BaseToFloat(yytext, 8);
                                                             return T_FCONST;}   
  /* FLOAT BIN CONSTANT */
-(0B)(1{BINDIGIT}*)?\.(0*1+{BINDIGIT}*|0)                {FPRINT(T_FCONST, 2); yylval.doubleval = BaseToFloat(yytext, 2);
+(0B)(1{BINDIGIT}*)?\.(0*1+{BINDIGIT}*|0)                {FPRINT(T_FCONST, 2); yylval.floatval = BaseToFloat(yytext, 2);
                                                             return T_FCONST;}
                                                             
  /* FLOAT DECIMAL CONSTANT */
-(0|{NZDIGIT})?(\.)(0*[1-9]+{DIGIT}*|0){EXPONENT}        {FPRINT(T_FCONST, 10); yylval.doubleval = atof(yytext);
+(0|{NZDIGIT})?(\.)(0*[1-9]+{DIGIT}*|0){EXPONENT}        {FPRINT(T_FCONST, 10); yylval.floatval = atof(yytext);
                                                             return T_FCONST;}
-(0|{NZDIGIT})?(\.)(0*[1-9]+{DIGIT}*|0)                  {FPRINT(T_FCONST, 10); yylval.doubleval = atof(yytext);
+(0|{NZDIGIT})?(\.)(0*[1-9]+{DIGIT}*|0)                  {FPRINT(T_FCONST, 10); yylval.floatval = atof(yytext);
                                                             return T_FCONST;}
-(0|{NZDIGIT}){EXPONENT}                                 {FPRINT(T_FCONST, 10); yylval.doubleval = atof(yytext);
+(0|{NZDIGIT}){EXPONENT}                                 {FPRINT(T_FCONST, 10); yylval.floatval = atof(yytext);
                                                             return T_FCONST;}
                                                             
  /* HEX CONSTANT */

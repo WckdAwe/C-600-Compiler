@@ -39,12 +39,12 @@ int scope = 0;
 
 %union{
     int intval;
-    double doubleval; 
+    float floatval; 
     char *strval;
 }
 
 %token <intval>     T_ICONST        "integer constant"
-%token <doubleval>  T_FCONST        "float constant"
+%token <floatval>   T_FCONST        "float constant"
 %token <strval>     T_TYPEDEF       "typedef"
 %token <strval>     T_CHAR          "char"
 %token <strval>     T_STRING        "string"
