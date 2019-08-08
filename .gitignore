@@ -103,3 +103,5 @@ bin-release/
 2\. Syntax Analysis/2\. Syntax Analysis\.zip
 
 \.vscode/
+
+3\. Semantics Analysis/tmp/

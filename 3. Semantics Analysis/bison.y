@@ -8,6 +8,8 @@
    --------------------------------------------------------------------- */
 
 extern HASHTBL *hashtbl;
+extern void yyerror(const char *message);
+
 
 /* ---------------------------------------------------------------------
    ------------- External variables & functions from lexer.l -----------
@@ -96,7 +98,7 @@ Data data;
 %token <strval>     T_OUT           ">>"
 %token <strval>     T_ASSIGN        "="
 %token <strval>     T_CASE          "case"
-%token <strval>     T_CCONST        "char const"
+%token <charval>    T_CCONST        "char const"
 %token <strval>     T_FLOAT         "float"
 %token <strval>     T_NOTOP         "!"
 %token <strval>     T_RELOP         "> or >= or < or <="
@@ -221,7 +223,7 @@ expression_list:          general_expression
 constant:                 T_CCONST                                                          {data.chardata=$1;} 
                         | T_ICONST                                                          {data.intdata=$1;}
                         | T_FCONST                                                          {data.floatdata=$1;}
-                        | T_SCONST                                                          {data.stringdata=$1;}
+                        | T_SCONST                                                          {data.strdata=$1;}
                         ;
 listexpression:           T_LBRACK expression_list T_RBRACK
                         ;
