@@ -40,6 +40,7 @@ int scope = 0;
 %union{
     int intval;
     float floatval; 
+    char charval;
     char *strval;
 }
 
