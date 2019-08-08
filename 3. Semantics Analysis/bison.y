@@ -8,8 +8,6 @@
    --------------------------------------------------------------------- */
 
 extern HASHTBL *hashtbl;
-extern void yyerror(const char *message);
-
 
 /* ---------------------------------------------------------------------
    ------------- External variables & functions from lexer.l -----------
@@ -29,6 +27,8 @@ extern char *yytext;
    --------------------------------------------------------------------- */
 
 int scope = 0;
+
+Data data;
 
 /** TODO: Write why split T_ICONST/T_FCONST **/
 /** TODO: constant Union with type and val **/
@@ -218,10 +218,10 @@ assignment:               variable T_ASSIGN assignment
 expression_list:          general_expression
                         | %empty {}
                         ;
-constant:                 T_CCONST 
-                        | T_ICONST 
-                        | T_FCONST 
-                        | T_SCONST
+constant:                 T_CCONST                                                          {data.chardata=$1;} 
+                        | T_ICONST                                                          {data.intdata=$1;}
+                        | T_FCONST                                                          {data.floatdata=$1;}
+                        | T_SCONST                                                          {data.stringdata=$1;}
                         ;
 listexpression:           T_LBRACK expression_list T_RBRACK
                         ;
@@ -357,7 +357,6 @@ if_tail:                  T_ELSE                                                
                         ;
 while_statement:          T_WHILE T_LPAREN                                                  {scope++;} 
                             general_expression T_RPAREN statement                           {hashtbl_get(hashtbl, scope);scope--;}
-                        | T_WHILE error general_expression T_RPAREN statement               {yyerror("CST_ERR | Missing '('");yyerrok;}
                         ;
 for_statement:            T_FOR T_LPAREN                                                    {scope++;} 
                             optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement        {hashtbl_get(hashtbl, scope);scope--;}
@@ -380,13 +379,10 @@ casestatements:           casestatements casestatement
                         | casestatement
                         ;
 casestatement:            T_CASE constant T_COLON casestatement
-                        | T_CASE constant error casestatement                               {yyerror("CST_ERR | Missing ':'");yyerrok;}
                         | T_CASE constant T_COLON                                           {scope++;}
                             statements                                                      {hashtbl_get(hashtbl, scope);scope--;}
-                        | T_CASE constant error statements                                  {yyerror("CST_ERR | Missing ':'");yyerrok;}
                         | T_DEFAULT T_COLON                                                 {scope++;} 
                             statements                                                      {hashtbl_get(hashtbl, scope);scope--;}
-                        | T_DEFAULT error statements                                        {yyerror("CST_ERR | Missing ':'");yyerrok;}
                         ;
 single_casestatement:     T_CASE constant T_COLON single_casestatement
                         | T_CASE constant T_COLON                                           {scope++;} 
@@ -395,9 +391,7 @@ single_casestatement:     T_CASE constant T_COLON single_casestatement
 return_statement:         T_RETURN optexpr T_SEMI
                         ;
 io_statement:             T_CIN T_INP in_list T_SEMI
-                        | T_CIN T_INP in_list error                                         {yyerror("CST_ERR | Missing ';' or '>>'");yyerrok;}
                         | T_COUT T_OUT out_list T_SEMI
-                        | T_COUT T_OUT out_list error                                       {yyerror("CST_ERR | Missing ';' or '<<'");yyerrok;}
                         ;
 in_list:                  in_list T_INP in_item
                         | in_item
@@ -415,9 +409,5 @@ main_function:            main_header
                             T_LBRACE decl_statements T_RBRACE                               {hashtbl_get(hashtbl, scope);scope--;}
                         ;
 main_header:              T_INT T_MAIN T_LPAREN T_RPAREN                                    {scope++;}
-                        | error T_MAIN T_LPAREN T_RPAREN                                    {yyerror("Bad main init! Accepting only 'int main()'");yyerrok;}
-                        | T_INT error T_LPAREN T_RPAREN                                     {yyerror("Bad main init! Accepting only 'int main()'");yyerrok;}
-                        | T_INT T_MAIN error T_RPAREN                                       {yyerror("Bad main init! Accepting only 'int main()'");yyerrok;}
-                        | T_INT T_MAIN T_LPAREN error                                       {yyerror("Bad main init! Accepting only 'int main()'");yyerrok;}
                         ;
 %%
