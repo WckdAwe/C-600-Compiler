@@ -7,7 +7,6 @@
 #define SETTINGS_H_INCLUDE_GUARD
 
 #define MAX_ERRORS                  0
-#define MAX_STR_CONST               256
 
 #ifndef FLEX_DEBUG
 #define FLEX_DEBUG                  1
