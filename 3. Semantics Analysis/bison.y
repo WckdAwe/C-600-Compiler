@@ -152,14 +152,14 @@ global_declaration:       typedef_declaration
 typedef_declaration:      T_TYPEDEF typename listspec T_ID                                  {hashtbl_insert(hashtbl, $4, NULL, scope);scope++;}
                             dims T_SEMI                                                     {hashtbl_get(hashtbl, scope);scope--;}
                         ;
-typename:                 standard_type
-                        | T_ID                                                              {hashtbl_insert(hashtbl, $1, NULL, scope);}
+typename:                 standard_type                                                     {ts_create_standard_type($1);}
+                        | T_ID                                                              {ha1shtbl_insert(hashtbl, $1, NULL, scope);}
                         ;
-standard_type:            T_CHAR 
-                        | T_INT 
-                        | T_FLOAT 
-                        | T_STRING 
-                        | T_VOID
+standard_type:            T_CHAR                                                            {$$=CHARACTER;} 
+                        | T_INT                                                             {$$=INTEGER;}
+                        | T_FLOAT                                                           {$$=REAL;}
+                        | T_STRING                                                          {$$=STRING;}
+                        | T_VOID                                                            {$$=VOID;}
                         ;
 listspec:                 T_LIST 
                         | %empty {}

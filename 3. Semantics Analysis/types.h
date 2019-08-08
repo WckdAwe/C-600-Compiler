@@ -19,8 +19,6 @@ typedef enum operation_enum {
     ASSIGN, METH, COLON, BRACKS, REFER, BRACES, INP, OUT
 } Operation; 
 
-
-
 typedef union Data{
     int intdata;
     float floatdata;
@@ -33,6 +31,12 @@ typedef struct T_Data{
 	Data data;
 }T_Data;
 
+typedef struct Type_Struct{
+	Type type;
+	int size;						//megethos typou
+	// int offset;
+	
+}Type_Struct;
 
 // typedef struct Type_tag *Type;
 // struct Type_tag {

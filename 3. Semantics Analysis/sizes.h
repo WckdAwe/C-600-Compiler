@@ -3,7 +3,7 @@
 
 #define CHAR_SIZE       sizeof(char)
 #define INT_SIZE        sizeof(int)
-#define FLOAT           sizeof(float)
+#define FLOAT_SIZE      sizeof(float)
 
 #define ENUM_SIZE       INT_SIZE
 #define MAX_STR_CONST 	256
