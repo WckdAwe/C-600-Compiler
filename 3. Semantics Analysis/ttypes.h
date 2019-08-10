@@ -20,7 +20,7 @@ typedef struct Data_union{
 	char *strval;
 	Boolean bval;	//Maybe delete this after
 
-}Data;
+}Data;	
 
 typedef struct T_data{
 	Type type;

@@ -21,4 +21,6 @@ extern bool flagVerbose;
 extern char *filename;
 extern int linecount;
 
+
+void *emalloc(size_t size);
 #endif

@@ -44,6 +44,8 @@ Data data;
     float floatval; 
     char charval;
     char *strval;
+    Type typeval;
+    Type_Struct *tsval;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -108,7 +110,7 @@ Data data;
 %token <strval>     T_LENGTH        "length"
 %token <strval>     T_EOF   0       "end of file"
     
-%type <strval> program global_declaration global_declarations typedef_declaration typename standard_type listspec dims dim enum_declaration
+%type <strval> program global_declaration global_declarations typedef_declaration listspec dims dim enum_declaration
 %type <strval> enum_body id_list initializer init_value expression variable general_expression assignment expression_list listexpression
 %type <strval> init_values class_declaration class_body parent members_methods access member_or_method member var_declaration variabledefs variabledef 
 %type <strval> anonymous_union union_body fields field method short_func_declaration short_par_func_header func_header_start parameter_types 
@@ -117,6 +119,9 @@ Data data;
 %type <strval> statements statement expression_statement if_statement if_tail while_statement for_statement optexpr switch_statement switch_tail decl_cases 
 %type <strval> casestatements casestatement single_casestatement return_statement io_statement in_list in_item out_list out_item comp_statement main_function main_header
 %type <strval> constant
+
+%type <typeval> standard_type
+%type <tsval> typename
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -152,12 +157,12 @@ global_declaration:       typedef_declaration
 typedef_declaration:      T_TYPEDEF typename listspec T_ID                                  {hashtbl_insert(hashtbl, $4, NULL, scope);scope++;}
                             dims T_SEMI                                                     {hashtbl_get(hashtbl, scope);scope--;}
                         ;
-typename:                 standard_type                                                     {ts_create_standard_type($1);}
-                        | T_ID                                                              {ha1shtbl_insert(hashtbl, $1, NULL, scope);}
+typename:                 standard_type                                                     {$$ = ts_create_standard_type($1);}
+                        | T_ID                                                              {hashtbl_insert(hashtbl, $1, NULL, scope);}
                         ;
 standard_type:            T_CHAR                                                            {$$=CHARACTER;} 
                         | T_INT                                                             {$$=INTEGER;}
-                        | T_FLOAT                                                           {$$=REAL;}
+                        | T_FLOAT                                                           {$$=FLOAT;}
                         | T_STRING                                                          {$$=STRING;}
                         | T_VOID                                                            {$$=VOID;}
                         ;
@@ -253,7 +258,7 @@ member_or_method:         member
 member:                   var_declaration
                         | anonymous_union
                         ;
-var_declaration:          typename variabledefs T_SEMI
+var_declaration:          typename variabledefs T_SEMI                                      
                         ;
 variabledefs:             variabledefs T_COMMA variabledef
                         | variabledef

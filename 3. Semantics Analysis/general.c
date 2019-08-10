@@ -3,7 +3,9 @@
    --------------------------------------------------------------------- */
 
 #include <stdlib.h>
-#include <string.h>
+#include <stdio.h>
+#include <error.h>
+#include <errno.h>
 #include "general.h"
 
 /* ---------------------------------------------------------------------
@@ -22,3 +24,15 @@ bool flagVerbose = true;
 //         message("\r\nErrors:   %d\nWarnings: %d", numErrors, numWarnings);
 //     exit(code);
 // }
+
+
+void *emalloc(size_t size){
+    void *pointer = malloc(size);
+
+    if (!pointer){
+        perror("malloc");
+        exit(ENOMEM);
+    }
+
+    return pointer;
+}

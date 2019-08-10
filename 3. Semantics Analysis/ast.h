@@ -4,72 +4,41 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ttypes.h"
+#include "types.h"
 
-#ifndef ast
-#define ast
+#ifndef __AST_H__
+#define __AST_H__
 
-
+// Operations
 typedef struct ast_node{
 	Operation op;
 	Type type;
 	
-	struct ast_node *left;
-	struct ast_node *right;
-}AST_node;
+	AST_Node *left;
+	AST_Node *right;
+}AST_Node;
 
-//if
-struct ast_if_node{
+// If's
+typedef struct ast_if_node{
 	Operation op;
 	
-	struct ast_node *condition;
-	struct ast_node *if_branch;
-	struct ast_node *else_brach;
-}
+	AST_Node *condition;
+	AST_Node *if_branch;
+	AST_Node *else_brach;
+} AST_IF_Node;
 
-//while
-struct ast_while_node{
+// While Loop
+typedef struct ast_while_node{
 	Operation op;
 	
-	struct ast_node *condition;
-	struct ast_node *while_branch;
-}
-
-//for
-struct ast_for_node{
-	Operation op;
-	Increment inc;
-	struct ast_node *init_condition;
-	struct ast_node *end_condition;
-	struct ast_node *for_branch;
-}
-
-//Ids
-struct ast_leaf_node{
-	Operation op;
-	char *name;
-	
-	Type_Struct *value;
-}
-
-//enum
-struct ast_enum_node{
-	Operation op;
-	char *name;
-	
-	Type_Struct *ts_value;
-	Type_Struct *enumeration;
-	
-};
+	AST_Node *condition;
+	AST_Node *while_branch;
+}AST_WHILE_Node;
 
 
-//Read/Write
-struct ast_io_node{
-	Operation op;
-	struct ast_node *params;
-}
-
-//TODO: write signatures 
+AST_Node *create_ast_node(Operation op, Type type, AST_Node *left, AST_Node *right);
+AST_Node *create_ast_if_node(AST_Node *condition, AST_Node *if_branch, AST_Node *else_branch);
+AST_Node *create_ast_while_node(AST_Node *condition, AST_Node *while_branch);
 
 #endif
 

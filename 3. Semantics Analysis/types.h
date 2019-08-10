@@ -1,3 +1,4 @@
+
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
@@ -9,8 +10,9 @@
  */
 
 typedef enum type_enum {
-    NOTHING, INTEGER, REAL, // REAL == Float
-    CHARACTER, STRING, VOID, ARRAY, ENUMERATION, UNION, LIST, CLASS_NAME, FUNCTION_NAME} Type;
+    NOTHING, INTEGER, FLOAT, CHARACTER, STRING, VOID, 
+    ARRAY, ENUMERATION, UNION, LIST, CLASS_NAME, FUNCTION_NAME
+} Type;
 typedef enum param_enum {VARIABLE, VALUE} Param;
 typedef enum static_enum {NO_STATIC, STATIC} Static;
 typedef enum operation_enum {
@@ -37,6 +39,25 @@ typedef struct Type_Struct{
 	// int offset;
 	
 }Type_Struct;
+
+typedef struct TS_Array{
+	int dimensions;
+	Type_Struct *dims;
+}TS_Array;
+
+typedef union TS_Union{
+	struct ast_node *ast_node;
+	Type_Struct *type_struct;
+}AST_TS_Union;
+
+typedef struct For_List{
+	char *key;
+	struct ast_node *cond;
+	struct For_List *next;
+}For_List;
+
+
+Type_Struct *ts_create_standard_type(Type type);
 
 // typedef struct Type_tag *Type;
 // struct Type_tag {

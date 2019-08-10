@@ -21,7 +21,7 @@ Type_Struct *ts_create_standard_type(Type type){
 		case CHARACTER:
 			result->size = CHAR_SIZE;
 			break;
-		case REAL:
+		case FLOAT:
 			result->size = FLOAT_SIZE;
 			break;
 		default:
