@@ -55,8 +55,8 @@ typedef struct ast_leaf_node{
 	Operation op;
 	char *name;
 
-	Type_Struct value;
-}
+	Type_Struct *value;
+};
 
 
 
