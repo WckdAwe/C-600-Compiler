@@ -5,6 +5,10 @@
 #include "c600.h"
 #include "types.h"
 
+char *reverse_types[] = {
+    "NOTHING", "INT", "FLOAT", "CHAR", "STR", "VOID", 
+    "ARRAY", "ENUM", "UNION", "LIST", "CLASS", "FUNC"
+};
 
 Type_Struct *ts_create_standard_type(Type type){
 	
@@ -15,10 +19,10 @@ Type_Struct *ts_create_standard_type(Type type){
 	result->type = type;
 	
 	switch (result->type){
-		case INTEGER: 
+		case INT: 
 			result->size = INT_SIZE;
 			break;
-		case CHARACTER:
+		case CHAR:
 			result->size = CHAR_SIZE;
 			break;
 		case FLOAT:
@@ -30,4 +34,45 @@ Type_Struct *ts_create_standard_type(Type type){
 	}
 	
 	return result;
+}
+
+
+List *list_create_node(char *name){
+	List *result = emalloc(sizeof(List));
+
+	result->key = name;
+	result->value = -1;
+	result->next = NULL;
+	
+	return result;
+}
+
+List *list_add_node(List *rl, List *node){
+	List *curr;
+	
+	curr = rl;
+	while(curr->next != NULL){
+		curr = curr->next;
+	}
+	curr->next = node;
+	
+	return rl;
+}
+
+
+List *list_addType(List *rl, Type_Struct *ts){
+	List *curr;
+	Type_Struct *temp;
+	
+	curr = rl;
+	while(curr != NULL){
+		temp = emalloc(sizeof(Type_Struct));
+		*temp = *ts;
+		curr->field = temp;
+		
+		curr = curr->next;
+	}
+
+	free(ts);
+	return rl;
 }

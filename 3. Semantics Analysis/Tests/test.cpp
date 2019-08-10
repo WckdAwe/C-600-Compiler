@@ -7,6 +7,20 @@ enum days
    thursday,
    friday
 };
+class cst_t
+{
+private:
+   float a, b; // double a,b;
+   int list al;
+   days d;
+
+public:
+   float zz(int &, ar);
+   union {
+      int i[2];
+      float f[2];
+   };
+};
 class t
 {
 private:

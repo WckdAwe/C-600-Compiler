@@ -7,6 +7,7 @@
 
 #define ENUM_SIZE       INT_SIZE
 #define MAX_STR_CONST 	256
+#define SMALL_STR_CONST	32
 
 #ifndef __ASCII_CHARS__
 #define __ASCII_CHARS__

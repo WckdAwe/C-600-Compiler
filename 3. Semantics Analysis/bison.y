@@ -46,6 +46,7 @@ Data data;
     char *strval;
     Type typeval;
     Type_Struct *tsval;
+    List *listval;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -112,16 +113,17 @@ Data data;
     
 %type <strval> program global_declaration global_declarations typedef_declaration listspec dims dim enum_declaration
 %type <strval> enum_body id_list initializer init_value expression variable general_expression assignment expression_list listexpression
-%type <strval> init_values class_declaration class_body parent members_methods access member_or_method member var_declaration variabledefs variabledef 
+%type <strval> init_values class_declaration class_body parent members_methods access member_or_method member var_declaration
 %type <strval> anonymous_union union_body fields field method short_func_declaration short_par_func_header func_header_start parameter_types 
 %type <strval> pass_list_dims nopar_func_header union_declaration global_var_declaration init_variabledefs init_variabledef func_declaration full_func_declaration 
-%type <strval> full_par_func_header class_func_header_start func_class parameter_list pass_variabledef nopar_class_func_header decl_statements declarations decltype 
+%type <strval> full_par_func_header class_func_header_start func_class parameter_list nopar_class_func_header decl_statements declarations decltype 
 %type <strval> statements statement expression_statement if_statement if_tail while_statement for_statement optexpr switch_statement switch_tail decl_cases 
 %type <strval> casestatements casestatement single_casestatement return_statement io_statement in_list in_item out_list out_item comp_statement main_function main_header
 %type <strval> constant
 
 %type <typeval> standard_type
 %type <tsval> typename
+%type <listval> variabledef variabledefs pass_variabledef
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -154,35 +156,35 @@ global_declaration:       typedef_declaration
                         | global_var_declaration
                         | func_declaration
                         ;
-typedef_declaration:      T_TYPEDEF typename listspec T_ID                                  {hashtbl_insert(hashtbl, $4, NULL, scope);scope++;}
+typedef_declaration:      T_TYPEDEF typename listspec T_ID                                  {ht_complex_insert(hashtbl, $4, $2, scope);scope++;}
                             dims T_SEMI                                                     {hashtbl_get(hashtbl, scope);scope--;}
                         ;
 typename:                 standard_type                                                     {$$ = ts_create_standard_type($1);}
-                        | T_ID                                                              {hashtbl_insert(hashtbl, $1, NULL, scope);}
+                        | T_ID                                                              {$$ = ht_extract_ts(ht_lookup(hashtbl, scope, $1));} // TODO: Lookup here?
                         ;
-standard_type:            T_CHAR                                                            {$$=CHARACTER;} 
-                        | T_INT                                                             {$$=INTEGER;}
+standard_type:            T_CHAR                                                            {$$=CHAR;} 
+                        | T_INT                                                             {$$=INT;}
                         | T_FLOAT                                                           {$$=FLOAT;}
-                        | T_STRING                                                          {$$=STRING;}
+                        | T_STRING                                                          {$$=STR;}
                         | T_VOID                                                            {$$=VOID;}
                         ;
-listspec:                 T_LIST 
-                        | %empty {}
+listspec:                 T_LIST                                                            // TODO: C600++.pdf
+                        | %empty                                                            {}                                                        
                         ;
 dims:                     dims dim
-                        | %empty {}
+                        | %empty                                                            {}
                         ;
-dim:                      T_LBRACK T_ICONST T_RBRACK 
-                        | T_LBRACK T_RBRACK
+dim:                      T_LBRACK T_ICONST T_RBRACK                                        // TODO: [x] Preassign memory.
+                        | T_LBRACK T_RBRACK                                                 // TODO: Dynamic memory? Assign later
                         ;
-enum_declaration:         T_ENUM T_ID                                                       {hashtbl_insert(hashtbl, $2, NULL, scope);scope++;}
+enum_declaration:         T_ENUM T_ID                                                       {ht_complex_insert(hashtbl, $2, ts_create_standard_type(ENUM), scope);scope++;}
                             enum_body                                                       {hashtbl_get(hashtbl, scope);scope--;}
                             T_SEMI                                                  
                         ;
 enum_body:                T_LBRACE id_list T_RBRACE
                         ;
-id_list:                  id_list T_COMMA T_ID initializer                                  {hashtbl_insert(hashtbl, $3, NULL, scope);}
-                        | T_ID                                                              {hashtbl_insert(hashtbl, $1, NULL, scope);} 
+id_list:                  id_list T_COMMA T_ID initializer                                  {ht_complex_insert(hashtbl, $3, ts_create_standard_type(INT), scope);} // TODO: IMPROVE
+                        | T_ID                                                              {ht_complex_insert(hashtbl, $1, ts_create_standard_type(INT), scope);} // TODO: IMPROVE
                           initializer
                         ;
 initializer:              T_ASSIGN init_value
@@ -213,7 +215,7 @@ expression:               expression T_OROP expression
 variable:                 variable T_LBRACK general_expression T_RBRACK
                         | variable T_DOT T_ID                                               {hashtbl_insert(hashtbl, $3, NULL, scope);}
                         | T_LISTFUNC T_LPAREN general_expression T_RPAREN
-                        | decltype T_ID                                                     {hashtbl_insert(hashtbl, $2, NULL, scope);}
+                        | decltype T_ID                                                     {hashtbl_insert(hashtbl, $2, NULL, scope);} // TODO: STATIC ASSIGNMENT?
                         | T_THIS
                         ;
 general_expression:       general_expression T_COMMA general_expression
@@ -235,13 +237,13 @@ listexpression:           T_LBRACK expression_list T_RBRACK
 init_values:              init_values T_COMMA init_value
                         | init_value
                         ;
-class_declaration:        T_CLASS T_ID                                                      {hashtbl_insert(hashtbl, $2, NULL, scope);scope++;}
+class_declaration:        T_CLASS T_ID                                                      {ht_complex_insert(hashtbl, $2, ts_create_standard_type(CLASS), scope);scope++;}
                             class_body                                              
                             T_SEMI                                                          {hashtbl_get(hashtbl, scope);scope--;}
                         ;
 class_body:               parent T_LBRACE members_methods T_RBRACE
                         ;
-parent:                   T_COLON T_ID                                                      {hashtbl_insert(hashtbl, $2, NULL, scope);}
+parent:                   T_COLON T_ID                                                      {ht_complex_insert(hashtbl, $2, ts_create_standard_type(CLASS), scope);}
                         | %empty {}
                         ;
 members_methods:          members_methods access member_or_method
@@ -258,12 +260,12 @@ member_or_method:         member
 member:                   var_declaration
                         | anonymous_union
                         ;
-var_declaration:          typename variabledefs T_SEMI                                      
+var_declaration:          typename variabledefs T_SEMI                                      {ht_var_insert(hashtbl, $2, $1, scope);}                            
                         ;
-variabledefs:             variabledefs T_COMMA variabledef
-                        | variabledef
+variabledefs:             variabledefs T_COMMA variabledef                                  {$$ = list_add_node($3, $1);}
+                        | variabledef                                                       {$$ = $1;}
                         ;
-variabledef:              listspec T_ID dims                                                {hashtbl_insert(hashtbl, $2, NULL, scope);}
+variabledef:              listspec T_ID dims                                                {$$ = list_create_node($2);}
                         ;
 anonymous_union:          T_UNION                                                           {scope++;}
                             union_body                                                      {hashtbl_get(hashtbl, scope);scope--;}
@@ -283,7 +285,7 @@ short_func_declaration:   short_par_func_header T_SEMI                          
                         ;
 short_par_func_header:    func_header_start T_LPAREN parameter_types T_RPAREN      
                         ;
-func_header_start:        typename listspec T_ID                                            {hashtbl_insert(hashtbl, $3, NULL, scope);scope++;/**Scope++ for every function!!!**/}
+func_header_start:        typename listspec T_ID                                            {ht_complex_insert(hashtbl, $3, ts_create_standard_type(FUNC), scope);scope++;}//{hashtbl_insert(hashtbl, $3, NULL, scope);scope++;/**Scope++ for every function!!!**/}
                         ;
 parameter_types:          parameter_types T_COMMA typename pass_list_dims
                         | typename pass_list_dims
@@ -293,7 +295,7 @@ pass_list_dims:           T_REFER
                         ;
 nopar_func_header:        func_header_start T_LPAREN T_RPAREN                               {/** NO SCOPE due to func_header_start! **/}
                         ;
-union_declaration:        T_UNION T_ID                                                      {hashtbl_insert(hashtbl, $2, NULL, scope);scope++;}
+union_declaration:        T_UNION T_ID                                                      {ht_complex_insert(hashtbl, $2, ts_create_standard_type(UNION), scope);scope++;}
                             union_body          
                             T_SEMI                                                          {hashtbl_get(hashtbl, scope);scope--;}
                         ;
@@ -314,15 +316,15 @@ full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE
 full_par_func_header:     class_func_header_start T_LPAREN parameter_list T_RPAREN
                         | func_header_start T_LPAREN parameter_list T_RPAREN
                         ;
-class_func_header_start:  typename listspec func_class T_ID                                 {hashtbl_insert(hashtbl, $4, NULL, scope);scope++;/**Scope++ for every function!!!**/}
+class_func_header_start:  typename listspec func_class T_ID                                 {ht_complex_insert(hashtbl, $4, ts_create_standard_type(FUNC), scope);scope++;}//{hashtbl_insert(hashtbl, $4, NULL, scope);scope++;/**Scope++ for every function!!!**/}
                         ;
-func_class:               T_ID T_METH                                                       {hashtbl_insert(hashtbl, $1, NULL, scope);}
+func_class:               T_ID T_METH                                                       {ht_complex_insert(hashtbl, $1, ts_create_standard_type(FUNC), scope);}
                         ;
-parameter_list:           parameter_list T_COMMA typename pass_variabledef
-                        | typename pass_variabledef
+parameter_list:           parameter_list T_COMMA typename pass_variabledef                  {ht_var_insert(hashtbl, $4, $3, scope);}
+                        | typename pass_variabledef                                         {ht_var_insert(hashtbl, $2, $1, scope);}
                         ;
-pass_variabledef:         variabledef
-                        | T_REFER T_ID                                                      {hashtbl_insert(hashtbl, $2, NULL, scope);}
+pass_variabledef:         variabledef                                                       {$$ = $1;}
+                        | T_REFER T_ID                                                      {$$ = list_create_node($2);}//{hashtbl_insert(hashtbl, $2, NULL, scope);}
                         ;
 nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN                 
                         ;

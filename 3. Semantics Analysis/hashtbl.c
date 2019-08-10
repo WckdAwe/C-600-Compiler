@@ -20,9 +20,16 @@ Retrieved from: http://en.literateprograms.org/Hash_table_(C)?oldid=19638
 
 #include "hashtbl.h"
 #include "settings.h"
+#include "types.h"
+#include "general.h"
+#include "sizes.h"
 
 #include <string.h>
 #include <stdio.h>
+
+
+extern void yyerror(char *message);
+extern char *reverse_types[];
 
 static char *mystrdup(const char *s)
 {
@@ -114,9 +121,14 @@ int hashtbl_insert(HASHTBL *hashtbl, const char *key, void *data, int scope)
 		free(node);
 		return -1;
 	}
+
+	// Type_Struct *ts = emalloc(sizeof(Type_Struct));
+	
 	node->data = data;
 	node->scope = scope;
 	node->next = hashtbl->nodes[hash];
+	node->ts = NULL;
+
 	hashtbl->nodes[hash] = node;
 
 	return 0;
@@ -169,10 +181,14 @@ void *hashtbl_get(HASHTBL *hashtbl, int scope)
 						if (!found)
 						{
 							printf("-------------- Scope %-2d ---------------\n", scope);
-							printf("Name------------------ Value-----------\n");
+							printf("Name------------------ Type----------- Value-----------\n");
 							found++;
 						}
-						printf("%-22s %-16s\n", node->key, (char *)node->data);
+						char type[SMALL_STR_CONST] = "N/A";
+						if(node->ts != NULL){
+							strcpy(type, reverse_types[node->ts->type]);
+						}
+						printf("%-22s %-16s %-16s\n", node->key, type, (char *)node->data);
 					}
 					else
 					{
@@ -196,4 +212,119 @@ void *hashtbl_get(HASHTBL *hashtbl, int scope)
 		printf("HASHTBL_GET():\tThere are no elements in the hash table with this scope!\n\t\tSCOPE = %d\n", scope);
 
 	return NULL;
+}
+
+Type_Struct *ht_extract_ts(struct hashnode_s *node){ // TODO: check why its is needed exactly.
+	Type_Struct *result;
+	result = emalloc(sizeof(Type_Struct));
+	printf("Extract");
+	if(node->ts != NULL) // TODO: Revisit this if everything is a TypeStruct
+		*result = *(node->ts);
+	// *result = *(node->ts);
+	// result->next = NULL;
+	
+	return result;
+}
+
+struct hashnode_s *ht_lookup(HASHTBL *hashtbl, int scope, char *key){
+	int s;
+	struct hashnode_s *node;
+	hash_size hash = hashtbl->hashfunc(key)%hashtbl->size;
+	
+	for(s = scope; s >= 0; s--){
+		node = hashtbl->nodes[hash];
+		while(node) {
+			if(!strcmp(node->key, key) && (node->scope == s)) {
+				printf("\t\t\t\t\tKey %s found in scope %d\n", key, s);
+				return node;
+			}
+			node=node->next;
+		}
+	}
+	
+	printf("\t\t\t\t\tThere is no entry with the name: %s\n\t\t\t\t\tChecking for enumeration value...\n", key);
+	
+	// node = ht_lookup_enums(hashtbl, scope, key);
+	// if(node == NULL){
+	// 	sem_error = 1;
+	// 	yyerror("There is no such entry into the symbol table");
+	// 	return NULL;
+	// }
+	
+	return NULL;
+}
+
+
+void ht_complex_insert(HASHTBL *hashtbl, const char *key, Type_Struct *ts, int scope){
+	
+	struct hashnode_s *node;
+	hash_size hash = hashtbl->hashfunc(key)%hashtbl->size;
+	
+	Type type = ts->type;
+	switch (type){
+		case INT: 
+			printf("TYPE = INT, DATA = %d\n", 0);
+			break;
+		case FLOAT: 
+			printf("TYPE = FLOAT, DATA = %lf\n", 0.0f);
+			break;
+		case CHAR: 
+			printf("TYPE = CHAR, DATA = %c\n", 'Z');
+			break;
+		case CLASS:
+			printf("TYPE = CLASS");
+			break;
+		default:
+			printf("TYPE = %d, DATA = %s\n", type, "test");
+			break;
+	} 
+	
+	
+	node = hashtbl->nodes[hash];
+	while(node) {
+		if(!strcmp(node->key, key) && (node->scope == scope)) {
+			char buffer[254];
+			sprintf(buffer, "There is already an entry %s with the same name\n", key);
+			yyerror(buffer);
+		}
+		node=node->next;
+	}
+
+	node = emalloc(sizeof(struct hashnode_s));
+	
+	if(!(node->key=mystrdup(key))) {
+		free(node);
+		printf("mystrdup issue");
+		exit(1);
+	}
+	
+	node->ts = malloc(sizeof(Type_Struct));
+	*(node->ts) = *(ts);
+	
+	node->scope = scope;
+	
+	// if (ts->type == ENUMERATION){
+	// 	node->isConst = CONST;
+	// }else{
+	// 	node->isConst = NO_CONST;
+	// }
+	
+	printf("\t\t\t\t\tHT_COMPLEX_INSERT(): KEY = %s, HASH = %ld, SCOPE = %d, SIZE = %d, TYPE = %d \n", node->key, hash, node->scope, node->ts->size, node->ts->type);
+	
+	node->next = hashtbl->nodes[hash];
+	hashtbl->nodes[hash] = node;
+
+}
+
+List *ht_var_insert(HASHTBL *hashtbl, List *list, Type_Struct *ts, int scope){
+	Data data;
+	List *curr = list;
+	
+	while( curr != NULL){
+		ht_complex_insert(hashtbl, curr->key, ts, scope);
+	
+		curr = curr->next;
+	}
+	
+	return list;
 }

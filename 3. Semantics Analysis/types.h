@@ -3,15 +3,16 @@
 #define __TYPES_H__
 
 /*
-    TYPEDEF, PRIVATE, PROTECTED, PUBLIC, VOID,
+    TYPEDEF, 
+    ~PRIVATE, PROTECTED, PUBLIC, VOID,
     STATIC,
     ~CONTINUE, BREAK
     NEW, MAIN??
  */
 
 typedef enum type_enum {
-    NOTHING, INTEGER, FLOAT, CHARACTER, STRING, VOID, 
-    ARRAY, ENUMERATION, UNION, LIST, CLASS_NAME, FUNCTION_NAME
+    NOTHING, INT, FLOAT, CHAR, STR, VOID, 
+    ARRAY, ENUM, UNION, LIST, CLASS, FUNC,
 } Type;
 typedef enum param_enum {VARIABLE, VALUE} Param;
 typedef enum static_enum {NO_STATIC, STATIC} Static;
@@ -28,17 +29,39 @@ typedef union Data{
     char *strdata;
 }Data;
 
-typedef struct T_Data{
-	Type type;
-	Data data;
-}T_Data;
-
 typedef struct Type_Struct{
 	Type type;
 	int size;						//megethos typou
 	// int offset;
+
+    union {
+        /** CONSTANT (e.x Int/Float/Char/String) **/
+        Data data;
+
+        // struct {
+        //     int dim;
+        //     Type type;
+        // } t_array;  /* Type will either be an array.. */
+        // struct {
+        //     Type type;
+        // } t_ref;   /* A simple type... */
+        // struct {
+        //     Type type1; /* .. */
+        //     Type type2; /* .. */
+        // } t_func;  /* Or a function */
+    } u;
 	
+    // Type_Struct *next;           // Shouldn't this be part of an array?
 }Type_Struct;
+
+typedef struct list{
+	char *key;
+	// Param param;
+	int value;
+	// int offset;
+	struct Type_Struct *field;
+	struct list *next;
+}List;
 
 typedef struct TS_Array{
 	int dimensions;
@@ -56,38 +79,11 @@ typedef struct For_List{
 	struct For_List *next;
 }For_List;
 
-
 Type_Struct *ts_create_standard_type(Type type);
 
-// typedef struct Type_tag *Type;
-// struct Type_tag {
-//     enum {
-//         TYPE_int,
-//         TYPE_float,
-//         TYPE_char,
-//         TYPE_string, /* Is this required? string => array[char] */
-//         TYPE_void,
-//         TYPE_enum, /* Is this required? enum => array[int]*/
-//         TYPE_array,
-//         TYPE_list, /* Can we unify them? c++600.pdf | 9 */
-//         TYPE_class,
-//         TYPE_func,
-//         TYPE_union,                     
-//         TYPE_unknown, /* Should i remove this? */
-//     } kind;
-//     union {
-//         struct {
-//             int dim;
-//             Type type;
-//         } t_array;  /* Type will either be an array.. */
-//         struct {
-//             Type type;
-//         } t_ref;   /* A simple type... */
-//         struct {
-//             Type type1; /* .. */
-//             Type type2; /* .. */
-//         } t_func;  /* Or a function */
-//     } u;
-// };
 
+
+List *list_create_node(char *name);
+List *list_add_node(List *rl, List *node);
+List *list_addType(List *rl, Type_Struct *ts);
 #endif
