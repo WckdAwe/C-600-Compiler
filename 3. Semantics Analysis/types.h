@@ -63,6 +63,8 @@ typedef struct list{
 	struct list *next;
 }List;
 
+
+
 typedef struct TS_Array{
 	int dimensions;
 	Type_Struct *dims;
@@ -78,6 +80,7 @@ typedef struct For_List{
 	struct ast_node *cond;
 	struct For_List *next;
 }For_List;
+
 
 Type_Struct *ts_create_standard_type(Type type);
 

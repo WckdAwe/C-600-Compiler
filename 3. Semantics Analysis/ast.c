@@ -71,3 +71,15 @@ AST_Node *create_leaf_node(Type_Struct *value, char *name){
 
 	return (struct ast_node*) ast_node;
 }
+
+AST_Node *new_ast_enum_leaf_node(Type_Struct *ts_value, char *name, Type_Struct *enumeration){
+	struct ast_enum_leaf_node *ast_node = emalloc(sizeof(struct ast_enum_leaf_node));
+
+	ast_node->op = ENUM;
+	ast_node->values = ts_value;
+	ast_node->name = name;
+	ast_node->enumeration = enumeration;
+
+	return (struct AST_Node*) ast_node;
+	
+}

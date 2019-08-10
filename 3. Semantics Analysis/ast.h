@@ -56,8 +56,16 @@ typedef struct ast_leaf_node{
 	char *name;
 
 	Type_Struct *value;
-};
+}AST_LEAF_Node;
 
+
+typedef struct ast_enum_leaf_node{
+	Operation op;
+	char *name;
+
+	Type_Struct *values;
+	Type_Struct *enumeration;
+}AST_ENUM_LEAF_Node;
 
 
 AST_Node *create_ast_node(Operation op, Type type, AST_Node *left, AST_Node *right);
