@@ -60,3 +60,14 @@ AST_Node *create_ast_for_node(AST_Node *start_condition, AST_Node *end_condition
 
 	return (AST_Node *) ast_node;
 }
+
+AST_Node *create_leaf_node(Type_Struct *value, char *name){
+	struct ast_leaf_node *ast_node = emalloc(sizeof(struct ast_leaf_node));
+
+	ast_node->op = LEAF;
+	ast_node->name = name;
+
+	ast_node->value = value;
+
+	return (struct ast_node*) ast_node;
+}
