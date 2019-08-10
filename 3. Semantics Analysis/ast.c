@@ -46,3 +46,17 @@ AST_Node *create_ast_while_node(AST_Node *condition, AST_Node *while_branch){
   
 	return (AST_Node *) ast_node;
 }
+
+
+AST_Node *create_ast_for_node(AST_Node *start_condition, AST_Node *end_condition, int increment, AST_Node *for_branch){
+	AST_FOR_Node *ast_node = emalloc(sizeof(AST_FOR_Node));
+
+	ast_node->op = FOR;
+
+	ast_node->start_condition = start_condition;
+	ast_node->end_condition = end_condition;
+	ast_node->increment = increment;
+	ast_node->for_branch = for_branch;
+
+	return (AST_Node *) ast_node;
+}

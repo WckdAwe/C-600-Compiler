@@ -35,10 +35,25 @@ typedef struct ast_while_node{
 	AST_Node *while_branch;
 }AST_WHILE_Node;
 
+// For loop
+typedef struct ast_for_node{
+	Operation op;
+
+	//(i=0; i<10; i++)
+	AST_Node *start_condition;
+	AST_Node *end_condition;
+	int increment;
+
+	//{
+
+	//}
+	AST_Node *for_branch;
+}AST_FOR_Node;
 
 AST_Node *create_ast_node(Operation op, Type type, AST_Node *left, AST_Node *right);
 AST_Node *create_ast_if_node(AST_Node *condition, AST_Node *if_branch, AST_Node *else_branch);
 AST_Node *create_ast_while_node(AST_Node *condition, AST_Node *while_branch);
+AST_Node *create_ast_for_node(AST_Node *start_condition, AST_Node *end_condition, int increment, AST_Node *for_branch);
 
 #endif
 
