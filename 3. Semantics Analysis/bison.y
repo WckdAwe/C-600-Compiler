@@ -1,13 +1,13 @@
 %{
 #include <string.h>
+#include <stdio.h>
 #include "c600.h"
+#include "symbol.h"
 
 
 /* ---------------------------------------------------------------------
    ------------- External variables & functions from main.c ------------
    --------------------------------------------------------------------- */
-
-extern HASHTBL *hashtbl;
 extern void yyerror(const char *message);
 
 
@@ -28,9 +28,10 @@ extern char *yytext;
    --------------------- Local variables & functions  ------------------
    --------------------------------------------------------------------- */
 
-int scope = 0;
-
-Data data;
+SymbolEntry entry;
+SymbolTable symbol_table;
+Scope scope;
+int function_counter = 0;
 
 /** TODO: Write why split T_ICONST/T_FCONST **/
 /** TODO: constant Union with type and val **/
@@ -44,9 +45,10 @@ Data data;
     float floatval; 
     char charval;
     char *strval;
-    Type typeval;
-    Type_Struct *tsval;
-    List *listval;
+    Type type;
+    // Type typeval;
+    // Type_Struct *tsval;
+    // List *listval;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -121,9 +123,9 @@ Data data;
 %type <strval> casestatements casestatement single_casestatement return_statement io_statement in_list in_item out_list out_item comp_statement main_function main_header
 %type <strval> constant
 
-%type <typeval> standard_type
-%type <tsval> typename
-%type <listval> variabledef variabledefs pass_variabledef
+%type <type> standard_type
+%type <strval> typename
+%type <strval> variabledef variabledefs pass_variabledef
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -144,7 +146,9 @@ Data data;
 %start program 
 
 %%
-program:                  global_declarations main_function                        
+program:                                                                                    {symbol_table=symbol_make(28447);scope_open(symbol_table);}
+                        global_declarations main_function     
+                                                                                            {scope_print(symbol_table->currentScope);scope_close(symbol_table);}
                         ;
 global_declarations:      global_declarations global_declaration
                         | %empty {}
@@ -156,17 +160,17 @@ global_declaration:       typedef_declaration
                         | global_var_declaration
                         | func_declaration
                         ;
-typedef_declaration:      T_TYPEDEF typename listspec T_ID                                  {ht_complex_insert(hashtbl, $4, $2, scope);scope++;}
-                            dims T_SEMI                                                     {hashtbl_get(hashtbl, scope);scope--;}
+typedef_declaration:      T_TYPEDEF typename listspec T_ID                                  {scope_open(symbol_table);} // {ht_complex_insert(hashtbl, $4, $2, scope);scope++;scope_open(symbol_table);} // TODO: Is scope is supposed to be there?
+                            dims T_SEMI                                                     {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         ;
-typename:                 standard_type                                                     {$$ = ts_create_standard_type($1);}
-                        | T_ID                                                              {$$ = ht_extract_ts(ht_lookup(hashtbl, scope, $1));} // TODO: Lookup here?
+typename:                 standard_type                                                     // {$$ = ts_create_standard_type($1);}
+                        | T_ID                                                              // {$$ = ht_extract_ts(ht_lookup(hashtbl, scope, $1));} // TODO: Lookup here?
                         ;
-standard_type:            T_CHAR                                                            {$$=CHAR;} 
-                        | T_INT                                                             {$$=INT;}
-                        | T_FLOAT                                                           {$$=FLOAT;}
-                        | T_STRING                                                          {$$=STR;}
-                        | T_VOID                                                            {$$=VOID;}
+standard_type:            T_CHAR                                                            {$$ = type_basic(TYPE_char);} 
+                        | T_INT                                                             {$$ = type_basic(TYPE_int);}
+                        | T_FLOAT                                                           {$$ = type_basic(TYPE_float);}
+                        | T_STRING                                                          {$$ = type_basic(TYPE_str);}
+                        | T_VOID                                                            {$$ = type_basic(TYPE_void);}
                         ;
 listspec:                 T_LIST                                                            // TODO: C600++.pdf
                         | %empty                                                            {}                                                        
@@ -177,14 +181,14 @@ dims:                     dims dim
 dim:                      T_LBRACK T_ICONST T_RBRACK                                        // TODO: [x] Preassign memory.
                         | T_LBRACK T_RBRACK                                                 // TODO: Dynamic memory? Assign later
                         ;
-enum_declaration:         T_ENUM T_ID                                                       {ht_complex_insert(hashtbl, $2, ts_create_standard_type(ENUM), scope);scope++;}
-                            enum_body                                                       {hashtbl_get(hashtbl, scope);scope--;}
+enum_declaration:         T_ENUM T_ID                                                       {entry = symbol_enter(symbol_table, id_make($2), 0);entry->entry_type = ENTRY_TYPE;entry->e.type.type=type_basic(TYPE_enum);scope=scope_open(symbol_table);entry->e.type.scope=scope;} //{ht_complex_insert(hashtbl, $2, ts_create_standard_type(ENUM), scope);scope++;
+                            enum_body                                                       {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;symbol_print(symbol_table);scope_close(symbol_table);}
                             T_SEMI                                                  
                         ;
 enum_body:                T_LBRACE id_list T_RBRACE
                         ;
-id_list:                  id_list T_COMMA T_ID initializer                                  {ht_complex_insert(hashtbl, $3, ts_create_standard_type(INT), scope);} // TODO: IMPROVE
-                        | T_ID                                                              {ht_complex_insert(hashtbl, $1, ts_create_standard_type(INT), scope);} // TODO: IMPROVE
+id_list:                  id_list T_COMMA T_ID initializer                                  {entry = symbol_enter(symbol_table, id_make($3), 1);entry->entry_type = ENTRY_CONSTANT;entry->e.constant.type=type_basic(TYPE_int);} //{ht_complex_insert(hashtbl, $3, ts_create_standard_type(ENUM), scope); // TODO: IMPROVE
+                        | T_ID                                                              {entry = symbol_enter(symbol_table, id_make($1), 1);entry->entry_type = ENTRY_CONSTANT;entry->e.constant.type=type_basic(TYPE_int);} // {ht_complex_insert(hashtbl, $1, ts_create_standard_type(ENUM), scope); // TODO: IMPROVE
                           initializer
                         ;
 initializer:              T_ASSIGN init_value
@@ -213,9 +217,9 @@ expression:               expression T_OROP expression
                         | listexpression
                         ;
 variable:                 variable T_LBRACK general_expression T_RBRACK
-                        | variable T_DOT T_ID                                               {hashtbl_insert(hashtbl, $3, NULL, scope);}
+                        | variable T_DOT T_ID                                               //TODO: UPDATE DIS. {ht_extract_ts(ht_lookup(hashtbl, scope, $3));} //{ht_complex_insert(hashtbl, $3, ht_extract_ts(ht_lookup(hashtbl, scope, $3)), scope);}
                         | T_LISTFUNC T_LPAREN general_expression T_RPAREN
-                        | decltype T_ID                                                     {hashtbl_insert(hashtbl, $2, NULL, scope);} // TODO: STATIC ASSIGNMENT?
+                        | decltype T_ID                                                     //TODO: UPDATE DIS. {hashtbl_insert(hashtbl, $2, NULL, scope);} // TODO: STATIC ASSIGNMENT?
                         | T_THIS
                         ;
 general_expression:       general_expression T_COMMA general_expression
@@ -227,23 +231,23 @@ assignment:               variable T_ASSIGN assignment
 expression_list:          general_expression
                         | %empty {}
                         ;
-constant:                 T_CCONST                                                          {data.chardata=$1;} 
-                        | T_ICONST                                                          {data.intdata=$1;}
-                        | T_FCONST                                                          {data.floatdata=$1;}
-                        | T_SCONST                                                          {data.strdata=$1;}
+constant:                 T_CCONST                                                          // {data.chardata=$1;} 
+                        | T_ICONST                                                          // {data.intdata=$1;}
+                        | T_FCONST                                                          // {data.floatdata=$1;}
+                        | T_SCONST                                                          // {data.strdata=$1;}
                         ;
 listexpression:           T_LBRACK expression_list T_RBRACK
                         ;
 init_values:              init_values T_COMMA init_value
                         | init_value
                         ;
-class_declaration:        T_CLASS T_ID                                                      {ht_complex_insert(hashtbl, $2, ts_create_standard_type(CLASS), scope);scope++;}
+class_declaration:        T_CLASS T_ID                                                      {entry = symbol_enter(symbol_table, id_make($2), 0);entry->entry_type = ENTRY_CONSTANT;entry->e.constant.type=type_basic(TYPE_class); scope_open(symbol_table);}//{ht_complex_insert(hashtbl, $2, ts_create_standard_type(CLASS), scope);scope++;scope_open(symbol_table);}
                             class_body                                              
-                            T_SEMI                                                          {hashtbl_get(hashtbl, scope);scope--;}
+                            T_SEMI                                                          {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         ;
 class_body:               parent T_LBRACE members_methods T_RBRACE
                         ;
-parent:                   T_COLON T_ID                                                      {ht_complex_insert(hashtbl, $2, ts_create_standard_type(CLASS), scope);}
+parent:                   T_COLON T_ID                                                      // TODO: Update this {ht_complex_insert(hashtbl, $2, ts_create_standard_type(CLASS), scope);}
                         | %empty {}
                         ;
 members_methods:          members_methods access member_or_method
@@ -260,15 +264,15 @@ member_or_method:         member
 member:                   var_declaration
                         | anonymous_union
                         ;
-var_declaration:          typename variabledefs T_SEMI                                      {ht_var_insert(hashtbl, $2, $1, scope);}                            
+var_declaration:          typename variabledefs T_SEMI                                      // TODO: UPDATE THESE {ht_var_insert(hashtbl, $2, $1, scope);}                            
                         ;
-variabledefs:             variabledefs T_COMMA variabledef                                  {$$ = list_add_node($3, $1);}
-                        | variabledef                                                       {$$ = $1;}
+variabledefs:             variabledefs T_COMMA variabledef                                  // {$$ = list_add_node($3, $1);}
+                        | variabledef                                                       // {$$ = $1;}
                         ;
-variabledef:              listspec T_ID dims                                                {$$ = list_create_node($2);}
+variabledef:              listspec T_ID dims                                                // {$$ = list_create_node($2);}
                         ;
-anonymous_union:          T_UNION                                                           {scope++;}
-                            union_body                                                      {hashtbl_get(hashtbl, scope);scope--;}
+anonymous_union:          T_UNION                                                           {scope_open(symbol_table);} // {scope++;scope_open(symbol_table);}
+                            union_body                                                      {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                             T_SEMI                                                  
                         ;
 union_body:               T_LBRACE fields T_RBRACE
@@ -280,12 +284,12 @@ field:                    var_declaration
                         ;
 method:                   short_func_declaration                                    
                         ;
-short_func_declaration:   short_par_func_header T_SEMI                                      {hashtbl_get(hashtbl, scope);scope--;}
-                        | nopar_func_header T_SEMI                                          {hashtbl_get(hashtbl, scope);scope--;}
+short_func_declaration:   short_par_func_header T_SEMI                                      {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
+                        | nopar_func_header T_SEMI                                          {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         ;
 short_par_func_header:    func_header_start T_LPAREN parameter_types T_RPAREN      
                         ;
-func_header_start:        typename listspec T_ID                                            {ht_complex_insert(hashtbl, $3, ts_create_standard_type(FUNC), scope);scope++;}//{hashtbl_insert(hashtbl, $3, NULL, scope);scope++;/**Scope++ for every function!!!**/}
+func_header_start:        typename listspec T_ID                                            {entry = symbol_enter(symbol_table, id_make($3), 1);entry->entry_type = ENTRY_FUNCTION;scope_open(symbol_table);} //{ht_complex_insert(hashtbl, $3, ts_create_standard_type(FUNC), scope);scope++;scope_open(symbol_table);}//{hashtbl_insert(hashtbl, $3, NULL, scope);scope++;scope_open(symbol_table);/**Scope++ for every function!!!**/}
                         ;
 parameter_types:          parameter_types T_COMMA typename pass_list_dims
                         | typename pass_list_dims
@@ -295,9 +299,9 @@ pass_list_dims:           T_REFER
                         ;
 nopar_func_header:        func_header_start T_LPAREN T_RPAREN                               {/** NO SCOPE due to func_header_start! **/}
                         ;
-union_declaration:        T_UNION T_ID                                                      {ht_complex_insert(hashtbl, $2, ts_create_standard_type(UNION), scope);scope++;}
+union_declaration:        T_UNION T_ID                                                      {entry = symbol_enter(symbol_table, id_make($2), 1);entry->entry_type=ENTRY_TYPE;entry->e.type.type=type_basic(TYPE_union);scope=scope_open(symbol_table);entry->e.type.scope=scope;} // {ht_complex_insert(hashtbl, $3, ts_create_standard_type(FUNC), scope);scope++;scope_open(symbol_table);}// {ht_complex_insert(hashtbl, $2, ts_create_standard_type(UNION), scope);scope++;scope_open(symbol_table);}
                             union_body          
-                            T_SEMI                                                          {hashtbl_get(hashtbl, scope);scope--;}
+                            T_SEMI                                                          {scope_close(symbol_table);} // {hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         ;
 global_var_declaration:   typename init_variabledefs T_SEMI
                         ;
@@ -309,22 +313,22 @@ init_variabledef:         variabledef initializer
 func_declaration:         short_func_declaration
                         | full_func_declaration
                         ;
-full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE            {hashtbl_get(hashtbl, scope);scope--;}
-                        | nopar_class_func_header T_LBRACE decl_statements T_RBRACE         {hashtbl_get(hashtbl, scope);scope--;}
-                        | nopar_func_header T_LBRACE decl_statements T_RBRACE               {hashtbl_get(hashtbl, scope);scope--;}
+full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE            {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
+                        | nopar_class_func_header T_LBRACE decl_statements T_RBRACE         {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
+                        | nopar_func_header T_LBRACE decl_statements T_RBRACE               {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         ;
 full_par_func_header:     class_func_header_start T_LPAREN parameter_list T_RPAREN
                         | func_header_start T_LPAREN parameter_list T_RPAREN
                         ;
-class_func_header_start:  typename listspec func_class T_ID                                 {ht_complex_insert(hashtbl, $4, ts_create_standard_type(FUNC), scope);scope++;}//{hashtbl_insert(hashtbl, $4, NULL, scope);scope++;/**Scope++ for every function!!!**/}
+class_func_header_start:  typename listspec func_class T_ID                                 {entry = symbol_enter(symbol_table, id_make($4), 1);entry->entry_type = ENTRY_FUNCTION;scope_open(symbol_table);} // {ht_complex_insert(hashtbl, $4, ts_create_standard_type(FUNC), scope);scope++;scope_open(symbol_table);}//{hashtbl_insert(hashtbl, $4, NULL, scope);scope++;scope_open(symbol_table);/**Scope++ for every function!!!**/}
                         ;
-func_class:               T_ID T_METH                                                       {ht_complex_insert(hashtbl, $1, ts_create_standard_type(FUNC), scope);}
+func_class:               T_ID T_METH                                                       {entry = symbol_enter(symbol_table, id_make($1), 1);entry->entry_type = ENTRY_FUNCTION;}// {ht_complex_insert(hashtbl, $1, ts_create_standard_type(FUNC), scope);}
                         ;
-parameter_list:           parameter_list T_COMMA typename pass_variabledef                  {ht_var_insert(hashtbl, $4, $3, scope);}
-                        | typename pass_variabledef                                         {ht_var_insert(hashtbl, $2, $1, scope);}
+parameter_list:           parameter_list T_COMMA typename pass_variabledef                  //TODO: IMPROVE THIS {ht_var_insert(hashtbl, $4, $3, scope);}
+                        | typename pass_variabledef                                         //TODO: IMPROVE THIS {ht_var_insert(hashtbl, $2, $1, scope);}
                         ;
-pass_variabledef:         variabledef                                                       {$$ = $1;}
-                        | T_REFER T_ID                                                      {$$ = list_create_node($2);}//{hashtbl_insert(hashtbl, $2, NULL, scope);}
+pass_variabledef:         variabledef                                                       //TODO: IMPROVE THIS {$$ = $1;}
+                        | T_REFER T_ID                                                      //TODO: IMPROVE THIS {$$ = list_create_node($2);}//{hashtbl_insert(hashtbl, $2, NULL, scope);}
                         ;
 nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN                 
                         ;
@@ -356,25 +360,25 @@ statement:                expression_statement
                         ;
 expression_statement:     general_expression T_SEMI
                         ;
-if_statement:             T_IF T_LPAREN                                                     {scope++;}
-                            general_expression T_RPAREN statement                           {hashtbl_get(hashtbl, scope);scope--;}
+if_statement:             T_IF T_LPAREN                                                     {scope_open(symbol_table);} //  {scope++;scope_open(symbol_table);}
+                            general_expression T_RPAREN statement                           {scope_close(symbol_table);} // {hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                             if_tail
                         ;
-if_tail:                  T_ELSE                                                            {scope++;}
-                            statement                                                       {hashtbl_get(hashtbl, scope);scope--;}
+if_tail:                  T_ELSE                                                            {scope_open(symbol_table);} //  {scope++;scope_open(symbol_table);}
+                            statement                                                       {scope_close(symbol_table);} // {hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         | %empty %prec LOWER_THAN_ELSE                                      {}
                         ;
-while_statement:          T_WHILE T_LPAREN                                                  {scope++;} 
-                            general_expression T_RPAREN statement                           {hashtbl_get(hashtbl, scope);scope--;}
+while_statement:          T_WHILE T_LPAREN                                                  {scope_open(symbol_table);} //  {scope++;scope_open(symbol_table);} 
+                            general_expression T_RPAREN statement                           {scope_close(symbol_table);} // {hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         ;
-for_statement:            T_FOR T_LPAREN                                                    {scope++;} 
-                            optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement        {hashtbl_get(hashtbl, scope);scope--;}
+for_statement:            T_FOR T_LPAREN                                                    {scope_open(symbol_table);} //  {scope++;scope_open(symbol_table);} 
+                            optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement        {scope_close(symbol_table);} // {hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         ;
 optexpr:                  general_expression
                         | %empty {}
                         ;
-switch_statement:         T_SWITCH T_LPAREN                                                 {scope++;}
-                            general_expression T_RPAREN switch_tail                         {hashtbl_get(hashtbl, scope);scope--;}
+switch_statement:         T_SWITCH T_LPAREN                                                 {scope_open(symbol_table);} //  {scope++;scope_open(symbol_table);}
+                            general_expression T_RPAREN switch_tail                         {scope_close(symbol_table);} // {hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         ;
 switch_tail:              T_LBRACE decl_cases T_RBRACE
                         | single_casestatement
@@ -388,14 +392,14 @@ casestatements:           casestatements casestatement
                         | casestatement
                         ;
 casestatement:            T_CASE constant T_COLON casestatement
-                        | T_CASE constant T_COLON                                           {scope++;}
-                            statements                                                      {hashtbl_get(hashtbl, scope);scope--;}
-                        | T_DEFAULT T_COLON                                                 {scope++;} 
-                            statements                                                      {hashtbl_get(hashtbl, scope);scope--;}
+                        | T_CASE constant T_COLON                                           {scope_open(symbol_table);} //  {scope++;scope_open(symbol_table);}
+                            statements                                                      {scope_close(symbol_table);} // {hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
+                        | T_DEFAULT T_COLON                                                 {scope_open(symbol_table);} //  {scope++;scope_open(symbol_table);} 
+                            statements                                                      {scope_close(symbol_table);} // {hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         ;
 single_casestatement:     T_CASE constant T_COLON single_casestatement
-                        | T_CASE constant T_COLON                                           {scope++;} 
-                            statement                                                       {hashtbl_get(hashtbl, scope);scope--;}
+                        | T_CASE constant T_COLON                                           {scope_open(symbol_table);} //  {scope++;scope_open(symbol_table);} 
+                            statement                                                       {scope_close(symbol_table);} // {hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         ;
 return_statement:         T_RETURN optexpr T_SEMI
                         ;
@@ -415,8 +419,8 @@ out_item:                 general_expression
 comp_statement:           T_LBRACE decl_statements T_RBRACE
                         ;
 main_function:            main_header                                                  
-                            T_LBRACE decl_statements T_RBRACE                               {hashtbl_get(hashtbl, scope);scope--;}
+                            T_LBRACE decl_statements T_RBRACE                               {scope_close(symbol_table);} // {hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
                         ;
-main_header:              T_INT T_MAIN T_LPAREN T_RPAREN                                    {scope++;}
+main_header:              T_INT T_MAIN T_LPAREN T_RPAREN                                    {scope_open(symbol_table);} //  {scope++;scope_open(symbol_table);}
                         ;
 %%

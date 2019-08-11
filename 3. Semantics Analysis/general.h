@@ -19,8 +19,19 @@ extern bool flagVerbose;
    --------------------------------------------------------------------- */
 
 extern char *filename;
-extern int linecount;
+extern int lineno;
 
+typedef struct Identifier_tag * Identifier;
 
-void *emalloc(size_t size);
+struct Identifier_tag {
+   char * name;
+   Identifier next;
+};
+
+Identifier id_make (const char *);
+const char * id_name (Identifier);
+
+void id_reset ();
+
+void *new(size_t size);
 #endif

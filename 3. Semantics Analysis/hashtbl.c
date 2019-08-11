@@ -122,12 +122,12 @@ int hashtbl_insert(HASHTBL *hashtbl, const char *key, void *data, int scope)
 		return -1;
 	}
 
-	// Type_Struct *ts = emalloc(sizeof(Type_Struct));
+	Type_Struct *ts = new(sizeof(Type_Struct)); // TODO: Check if required
 	
 	node->data = data;
 	node->scope = scope;
 	node->next = hashtbl->nodes[hash];
-	node->ts = NULL;
+	node->ts = ts;
 
 	hashtbl->nodes[hash] = node;
 
@@ -184,11 +184,8 @@ void *hashtbl_get(HASHTBL *hashtbl, int scope)
 							printf("Name------------------ Type----------- Value-----------\n");
 							found++;
 						}
-						char type[SMALL_STR_CONST] = "N/A";
-						if(node->ts != NULL){
-							strcpy(type, reverse_types[node->ts->type]);
-						}
-						printf("%-22s %-16s %-16s\n", node->key, type, (char *)node->data);
+
+						printf("%-22s %-16s %-16s\n", node->key, reverse_types[node->ts->type], (char *)node->data);
 					}
 					else
 					{
@@ -215,15 +212,16 @@ void *hashtbl_get(HASHTBL *hashtbl, int scope)
 }
 
 Type_Struct *ht_extract_ts(struct hashnode_s *node){ // TODO: check why its is needed exactly.
-	Type_Struct *result;
-	result = emalloc(sizeof(Type_Struct));
-	printf("Extract");
-	if(node->ts != NULL) // TODO: Revisit this if everything is a TypeStruct
-		*result = *(node->ts);
-	// *result = *(node->ts);
-	// result->next = NULL;
+	if(node==NULL){
+		printf("erm... WTF DUDE - TODO: FIX THIS TOO\n");
+		return NULL;
+	}
+	Type_Struct *result = new(sizeof(Type_Struct));
+	printf("%d\n", node->ts->type);
+	*result = *(node->ts);
 	
 	return result;
+	// result->next = NULL;
 }
 
 struct hashnode_s *ht_lookup(HASHTBL *hashtbl, int scope, char *key){
@@ -290,7 +288,7 @@ void ht_complex_insert(HASHTBL *hashtbl, const char *key, Type_Struct *ts, int s
 		node=node->next;
 	}
 
-	node = emalloc(sizeof(struct hashnode_s));
+	node = new(sizeof(struct hashnode_s));
 	
 	if(!(node->key=mystrdup(key))) {
 		free(node);
@@ -298,7 +296,7 @@ void ht_complex_insert(HASHTBL *hashtbl, const char *key, Type_Struct *ts, int s
 		exit(1);
 	}
 	
-	node->ts = malloc(sizeof(Type_Struct));
+	node->ts = new(sizeof(Type_Struct));
 	*(node->ts) = *(ts);
 	
 	node->scope = scope;

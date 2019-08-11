@@ -17,6 +17,7 @@
    --------------------------------------------------------------------- */
 
 extern int lineno;
+extern char *filename;
 
 extern char str_buf[MAX_STR_CONST];
 extern char *str_buf_ptr;
@@ -31,8 +32,6 @@ extern FILE *yyin;
 
 int error_count = 0;
 int flag_err_type = 0; // 0: Token Error (YYTEXT) || 1: String Error (STRBUF)
-
-HASHTBL *hashtbl;
 
 void yyerror(const char *message)
 {
@@ -59,16 +58,10 @@ void yyerror(const char *message)
 
 int main(int argc, char *argv[])
 {
-
-    if (!(hashtbl = hashtbl_create(10, NULL)))
-    {
-        fprintf(stderr, "ERROR: hashtbl_create() failed!\n");
-        exit(EXIT_FAILURE);
-    }
-
     if (argc > 1)
     {
         yyin = fopen(argv[1], "r");
+        filename = argv[1];
         if (yyin == NULL)
         {
             perror("Error opening file");
@@ -77,9 +70,6 @@ int main(int argc, char *argv[])
     }
 
     yyparse();
-
-    hashtbl_get(hashtbl, 0); // Retrieve the last table (Scope 0);
-    hashtbl_destroy(hashtbl);
     fclose(yyin);
 
     if (error_count > 0)
