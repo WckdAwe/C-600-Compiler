@@ -86,7 +86,7 @@ AST_Node *new_ast_enum_leaf_node(Type_Struct *ts_value, char *name, Type_Struct 
 
 
 
-AST__DECL_Node* new_single_decl_node(Type variable_type, char* id)
+AST_DECL_Node* new_single_decl_node(Type variable_type, char* id)
 {   	AST_DECL_Node* new_node;
    	new_node = (AST_DECL_Node*)malloc(sizeof(AST_DECL_Node));
 	
