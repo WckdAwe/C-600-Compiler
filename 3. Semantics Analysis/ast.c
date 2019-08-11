@@ -86,9 +86,9 @@ AST_Node *new_ast_enum_leaf_node(Type_Struct *ts_value, char *name, Type_Struct 
 
 
 
-AST__DECL_node* new_single_decl_node(Type variable_type, char* id)
-{   	AST_DECL_node* new_node;
-   	new_node = (AST_DECL_node*)malloc(sizeof(AST_DECL_node));
+AST__DECL_Node* new_single_decl_node(Type variable_type, char* id)
+{   	AST_DECL_Node* new_node;
+   	new_node = (AST_DECL_Node*)malloc(sizeof(AST_DECL_Node));
 	
     	new_node->variable_type=variable_type;
     	new_node->id=id;
@@ -97,11 +97,11 @@ AST__DECL_node* new_single_decl_node(Type variable_type, char* id)
     	return new_node;
 }
 
-AST_node* new_exp_node(Operation op_type , AST_NODE* left_exp , AST_NODE* right_exp) 
+AST_Node* new_exp_node(Operation op_type , AST_Node* left_exp , AST_Node* right_exp) 
 //exp 'OP' exp : (op,exp,exp)
 {
-    	AST_node* new_node ; 
-    	new_node = (AST_node*)malloc(sizeof(AST_node)); 
+    	AST_Node* new_node ; 
+    	new_node = (AST_Node*)malloc(sizeof(AST_Node)); 
 
     	new_node->left=left_exp;
     	new_node->right=right_exp;
@@ -110,10 +110,10 @@ AST_node* new_exp_node(Operation op_type , AST_NODE* left_exp , AST_NODE* right_
     	return new_node;
 } 
 
-AST_node* new_asgn_node(AST_NODE* variable,AST_NODE* value)
+AST_Node* new_asgn_node(AST_Node* variable,AST_Node* value)
 {
-	AST_ASGN_node = new_node;
-	new_node = (AST_ASGN_node*)malloc(sizeof(ASGN_node));
+	AST_ASGN_Node = new_node;
+	new_node = (AST_ASGN_Node*)malloc(sizeof(ASGN_Node));
 
 	new_node->op_type=ASSIGN;
 	new_node->left=variable;
@@ -123,10 +123,10 @@ AST_node* new_asgn_node(AST_NODE* variable,AST_NODE* value)
 	
 }
 
-AST_node* new_condition_node(Operation op_type,AST_NODE* expr1,AST_NODE* expr2)
+AST_Node* new_condition_node(Operation op_type,AST_Node* expr1,AST_Node* expr2)
 {
-	AST_node* new_node;
-	new_node = (AST_node*)malloc(sizeof(AST_node));
+	AST_Node* new_node;
+	new_node = (AST_Node*)malloc(sizeof(AST_Node));
 	
 	new_node->left = expr1;
 	new_node->right = expr2;
@@ -137,10 +137,10 @@ AST_node* new_condition_node(Operation op_type,AST_NODE* expr1,AST_NODE* expr2)
 
 
 //const data nodes
-AST_node* new_iconst_node(int data)
+AST_Node* new_iconst_node(int data)
 {
-	AST_node *new_node;
-	new_node = (AST_node*)malloc(sizeof(AST_node));
+	AST_Node *new_node;
+	new_node = (AST_Node*)malloc(sizeof(AST_Node));
 	
 	new_node->op_type=LEAF;
 	new_node->node_data->intdata=data;
@@ -150,10 +150,10 @@ AST_node* new_iconst_node(int data)
 	return new_node;
 }
 
-AST_node* new_fconst_data(float data)
+AST_Node* new_fconst_data(float data)
 {
-	AST_node *new_node;
-	new_node = (AST_node*)malloc(sizeof(AST_node));
+	AST_Node *new_node;
+	new_node = (AST_Node*)malloc(sizeof(AST_Node));
 	
 	new_node->op_type=LEAF;
 	new_node->node_data->float=data;
@@ -165,10 +165,10 @@ AST_node* new_fconst_data(float data)
 }
 
 
-AST_node* new_cconst_node(char data)
+AST_Node* new_cconst_node(char data)
 {
-	AST_node *new_node;
-	new_node = (AST_node*)malloc(sizeof(AST_node));
+	AST_Node *new_node;
+	new_node = (AST_Node*)malloc(sizeof(AST_Node));
 	
 	new_node->op_type=LEAF;
 	new_node->node_data->chardata=data;
@@ -179,10 +179,10 @@ AST_node* new_cconst_node(char data)
 
 }
 
-AST_node* new_sconst_node(char* data)
+AST_Node* new_sconst_node(char* data)
 {
-	AST_CONST *new_node;
-	new_node = (AST_node*)malloc(sizeof(AST_node));
+	AST_Node *new_Node;
+	new_node = (AST_Node*)malloc(sizeof(AST_Node));
 	
 	new_node->op_type=LEAF;
 	new_node->node_data->strdata=data;
