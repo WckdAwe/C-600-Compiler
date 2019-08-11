@@ -111,7 +111,9 @@ typedef struct class{
 
     char *name;
     Class_Member *members;
+	int no_members;
 	Class_Method *methods;
+	int no_methods;
 }Class;
 
 AST_Node *create_ast_node(Operation op, Type type, AST_Node *left, AST_Node *right);
