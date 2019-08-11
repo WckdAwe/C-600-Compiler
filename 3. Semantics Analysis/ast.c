@@ -193,3 +193,14 @@ AST_Node* new_sconst_node(char* data)
 
 }
 
+AST_Node *create_function_node(char *name, AST_Node *arguments, AST_Node *statements, Type_Struct *return_type){
+	Function *ast_node = emalloc(sizeof(Function));
+
+	ast_node->op = FUNC;
+	ast_node->name = name;
+	ast_node->arguments = arguments;
+	ast_node->statements = statements;
+	ast_node->return_type = return_type;
+
+	return (struct AST_Node*) ast_node;
+}

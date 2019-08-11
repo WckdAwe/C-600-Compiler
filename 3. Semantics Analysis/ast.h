@@ -80,11 +80,46 @@ typedef struct ast_enum_leaf_node{
 }AST_ENUM_LEAF_Node;
 
 
+typedef struct function{
+	Operation op;
+	char *name;
+
+	AST_Node *arguments;
+	AST_Node *statements;
+	Type_Struct *return_type;
+
+}Function;
+
+typedef struct class_member{
+    char *name;
+    Type_Struct *member_type;
+    struct Class_Member *next;
+}Class_Member;
+
+typedef struct class_method{
+    char *name;
+    Type_Struct return_type;
+    struct AST_Node *arguments;
+	// Func / execute method code
+	struct AST_Node *statements;
+    struct Class_Method *next;
+}Class_Method;
+
+
+typedef struct class{
+	Operation op;
+
+    char *name;
+    Class_Member *members;
+	Class_Method *methods;
+}Class;
+
 AST_Node *create_ast_node(Operation op, Type type, AST_Node *left, AST_Node *right);
 AST_Node *create_ast_if_node(AST_Node *condition, AST_Node *if_branch, AST_Node *else_branch);
 AST_Node *create_ast_while_node(AST_Node *condition, AST_Node *while_branch);
 AST_Node *create_ast_for_node(AST_Node *start_condition, AST_Node *end_condition, int increment, AST_Node *for_branch);
 AST_Node *create_leaf_node(Type_Struct *value, char *name);
+AST_Node *create_function_node(char *name, AST_Node *arguments, AST_Node *statements, Type_Struct *return_type);
 
 AST_DECL_Node* new_single_decl_node(Type variable_type, char* id);
 AST_Node* new_asgn_node(AST_Node* variable,AST_Node* value);

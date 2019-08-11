@@ -63,6 +63,16 @@ typedef struct list{
 	struct list *next;
 }List;
 
+/*
+ALTERNATIVE LIST : CHECK THIS LATER
+typedef struct enum{
+    Operation op;
+    char *name;
+
+    struct list values;
+}Enum;
+*/
+
 
 
 typedef struct TS_Array{
