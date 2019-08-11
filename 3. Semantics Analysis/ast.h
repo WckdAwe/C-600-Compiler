@@ -86,16 +86,16 @@ AST_Node *create_ast_while_node(AST_Node *condition, AST_Node *while_branch);
 AST_Node *create_ast_for_node(AST_Node *start_condition, AST_Node *end_condition, int increment, AST_Node *for_branch);
 AST_Node *create_leaf_node(Type_Struct *value, char *name);
 
-AST__DECL_node* new_single_decl_node(Type variable_type, char* id)
-AST_node* new_asgn_node(AST_NODE* variable,AST_NODE* value)
-AST_node* new_exp_node(Operation op_type , AST_NODE* left_exp , AST_NODE* right_exp)
-AST_node* new_condition_node(Operation op_type,AST_NODE* expr1,AST_NODE* expr2)
+AST__DECL_node* new_single_decl_node(Type variable_type, char* id);
+AST_node* new_asgn_node(AST_NODE* variable,AST_NODE* value);
+AST_node* new_exp_node(Operation op_type , AST_NODE* left_exp , AST_NODE* right_exp);
+AST_node* new_condition_node(Operation op_type,AST_NODE* expr1,AST_NODE* expr2);
 
 //these might become one
-AST_node* new_iconst_node(int data)
-AST_node* new_fconst_data(float data)
-AST_node* new_cconst_node(char data)
-AST_node* new_sconst_node(char* data)
+AST_node* new_iconst_node(int data);
+AST_node* new_fconst_data(float data);
+AST_node* new_cconst_node(char data);
+AST_node* new_sconst_node(char* data);
 
 #endif
 

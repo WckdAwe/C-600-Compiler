@@ -88,10 +88,10 @@ AST_Node *new_ast_enum_leaf_node(Type_Struct *ts_value, char *name, Type_Struct 
 
 AST__DECL_node* new_single_decl_node(Type variable_type, char* id)
 {   	AST_DECL_node* new_node;
-   	new_node = (AST_DECL_node*)malloc(sizeof(AST_DECL_node))
+   	new_node = (AST_DECL_node*)malloc(sizeof(AST_DECL_node));
 	
     	new_node->variable_type=variable_type;
-    	new_node->id=id
+    	new_node->id=id;
     	new_node->dim=0;
 		//initial value? there could be none.	
     	return new_node;
@@ -131,8 +131,8 @@ AST_node* new_condition_node(Operation op_type,AST_NODE* expr1,AST_NODE* expr2)
 	new_node->left = expr1;
 	new_node->right = expr2;
 	new_node->op_type = op_type; //EQUOP , OROP ,ANDOP , RELOP
-
 	
+	return new_node;	
 }
 
 
