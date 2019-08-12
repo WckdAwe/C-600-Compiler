@@ -183,16 +183,16 @@ struct AST_expr_tag {
     } kind;
     union {
         struct {
-            RepInt rep;
+            int rep;
         } e_iconst;
         struct {
-            RepFloat rep;
+            float rep;
         } e_fconst;
         struct {
-            RepChar rep;
+            char rep;
         } e_cconst;
         struct {
-            RepString rep;
+            char* rep;
         } e_strlit;
         struct {
             AST_unop op;
@@ -279,13 +279,13 @@ struct AST_pattern_tag {
     } kind;
     union {
         struct {
-            RepInt rep;
+            int rep;
         } p_iconst;
         struct {
-            RepFloat rep;
+            float rep;
         } p_fconst;
         struct {
-            RepChar rep;
+            char rep;
         } p_cconst;
         struct {
             Identifier id;
@@ -378,10 +378,10 @@ AST_constr  ast_constr            (Identifier id, Type_list l);
 AST_par     ast_par               (Identifier id, Type t);
 AST_clause  ast_clause            (AST_pattern p, AST_expr e);
 
-AST_expr ast_expr_iconst (RepInt r);
-AST_expr ast_expr_fconst (RepFloat r);
-AST_expr ast_expr_cconst (RepChar r);
-AST_expr ast_expr_strlit (RepString r);
+AST_expr ast_expr_iconst (int r);
+AST_expr ast_expr_fconst (float r);
+AST_expr ast_expr_cconst (char r);
+AST_expr ast_expr_strlit (char* r);
 AST_expr ast_expr_true   ();
 AST_expr ast_expr_false  ();
 AST_expr ast_expr_unit   ();
@@ -402,9 +402,9 @@ AST_expr ast_expr_for    (Identifier id, AST_expr e1, bool down,
         AST_expr e2, AST_expr eb);
 AST_expr ast_expr_match  (AST_expr e, AST_clause_list l);
 
-AST_pattern ast_pattern_iconst (RepInt r);
-AST_pattern ast_pattern_fconst (RepFloat r);
-AST_pattern ast_pattern_cconst (RepChar r);
+AST_pattern ast_pattern_iconst (int r);
+AST_pattern ast_pattern_fconst (float r);
+AST_pattern ast_pattern_cconst (char r);
 AST_pattern ast_pattern_true   ();
 AST_pattern ast_pattern_false  ();
 AST_pattern ast_pattern_id     (Identifier id);
