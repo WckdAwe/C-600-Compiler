@@ -179,7 +179,9 @@ struct AST_expr_tag {
         EXPR_if,
         EXPR_while,
         EXPR_for,
-        EXPR_match
+        EXPR_match,
+        EXPR_function,
+        EXPR_class
     } kind;
     union {
         struct {
@@ -255,6 +257,17 @@ struct AST_expr_tag {
             AST_expr expr;
             AST_clause_list list;
         } e_match;
+        struct {
+            Type name;              //function NAME
+            AST_par_list params;    //(params)
+            AST_expr body;          //{ }
+            Type return_type;       //return
+        }e_function;
+        struct{
+            Type name;                  //Class Name
+            Type_list members;          // ex: int i , char c
+            AST_expr_list methods;      // doSomething()
+        }e_class;
     } u;
     int lineno;
     Type type;
