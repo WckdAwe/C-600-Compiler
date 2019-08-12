@@ -1,4 +1,4 @@
-typedef char ar[100];
+typedef char ar[100]; // TypeDefs??
 enum days
 {
    monday = 1,
@@ -17,7 +17,7 @@ private:
 public:
    float zz(int &, ar);
    union {
-      int i[2];
+      int i_cst[2];
       float f[2];
    };
 };
@@ -29,23 +29,23 @@ private:
    days d;
 
 public:
-   float zz(int &, ar);
-   union {
+   float zz(int &, ar); // Improve Type, Params, Return Type?
+   union {           // ANONYMOUS UNIONS? Define them...
       int i[2];
       float f[2];
    };
 };
 int g[3];
-int g[3][2];
+int g[3][2]; // How should i handle these? Currently NOT OVERRIDING
 float x = 5e-24;
 int g[3][2] = {{0X1A00, 0X30F0}, 0X18D0, 0XA030};
 union u {
    int a;
-   char b[4];
+   char b[4];  // CHAR[ARRAY]
    days dd;
 };
 int e = 3;
-days list dl[10];
+days list dl[10];  // List of <DAYS>
 string str = "string!";
 void mystery_class::__try_it()
 {

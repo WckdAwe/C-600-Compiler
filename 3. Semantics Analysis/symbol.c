@@ -217,20 +217,46 @@ SymbolEntry symbol_lookup (SymbolTable table, Identifier id,
 void scope_print (Scope scope)
 {
     SymbolEntry e;
+    Type type;
+    char str_bfr[256];
     for (e = scope->entries; e != NULL; e = e->nextInScope) {
-        // unsigned int hashValue = (unsigned int) e->id % table->hashTableSize;
+        // TODO: Anything better?
+        int i;
+        for(i=0;i<scope->nesting-1;i++)
+            printf("  ");
 
-        // ASSERT(table->hashTable[hashValue] == e);
-        printf("(%d) ID: %s | %s ", scope->nesting, id_name(e->id), reverse_entry_type[e->entry_type]);
+        printf("(%02d) ID: %-22s | %-5s", scope->nesting, id_name(e->id), reverse_entry_type[e->entry_type]);
 
         switch(e->entry_type){
             case ENTRY_CONSTANT:
                 ASSERT(e->e.constant.type != NULL);
-                printf(" | %s | \n", reverse_type_kind[e->e.constant.type->kind]);
+                printf(" | %-5s \n", reverse_type_kind[e->e.constant.type->kind]);
                 break;
             case ENTRY_TYPE:
                 ASSERT(e->e.type.scope != NULL);
+                printf("of %s \n", reverse_type_kind[e->e.type.type->kind]);
                 scope_print(e->e.type.scope);
+                break;
+            case ENTRY_FUNCTION:
+                printf(" of .....\n");
+                break;
+            case ENTRY_VARIABLE:
+                type = e->e.variable.type;
+                switch(type->kind){
+                    case TYPE_array:
+                        ASSERT(type != NULL);
+                        memset(str_bfr,0,strlen(str_bfr));
+                        while(type->kind == TYPE_array){
+                            sprintf(str_bfr, "%s[%d]", str_bfr, type->u.t_array.dim);
+                            type = type->u.t_array.type;
+                            ASSERT(type != NULL);
+                        }
+                        printf(" %s%s\n", reverse_type_kind[type->kind], str_bfr);
+                        break;
+                    default:
+                        printf(" Unknown type??\n");
+                        break;
+                }
                 break;
             default:
                 printf("\n");
@@ -238,26 +264,19 @@ void scope_print (Scope scope)
     }
 }
 
-void symbol_print (SymbolTable table)
-{
-    Scope result = table->currentScope;
+EntryList entry_list_add(EntryList list, SymbolEntry entry){
+    EntryList node = new(sizeof(struct EntryList_tag));
+    node->entry = entry;
+    node->next = NULL;
+
+    if(list == NULL)
+        return node;
     
-    // Scope result = table->currentScope;
-    // SymbolEntry e;
-    // while(result != NULL){
-    //     for (e = result->entries; e != NULL; e = e->nextInScope) {
-    //         // unsigned int hashValue = (unsigned int) e->id % table->hashTableSize;
-
-    //         // ASSERT(table->hashTable[hashValue] == e);
-    //         printf("(%d) ID: %s | %s ", result->nesting, id_name(e->id), reverse_entry_type[e->entry_type]);
-
-    //         switch(e->entry_type){
-    //             case ENTRY_CONSTANT:
-    //                 printf(" | CONSTANTTT");
-    //             default:
-    //                 printf("\n");
-    //         }
-    //     }
-    //     result = result->parent;
-    // }
+    EntryList tmp = list;
+	while(tmp->next != NULL){
+		tmp = tmp->next;
+	}
+    tmp->next = node;
+	
+	return list;
 }

@@ -41,6 +41,10 @@ typedef struct SymbolTable_tag * SymbolTable;
 
 typedef struct SymbolEntry_tag * SymbolEntry;
 
+/* Λίστα απο εγγραφές του πίνακα συμβόλων */
+
+typedef struct EntryList_tag * EntryList;
+
 /* Σύνολο εγγραφών που βρίσκονται στην ίδια εμβέλεια */
 
 typedef struct Scope_tag * Scope;
@@ -125,6 +129,11 @@ struct SymbolEntry_tag {
    } e;
 };
 
+struct EntryList_tag {
+    SymbolEntry entry;              /* Entry of List                   */
+    EntryList next;                 /* Pointer to next Entry           */
+};
+
 struct Scope_tag {
     /* Η διαχείριση αυτών των πεδίων γίνεται αυτόματα */
     Scope        parent;                       /* Περιβάλλουσα εμβέλεια */
@@ -147,5 +156,7 @@ void        scope_insert  (SymbolTable table, Scope scope);
 SymbolEntry symbol_enter  (SymbolTable table, Identifier id, bool err);
 SymbolEntry symbol_lookup (SymbolTable table, Identifier id, LookupType type,
         bool err);
-void scope_print (Scope scope);
+void        scope_print   (Scope scope);
+
+EntryList   entry_list_add(EntryList list, SymbolEntry entry);
 #endif

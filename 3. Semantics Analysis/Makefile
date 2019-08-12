@@ -58,7 +58,7 @@ c600$(EXE): $(OBJFILES)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS) 
 
 lexer.o      : lexer.c bison.h c600.h general.h
-bison.o      : bison.c  bison.h c600.h
+bison.o      : symbol.h bison.c bison.h c600.h
 
 general.o    : general.c general.h
 error.o      : error.c general.h error.h

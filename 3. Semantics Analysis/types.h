@@ -19,6 +19,12 @@
 
 typedef struct Type_tag * Type;
 
+typedef struct TypeList_tag * TypeList;
+struct TypeList_tag {
+    Type type;                     /* Type of List                   */
+    TypeList next;                 /* Pointer to next Type           */
+};
+
 
 /* Ορισμός δομής */
 extern char* reverse_type_kind[];         /* Type kind as String       */
@@ -45,7 +51,7 @@ struct Type_tag {
             Type type;
         } t_array;
         struct {
-            Type type;
+            Type type; 
         } t_ref;
         struct {
             Type type1;
@@ -71,6 +77,7 @@ Type type_enum (); // TODO: Verify if needed later. Currently using basic
 Type type_union (); // TODO: Verify if needed later. Currently using basic
 Type type_id    (Identifier id);
 
+TypeList   type_list_add(TypeList list, Type type);
 
 #endif
 

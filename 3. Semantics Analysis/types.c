@@ -4,7 +4,7 @@
 
 #include "types.h"
 #include "error.h"
-
+#include <stdio.h>
 
 char* reverse_type_kind[] = {
 	"UNKNOWN", "INT", "FLOAT", "CHAR", "STR", "VOID", 
@@ -28,10 +28,11 @@ Type type_basic (int kind_id)
 		case TYPE_enum: // TODO: Verify this?
 		case TYPE_union:
 		case TYPE_class: // TODO: and this
+		case TYPE_list:
 			result->kind = kind_id;
 			break;
 		default:
-			ASSERT(result->kind);
+			ASSERT(result->kind == TYPE_unknown);
 			result->kind = TYPE_unknown;
 	};
    	return result;
@@ -75,6 +76,22 @@ Type type_func (Type type1, Type type2)
   	return result;
 }
 
+TypeList type_list_add(TypeList list, Type type){
+    TypeList node = new(sizeof(struct TypeList_tag));
+    node->type = type;
+    node->next = NULL;
+
+    if(list == NULL)
+        return node;
+    
+    TypeList tmp = list;
+	while(tmp->next != NULL){
+		tmp = tmp->next;
+	}
+    tmp->next = node;
+	
+	return list;
+}
 
 // #include<string.h>
 // #include<stdio.h>
