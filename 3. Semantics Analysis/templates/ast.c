@@ -104,7 +104,7 @@ AST_clause ast_clause(AST_pattern p, AST_expr e) {
     return result;
 }
 
-AST_expr ast_expr_iconst(RepInt r) {
+AST_expr ast_expr_iconst(int r) {
     AST_expr result = new(sizeof(*result));
     result->kind = EXPR_iconst;
     result->u.e_iconst.rep = r;
@@ -113,7 +113,7 @@ AST_expr ast_expr_iconst(RepInt r) {
     return result;
 }
 
-AST_expr ast_expr_fconst(RepFloat r) {
+AST_expr ast_expr_fconst(float r) {
     AST_expr result = new(sizeof(*result));
     result->kind = EXPR_fconst;
     result->u.e_fconst.rep = r;
@@ -122,7 +122,7 @@ AST_expr ast_expr_fconst(RepFloat r) {
     return result;
 }
 
-AST_expr ast_expr_cconst(RepChar r) {
+AST_expr ast_expr_cconst(char r) {
     AST_expr result = new(sizeof(*result));
     result->kind = EXPR_cconst;
     result->u.e_cconst.rep = r;
@@ -131,7 +131,7 @@ AST_expr ast_expr_cconst(RepChar r) {
     return result;
 }
 
-AST_expr ast_expr_strlit(RepString r) {
+AST_expr ast_expr_strlit(char* r) {
     AST_expr result = new(sizeof(*result));
     result->kind = EXPR_strlit;
     result->u.e_strlit.rep = r;
@@ -301,7 +301,28 @@ AST_expr ast_expr_match(AST_expr e, AST_clause_list l) {
     return result;
 }
 
-AST_pattern ast_pattern_iconst(RepInt r) {
+AST_expr ast_expr_function(Identifier id, AST_par_list params, AST_expr body, Type rt){
+    AST_expr result = new(sizeof(*result));
+    result->kind = EXPR_function;
+    result->u.e_function.name = id;
+    result->u.e_function.params = params;
+    result->u.e_function.body = body;
+    result->u.e_function.return_type = rt;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_expr ast_expr_class(Identifier id, Type_list tl, AST_expr_list el){
+    AST_expr result = new(sizeof(*result));
+    result->kind = EXPR_class;
+    result->u.e_class.name = id;
+    result->u.e_class.members = tl;
+    result->u.e_class.methods = el;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_pattern ast_pattern_iconst(int r) {
     AST_pattern result = new(sizeof(*result));
     result->kind = PATTERN_iconst;
     result->u.p_iconst.rep = r;
@@ -309,7 +330,7 @@ AST_pattern ast_pattern_iconst(RepInt r) {
     return result;
 }
 
-AST_pattern ast_pattern_fconst(RepFloat r) {
+AST_pattern ast_pattern_fconst(float r) {
     AST_pattern result = new(sizeof(*result));
     result->kind = PATTERN_fconst;
     result->u.p_fconst.rep = r;
@@ -317,7 +338,7 @@ AST_pattern ast_pattern_fconst(RepFloat r) {
     return result;
 }
 
-AST_pattern ast_pattern_cconst(RepChar r) {
+AST_pattern ast_pattern_cconst(char r) {
     AST_pattern result = new(sizeof(*result));
     result->kind = PATTERN_cconst;
     result->u.p_cconst.rep = r;
@@ -355,6 +376,8 @@ AST_pattern ast_pattern_Id(Identifier id, AST_pattern_list l) {
     result->lineno = lineno;
     return result;
 }
+
+
 
 AST_ltdef_list ast_ltdef_list_let(AST_letdef ld, AST_ltdef_list l) {
     AST_ltdef_list result = new(sizeof(*result));
