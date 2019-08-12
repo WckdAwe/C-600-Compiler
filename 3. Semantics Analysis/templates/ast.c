@@ -292,6 +292,17 @@ AST_expr ast_expr_for(Identifier id, AST_expr e1, bool down,
     return result;
 }
 
+AST_expr ast_expr_class(Identifier id, Type_list tl, AST_expr_list el){
+    AST_expr result = new(sizeof(*result));
+
+    result->kind = EXPR_class;
+    result->u.e_class.name = id;
+    result->u.e_class.members = tl;
+    result->u.e_class.methods = el;
+    result->lineno = lineno;
+    return result;
+}
+
 AST_expr ast_expr_match(AST_expr e, AST_clause_list l) {
     AST_expr result = new(sizeof(*result));
     result->kind = EXPR_match;
