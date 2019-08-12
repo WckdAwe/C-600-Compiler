@@ -15,6 +15,7 @@
 SymbolTable symbol_table;
 SymbolTable type_symbol_table;
 int function_counter; /* Ο μετρητής των διαφορετικών συναρτήσεων που έχουμε βρει */
+int class_counter;
 
 void add_function(const char *name, Type parameter_type, Type result_type ) {
     SymbolEntry entry;
@@ -26,10 +27,21 @@ void add_function(const char *name, Type parameter_type, Type result_type ) {
     entry->e.function.counter = ++function_counter;
 }
 
-bool type_check_ref(Type a, bool deft) {
+void add_class(const char *name){
+    SymbolEntry entry;
+
+    entry = symbol_enter(symbol_table, id_make(name), 0);
+    entry->entry_type = ENTRY_CLASS;
+    entry->e.function.counter = ++class_counter;
+
+}
+
+
+//TODO: check if we need this:
+/*bool type_check_ref(Type a, bool deft) {
     if ( a == NULL ) return deft;
     return a->kind == TYPE_ref;
-}
+}*/
 
 bool type_check_array(Type a, bool deft) {
     if ( a == NULL ) return deft;
@@ -47,8 +59,8 @@ bool type_eq(Type a, Type b) {
                 type_eq(a->u.t_func.type2, b->u.t_func.type2);
         case TYPE_id:
             return strcmp(a->u.t_id.id->name, b->u.t_id.id->name) == 0;
-        case TYPE_ref:
-            return type_eq(a->u.t_ref.type, b->u.t_ref.type);
+       /* case TYPE_ref:
+            return type_eq(a->u.t_ref.type, b->u.t_ref.type); */
         case TYPE_array:
             return type_eq(a->u.t_array.type, b->u.t_array.type) &&
                 a->u.t_array.dim == b->u.t_array.dim;

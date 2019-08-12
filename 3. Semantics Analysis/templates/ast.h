@@ -180,7 +180,6 @@ struct AST_expr_tag {
         EXPR_while,
         EXPR_for,
         EXPR_match,
-        EXPR_function,
         EXPR_class
     } kind;
     union {
@@ -257,12 +256,6 @@ struct AST_expr_tag {
             AST_expr expr;
             AST_clause_list list;
         } e_match;
-        struct {
-            Identifier name;            //function NAME
-            AST_par_list params;        //(params)
-            AST_expr body;              //{ }
-            Type return_type;           //return
-        }e_function;
         struct{
             Identifier name;            //Class Name
             Type_list members;          // ex: int i , char c
@@ -414,7 +407,6 @@ AST_expr ast_expr_while  (AST_expr ec, AST_expr eb);
 AST_expr ast_expr_for    (Identifier id, AST_expr e1, bool down,
         AST_expr e2, AST_expr eb);
 AST_expr ast_expr_match  (AST_expr e, AST_clause_list l);
-AST_expr ast_expr_function(Identifier id, AST_par_list params, AST_expr body, Type rt);
 AST_expr ast_expr_class(Identifier id, Type_list tl, AST_expr_list el);
 
 

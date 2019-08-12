@@ -301,26 +301,7 @@ AST_expr ast_expr_match(AST_expr e, AST_clause_list l) {
     return result;
 }
 
-AST_expr ast_expr_function(Identifier id, AST_par_list params, AST_expr body, Type rt){
-    AST_expr result = new(sizeof(*result));
-    result->kind = EXPR_function;
-    result->u.e_function.name = id;
-    result->u.e_function.params = params;
-    result->u.e_function.body = body;
-    result->u.e_function.return_type = rt;
-    result->lineno = lineno;
-    return result;
-}
 
-AST_expr ast_expr_class(Identifier id, Type_list tl, AST_expr_list el){
-    AST_expr result = new(sizeof(*result));
-    result->kind = EXPR_class;
-    result->u.e_class.name = id;
-    result->u.e_class.members = tl;
-    result->u.e_class.methods = el;
-    result->lineno = lineno;
-    return result;
-}
 
 AST_pattern ast_pattern_iconst(int r) {
     AST_pattern result = new(sizeof(*result));

@@ -83,6 +83,7 @@ struct SymbolEntry_tag {
        ENTRY_TYPE,
        ENTRY_IDENTIFIER,
        ENTRY_CONSTRUCTOR,
+       ENTRY_CLASS,
    } entry_type;
 
    union {
@@ -126,6 +127,15 @@ struct SymbolEntry_tag {
           Type type;
           Type argument_type;
       } constructor;
+
+      struct{
+        Type type;
+        SymbolEntry *first_member;
+        SymbolEntry *last_member;
+        SymbolEntry *first_method;
+        SymbolEntry *last_method;
+        int counter;
+      } class;
    } e;
 };
 
