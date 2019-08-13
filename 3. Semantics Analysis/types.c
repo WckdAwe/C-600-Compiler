@@ -76,6 +76,7 @@ Type type_func (Type type1, Type type2)
   	return result;
 }
 
+
 TypeList type_list_add(TypeList list, Type type){
     TypeList node = new(sizeof(struct TypeList_tag));
     node->type = type;

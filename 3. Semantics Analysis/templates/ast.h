@@ -258,7 +258,7 @@ struct AST_expr_tag {
         } e_match;
         struct{
             Identifier name;            //Class Name
-            Type_list members;          // ex: int i , char c
+            AST_expr_list members;          // ex: int i , char c
             AST_expr_list methods;      // doSomething()
         }e_class;
     } u;
