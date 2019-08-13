@@ -1,4 +1,9 @@
+typedef int a;
+typedef a b;
+typedef b c[300];
+typedef c vasil500[500];
 typedef char ar[100]; // TypeDefs??
+//int ar;
 enum days
 {
    monday = 1,
@@ -7,9 +12,9 @@ enum days
    thursday,
    friday
 };
-class cst_t
+class mystery_class
 {
-private:
+private:          /// Create these!
    float a, b; // double a,b;
    int list al;
    days d;
@@ -35,18 +40,20 @@ public:
       float f[2];
    };
 };
-int g[3];
-int g[3][2]; // How should i handle these? Currently NOT OVERRIDING
+// int g[3];
+// int g[3][2]; // How should i handle these? Currently NOT OVERRIDING | DONE
 float x = 5e-24;
 int g[3][2] = {{0X1A00, 0X30F0}, 0X18D0, 0XA030};
 union u {
    int a;
-   char b[4];  // CHAR[ARRAY]
+   char b[4];  // CHAR[ARRAY] | DONE!
    days dd;
 };
 int e = 3;
-days list dl[10];  // List of <DAYS>
+// days list dl[10];  // List of <DAYS> | DONE?
+days list dl;
 string str = "string!";
+
 void mystery_class::__try_it()
 {
    /*

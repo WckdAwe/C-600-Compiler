@@ -32,7 +32,7 @@
 
 
 char* reverse_entry_type[] = {
-    "CONST", "FUNC", "PARAM", "VAR", "TYPE", "CONSTR", "ID"
+    "CONST", "FUNC", "PARAM", "VAR", "TYPE",// "CONSTR" //, "ID"
 };
 
 /* ---------------------------------------------------------------------
@@ -76,6 +76,7 @@ Scope scope_open (SymbolTable table)
 
 Scope scope_close (SymbolTable table)
 {
+    scope_print(table->currentScope, 0); // DEBUG ONLY;
     Scope result = table->currentScope;
     SymbolEntry e;
 
@@ -214,7 +215,7 @@ SymbolEntry symbol_lookup (SymbolTable table, Identifier id,
 
 // }
 
-void scope_print (Scope scope)
+void scope_print (Scope scope, int go_deeper)
 {
     SymbolEntry e;
     Type type;
@@ -225,26 +226,38 @@ void scope_print (Scope scope)
         for(i=0;i<scope->nesting-1;i++)
             printf("  ");
 
+        ASSERT(e != NULL);
         printf("(%02d) ID: %-22s | %-5s", scope->nesting, id_name(e->id), reverse_entry_type[e->entry_type]);
 
         switch(e->entry_type){
             case ENTRY_CONSTANT:
-                ASSERT(e->e.constant.type != NULL);
-                printf(" | %-5s \n", reverse_type_kind[e->e.constant.type->kind]);
+                type = e->e.constant.type;
+                ASSERT(type != NULL);
+                printf(" | %-5s", reverse_type_kind[type->kind]);
+                switch(type->kind){
+                    case TYPE_list:
+                        ASSERT(type->u.t_list.type != NULL);
+                        printf(" of %s\n", reverse_type_kind[type->u.t_list.type->kind]);
+                        break;
+                    default:
+                        printf("\n");
+                }
                 break;
             case ENTRY_TYPE:
                 ASSERT(e->e.type.scope != NULL);
                 printf("of %s \n", reverse_type_kind[e->e.type.type->kind]);
-                scope_print(e->e.type.scope);
+                if(go_deeper)
+                    scope_print(e->e.type.scope, go_deeper);
                 break;
             case ENTRY_FUNCTION:
-                printf(" of .....\n");
+                ASSERT(e->e.function.result_type != NULL);
+                printf(" of ..... that returns %s\n", reverse_type_kind[e->e.function.result_type->kind]);
                 break;
             case ENTRY_VARIABLE:
                 type = e->e.variable.type;
+                ASSERT(type != NULL);
                 switch(type->kind){
                     case TYPE_array:
-                        ASSERT(type != NULL);
                         memset(str_bfr,0,strlen(str_bfr));
                         while(type->kind == TYPE_array){
                             sprintf(str_bfr, "%s[%d]", str_bfr, type->u.t_array.dim);
@@ -253,8 +266,12 @@ void scope_print (Scope scope)
                         }
                         printf(" %s%s\n", reverse_type_kind[type->kind], str_bfr);
                         break;
+                    case TYPE_ref:
+                        ASSERT(type->u.t_ref.type != NULL);
+                        printf("reference to: %s \n", reverse_type_kind[type->u.t_ref.type->kind]);
+                        break;
                     default:
-                        printf(" Unknown type??\n");
+                        printf("%s\n", reverse_type_kind[type->kind]);
                         break;
                 }
                 break;
