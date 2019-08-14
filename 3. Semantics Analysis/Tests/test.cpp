@@ -2,7 +2,7 @@ typedef int a;
 typedef a b;
 typedef b c[300];
 typedef c vasil500[500];
-typedef char ar[100]; // TypeDefs??
+typedef char ar[100]; // TypeDefs?? | DONE
 //int ar;
 enum days
 {
@@ -14,7 +14,7 @@ enum days
 };
 class mystery_class
 {
-private:          /// Create these!
+private:          /// TODO: Create public/protected/private scopes! 
    float a, b; // double a,b;
    int list al;
    days d;
@@ -54,7 +54,7 @@ int e = 3;
 days list dl;
 string str = "string!";
 
-void mystery_class::__try_it()
+void mystery_class::__try_it(int test)
 {
    /*
 ** no comment

@@ -80,6 +80,7 @@ struct SymbolEntry_tag {
    enum {
        ENTRY_CONSTANT,
        ENTRY_FUNCTION,
+       ENTRY_FUNCTION_DECLARATION,
        ENTRY_PARAMETER,
        ENTRY_VARIABLE,
        ENTRY_TYPE,
@@ -99,13 +100,20 @@ struct SymbolEntry_tag {
        } constant;
 
       struct {
-          SymbolEntry *first_argument;
-          SymbolEntry *last_argument;
+        //   SymbolEntry *first_argument;
+        //   SymbolEntry *last_argument;
+        SymbolEntry parent;
+        EntryList arguments;
         //   Type type;
           Type result_type;
         //   int counter; /* Μοναδικός για κάθε συνάρτηση, για να ξεχωρίζουμε
                         //   αυτές που έχουν το ίδιο όνομα */
       } function;
+
+      struct {
+          TypeList parameters;
+          Type result_type;
+      } function_declaration;
 
       struct {
           Type type;

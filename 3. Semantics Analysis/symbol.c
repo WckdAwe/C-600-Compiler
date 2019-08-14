@@ -32,7 +32,7 @@
 
 
 char* reverse_entry_type[] = {
-    "CONST", "FUNC", "PARAM", "VAR", "TYPE",// "CONSTR" //, "ID"
+    "CONST", "FUNC", "FDCL", "PARAM", "VAR", "TYPE", "ID", "CLASS",
 };
 
 /* ---------------------------------------------------------------------
@@ -77,6 +77,7 @@ Scope scope_open (SymbolTable table)
 Scope scope_close (SymbolTable table)
 {
     scope_print(table->currentScope, 0); // DEBUG ONLY;
+    printf("---End Scope---\n");
     Scope result = table->currentScope;
     SymbolEntry e;
 
@@ -215,6 +216,23 @@ SymbolEntry symbol_lookup (SymbolTable table, Identifier id,
 
 // }
 
+char* _print_array_type(Type array){
+    ASSERT(array->kind == TYPE_array);
+    char* out_bfr = malloc(sizeof(char)*256);
+    char bfr[256];
+    memset(out_bfr,0, strlen(out_bfr));
+    memset(bfr,0, strlen(bfr));
+    Type tmp = array;
+    while(tmp->kind == TYPE_array){
+        sprintf(bfr, "%s[%d]", bfr, tmp->u.t_array.dim);
+        tmp = tmp->u.t_array.type;
+        ASSERT(tmp != NULL);
+    }
+    sprintf(out_bfr, "%s%s", reverse_type_kind[tmp->kind], bfr);
+    return out_bfr;
+    // TODO: Implement cleanup? MemLeaks otherwise...
+}
+
 void scope_print (Scope scope, int go_deeper)
 {
     SymbolEntry e;
@@ -251,20 +269,56 @@ void scope_print (Scope scope, int go_deeper)
                 break;
             case ENTRY_FUNCTION:
                 ASSERT(e->e.function.result_type != NULL);
-                printf(" of ..... that returns %s\n", reverse_type_kind[e->e.function.result_type->kind]);
+                EntryList arguments = e->e.function.arguments;
+                memset(str_bfr,0, strlen(str_bfr));
+                while(arguments != NULL){
+                    ASSERT(arguments->entry->entry_type == ENTRY_PARAMETER);
+                    type = arguments->entry->e.parameter.type;
+                    switch(type->kind){
+                        case TYPE_array:
+                            sprintf(str_bfr, "%s, %s", str_bfr, _print_array_type(type));
+                            break;
+                        default:
+                            sprintf(str_bfr, "%s, %s", str_bfr, reverse_type_kind[type->kind]);
+                            break;
+                    }
+                    arguments = arguments->next;
+                }
+                ASSERT(e->e.function.parent != NULL);
+                ASSERT(e->e.function.parent->id != NULL);
+                if(str_bfr != '\0'){
+                    printf(" [%s] of %s that returns %s\n", str_bfr+2, id_name(e->e.function.parent->id), reverse_type_kind[e->e.function.result_type->kind]);
+                }else{
+                    printf(" [%s] of %s that returns %s\n", str_bfr, id_name(e->e.function.parent->id), reverse_type_kind[e->e.function.result_type->kind]);
+                }
+                break;
+            case ENTRY_FUNCTION_DECLARATION:
+                ASSERT(e->e.function_declaration.result_type != NULL);
+                memset(str_bfr,0,strlen(str_bfr));
+                TypeList parameters = e->e.function_declaration.parameters;
+                while(parameters != NULL){
+                    switch(parameters->type->kind){
+                        case TYPE_array:
+                            sprintf(str_bfr, "%s, %s", str_bfr, _print_array_type(parameters->type));
+                            break;
+                        default:
+                            sprintf(str_bfr, "%s, %s", str_bfr, reverse_type_kind[parameters->type->kind]);
+                            break;
+                    }
+                    parameters = parameters->next;
+                }
+                if(str_bfr != '\0'){
+                    printf(" [%s] of ..... that returns %s\n", str_bfr+2, reverse_type_kind[e->e.function_declaration.result_type->kind]);
+                }else{
+                    printf(" [%s] of ..... that returns %s\n", str_bfr, reverse_type_kind[e->e.function_declaration.result_type->kind]);
+                }
                 break;
             case ENTRY_VARIABLE:
                 type = e->e.variable.type;
                 ASSERT(type != NULL);
                 switch(type->kind){
                     case TYPE_array:
-                        memset(str_bfr,0,strlen(str_bfr));
-                        while(type->kind == TYPE_array){
-                            sprintf(str_bfr, "%s[%d]", str_bfr, type->u.t_array.dim);
-                            type = type->u.t_array.type;
-                            ASSERT(type != NULL);
-                        }
-                        printf(" %s%s\n", reverse_type_kind[type->kind], str_bfr);
+                        printf("%s\n", _print_array_type(type));
                         break;
                     case TYPE_ref:
                         ASSERT(type->u.t_ref.type != NULL);

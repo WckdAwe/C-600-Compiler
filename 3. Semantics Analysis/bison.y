@@ -44,8 +44,6 @@ Scope scope;
 /** EXTRACT THESE LATER **/
 void set_array_type(Type array, Type t){
     ASSERT(array && t);
-    printf("%d\n", array->kind);
-    printf("%s\n", reverse_type_kind[array->kind]);
     ASSERT(array->kind == TYPE_array);
     Type tmp = array;
     while(tmp->u.t_array.type->kind == TYPE_array)
@@ -135,20 +133,22 @@ void set_array_type(Type array, Type t){
 %token <strval>     T_LENGTH        "length"
 %token <strval>     T_EOF   0       "end of file"
     
-%type <strval> program global_declaration global_declarations typedef_declaration enum_declaration
+%type <strval> program global_declaration global_declarations enum_declaration
 %type <strval> enum_body id_list initializer init_value expression variable general_expression assignment expression_list listexpression
-%type <strval> init_values class_declaration class_body parent members_methods access member_or_method member var_declaration
-%type <strval> anonymous_union union_body fields field method short_func_declaration short_par_func_header func_header_start parameter_types 
-%type <strval> pass_list_dims nopar_func_header union_declaration global_var_declaration func_declaration full_func_declaration 
-%type <strval> full_par_func_header class_func_header_start parameter_list nopar_class_func_header decl_statements declarations decltype 
+%type <strval> init_values class_declaration class_body members_methods access member_or_method member var_declaration
+%type <strval> anonymous_union union_body fields field method short_func_declaration short_par_func_header
+%type <strval> nopar_func_header union_declaration global_var_declaration func_declaration full_func_declaration 
+%type <strval> full_par_func_header nopar_class_func_header decl_statements declarations 
 %type <strval> statements statement expression_statement if_statement if_tail while_statement for_statement optexpr switch_statement switch_tail decl_cases 
 %type <strval> casestatements casestatement single_casestatement return_statement io_statement in_list in_item out_list out_item comp_statement main_function main_header
 
 //%type <constant> constant
-%type <intval> listspec
-%type <type_t> standard_type typename dim dims
-%type <symbol_entry> init_variabledef variabledef pass_variabledef func_class
-%type <entry_list> init_variabledefs variabledefs
+%type <intval> listspec decltype
+%type <type_t> standard_type typename dim dims pass_list_dims
+%type <symbol_entry> init_variabledef variabledef pass_variabledef func_class typedef_declaration func_header_start class_func_header_start
+%type <symbol_entry> parent
+%type <entry_list> init_variabledefs variabledefs parameter_list
+%type <type_list> parameter_types
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -176,7 +176,7 @@ program:                                                                        
 global_declarations:      global_declarations global_declaration
                         | %empty {}
                         ;
-global_declaration:       typedef_declaration
+global_declaration:       typedef_declaration                                               {}
                         | enum_declaration
                         | class_declaration
                         | union_declaration
@@ -270,7 +270,7 @@ expression:               expression T_OROP expression
                         | variable T_LPAREN expression_list T_RPAREN
                         | T_LENGTH T_LPAREN general_expression T_RPAREN
                         | T_NEW T_LPAREN general_expression T_RPAREN
-                        | constant                                                          
+                        | constant                                                          {}                                                          
                         | T_LPAREN general_expression T_RPAREN
                         | T_LPAREN standard_type T_RPAREN
                         | listexpression
@@ -278,7 +278,7 @@ expression:               expression T_OROP expression
 variable:                 variable T_LBRACK general_expression T_RBRACK
                         | variable T_DOT T_ID                                               // .......
                         | T_LISTFUNC T_LPAREN general_expression T_RPAREN
-                        | decltype T_ID                                                     //TODO: UPDATE DIS. {hashtbl_insert(hashtbl, $2, NULL, scope);} // TODO: STATIC ASSIGNMENT?
+                        | decltype T_ID                                                     {}//TODO: UPDATE DIS. {hashtbl_insert(hashtbl, $2, NULL, scope);} // TODO: STATIC ASSIGNMENT?
                         | T_THIS
                         ;
 general_expression:       general_expression T_COMMA general_expression
@@ -304,12 +304,12 @@ class_declaration:        T_CLASS T_ID                                          
                             class_body                                              
                             T_SEMI                                                          {scope_close(symbol_table);}
                         ;
-class_body:               parent T_LBRACE members_methods T_RBRACE
+class_body:               parent T_LBRACE members_methods T_RBRACE                          {}
                         ;
 parent:                   T_COLON T_ID                                                      {
                                                                                                 // Entry must exist to provide inheritance...
                                                                                                 // TODO: MUST ADD IT...
-                                                                                                entry = symbol_lookup(symbol_table, id_make($2), LOOKUP_ALL_SCOPES, 1); // TODO: Handle Inheritance ..........
+                                                                                                $$ = entry = symbol_lookup(symbol_table, id_make($2), LOOKUP_ALL_SCOPES, 1); // TODO: Handle Inheritance ..........
                                                                                             }// TODO: Update this {ht_complex_insert(hashtbl, $2, ts_create_standard_type(CLASS), scope);}
                         | %empty                                                            {} // No Inheritance
                         ;
@@ -347,7 +347,6 @@ var_declaration:          typename variabledefs T_SEMI                          
                                                                                                                     set_array_type(type, $1);
                                                                                                                     break;
                                                                                                                 default:
-                                                                                                                    printf("default type for %s is %s\n", id_name(entry->id), reverse_type_kind[$1->kind]);
                                                                                                                     *type = *($1);  
                                                                                                                     break;
                                                                                                             }                                                                               
@@ -365,7 +364,6 @@ variabledefs:             variabledefs T_COMMA variabledef                      
                         ;
 variabledef:              listspec T_ID dims                                                {
                                                                                                 ASSERT(!($1 == 1 && $3 != NULL));
-                                                                                                ASSERT($2 != NULL);
                                                                                                 $$ = entry = symbol_enter(symbol_table, id_make($2), 1); // TODO: Possibly change this to something more dynamic
                                                                                                 entry->entry_type = ENTRY_VARIABLE;
                                                                                                 if($3){ // If variable is array
@@ -377,27 +375,6 @@ variabledef:              listspec T_ID dims                                    
                                                                                                     entry->e.variable.type = type_basic(TYPE_unknown);
                                                                                                 }
                                                                                             }
-                                                                                            // if($3 != NULL){ // If is array....
-                                                                                            //     type = $3;
-                                                                                            //     entry->entry_type = ENTRY_VARIABLE;
-                                                                                            //     entry->e.variable.type = type;
-                                                                                            //     while(type != NULL){
-                                                                                            //         type = type->u.t_array.type;
-                                                                                            //     }
-                                                                                            //     if($1 == 1){
-                                                                                            //         type = type_basic(TYPE_list); // UPDATE THIS to type_list(...)
-                                                                                            //     }else{
-                                                                                            //         type = type_basic(TYPE_unknown);
-                                                                                            //     }
-                                                                                            // }else{
-                                                                                            //     entry->entry_type = ENTRY_CONSTANT;
-                                                                                            //     if($1 == 1){
-                                                                                            //         entry->e.constant.type = type_basic(TYPE_list); // UPDATE THIS to type_list(...)
-                                                                                            //     }else{
-                                                                                            //         entry->e.constant.type = type_basic(TYPE_unknown);
-                                                                                            //     }
-                                                                                            // }
-                                                                                            // }
                         ;
 anonymous_union:          T_UNION                                                           // TODO: Read more about anonymous unions. No scope should be added {scope_open(symbol_table);} // {scope++;scope_open(symbol_table);}
                             union_body                                                      // same ^ {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
@@ -412,24 +389,79 @@ field:                    var_declaration
                         ;
 method:                   short_func_declaration                                    
                         ;
-short_func_declaration:   short_par_func_header T_SEMI                                      {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
-                        | nopar_func_header T_SEMI                                          {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
+short_func_declaration:   short_par_func_header T_SEMI                                      {scope_close(symbol_table);}
+                        | nopar_func_header T_SEMI                                          {scope_close(symbol_table);}
                         ;
-short_par_func_header:    func_header_start T_LPAREN parameter_types T_RPAREN      
+short_par_func_header:    func_header_start T_LPAREN parameter_types T_RPAREN               {
+                                                                                                Type result_type = $1->e.function.result_type;
+                                                                                                $1->entry_type = ENTRY_FUNCTION_DECLARATION;
+                                                                                                $1->e.function_declaration.parameters = $3;
+                                                                                                $1->e.function_declaration.result_type = result_type;
+                                                                                            }
                         ;
 func_header_start:        typename listspec T_ID                                            {
-                                                                                                entry = symbol_enter(symbol_table, id_make($3), 1);
+                                                                                                $$ = entry = symbol_enter(symbol_table, id_make($3), 1);
                                                                                                 entry->entry_type = ENTRY_FUNCTION;
                                                                                                 entry->e.function.result_type=$1;
                                                                                                 scope_open(symbol_table);
-                                                                                             //Need to pass parameters here...
+                                                                                                //Need to pass parameters here...
                                                                                             }
                         ;
-parameter_types:          parameter_types T_COMMA typename pass_list_dims
-                        | typename pass_list_dims
+parameter_types:          parameter_types T_COMMA typename pass_list_dims                   {
+                                                                                                if(!$4){ // If not ref or list/array
+                                                                                                    $$ = type_list_add($1, $3);
+                                                                                                }else{
+                                                                                                    $$ = type_list_add($1, $4);
+                                                                                                    switch($4->kind){
+                                                                                                        case TYPE_ref:
+                                                                                                            $4->u.t_ref.type = $3;
+                                                                                                            break;
+                                                                                                        case TYPE_list:
+                                                                                                            $4->u.t_list.type = $3;
+                                                                                                            break;
+                                                                                                        case TYPE_array:
+                                                                                                            set_array_type($4, $3);
+                                                                                                            break;
+                                                                                                        default:
+                                                                                                            exit(1);
+                                                                                                            break;
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                        | typename pass_list_dims                                           {
+                                                                                                if(!$2){ // If not ref or list/array
+                                                                                                    $$ = type_list_add(NULL, $1);
+                                                                                                }else{
+                                                                                                    $$ = type_list_add(NULL, $2);
+                                                                                                    switch($2->kind){
+                                                                                                        case TYPE_ref:
+                                                                                                            $2->u.t_ref.type = $1;
+                                                                                                            break;
+                                                                                                        case TYPE_list:
+                                                                                                            $2->u.t_list.type = $1;
+                                                                                                            break;
+                                                                                                        case TYPE_array:
+                                                                                                            set_array_type($2, $1);
+                                                                                                            break;
+                                                                                                        default:
+                                                                                                            printf("Unexpected Input\n");
+                                                                                                            exit(1);
+                                                                                                            break;
+                                                                                                    }
+                                                                                                }
+                                                                                            }
                         ;
-pass_list_dims:           T_REFER
-                        | listspec dims
+pass_list_dims:           T_REFER                                                           {$$ = type_ref(TYPE_unknown);}
+                        | listspec dims                                                     {
+                                                                                                ASSERT(!($1 == 1 && $2 != NULL));
+                                                                                                if($1){
+                                                                                                    $$ = type_list(TYPE_unknown);
+                                                                                                }else if($2){
+                                                                                                    $$ = $2;
+                                                                                                }else{
+                                                                                                    $$ = NULL;
+                                                                                                }
+                                                                                            }
                         ;
 nopar_func_header:        func_header_start T_LPAREN T_RPAREN                               {/** NO SCOPE due to func_header_start! **/}
                         ;
@@ -478,45 +510,58 @@ init_variabledef:         variabledef initializer                               
 func_declaration:         short_func_declaration
                         | full_func_declaration
                         ;
-full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE            {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
-                        | nopar_class_func_header T_LBRACE decl_statements T_RBRACE         {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
-                        | nopar_func_header T_LBRACE decl_statements T_RBRACE               {scope_close(symbol_table);} //{hashtbl_get(hashtbl, scope);scope--;scope_close(symbol_table);}
+full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE            {scope_close(symbol_table);}
+                        | nopar_class_func_header T_LBRACE decl_statements T_RBRACE         {scope_close(symbol_table);}
+                        | nopar_func_header T_LBRACE decl_statements T_RBRACE               {scope_close(symbol_table);}
                         ;
-full_par_func_header:     class_func_header_start T_LPAREN parameter_list T_RPAREN
-                        | func_header_start T_LPAREN parameter_list T_RPAREN
+full_par_func_header:     class_func_header_start T_LPAREN parameter_list T_RPAREN          {$1->e.function.arguments = $3;}
+                        | func_header_start T_LPAREN parameter_list T_RPAREN                {$1->e.function.arguments = $3;}
                         ;
 //REMEMBER TO SET PARAMETERS FOR FUNCTION
 class_func_header_start:  typename listspec func_class T_ID                                 {
-                                                                                                entry = symbol_enter(symbol_table, id_make($4), 1);
+                                                                                                // Implement owner & inheritance?
+                                                                                                // TODO: Check about listspec?
+                                                                                                $$ = entry = symbol_enter(symbol_table, id_make($4), 1);
                                                                                                 entry->entry_type = ENTRY_FUNCTION;
                                                                                                 entry->e.function.result_type=$1;
+                                                                                                entry->e.function.parent=$3;
                                                                                                 scope_open(symbol_table);
                                                                                             } 
                         ;
 func_class:               T_ID T_METH                                                       {$$ = symbol_lookup(symbol_table, id_make($1), LOOKUP_CURRENT_SCOPE, 1); }
                         ;
 parameter_list:           parameter_list T_COMMA typename pass_variabledef                  {
-                                                                                                // entry = $4;
-                                                                                                // if(entry->e.parameter.type->kind == TYPE_ref){
-                                                                                                //     entry->e.parameter.type->u.t_ref.type = $3;
-                                                                                                // }else{
-                                                                                                //     entry->e.parameter.type = $3;
-                                                                                                // }
+                                                                                                $$ = entry_list_add($1, $4);
+                                                                                                entry = $4;
+                                                                                                Type type = entry->e.parameter.type;
+                                                                                                switch(type->kind){
+                                                                                                    case TYPE_ref:
+                                                                                                        type->u.t_ref.type = $3;
+                                                                                                        break;
+                                                                                                    default:
+                                                                                                        *type = *($3);
+                                                                                                        break;
+                                                                                                }
                                                                                             }
                         | typename pass_variabledef                                         {
-                                                                                                // entry = $2;
-                                                                                                // if(entry->e.parameter.type->kind == TYPE_ref){
-                                                                                                //     entry->e.parameter.type->u.t_ref.type = $1;
-                                                                                                // }else{
-                                                                                                //     entry->e.parameter.type = $1;
-                                                                                                // }
+                                                                                                $$ = entry_list_add(NULL, $2);
+                                                                                                entry = $2;
+                                                                                                Type type = entry->e.parameter.type;
+                                                                                                switch(type->kind){
+                                                                                                    case TYPE_ref:
+                                                                                                        type->u.t_ref.type = $1;
+                                                                                                        break;
+                                                                                                    default:
+                                                                                                        *type = *($1);
+                                                                                                        break;
+                                                                                                }
                                                                                             }
                         ;
 pass_variabledef:         variabledef                                                       {$$ = $1;$1->entry_type=ENTRY_PARAMETER;} // todo: Verify no conflicts/overrides
                         | T_REFER T_ID                                                      {
                                                                                                 $$ = entry = symbol_enter(symbol_table, id_make($2), 1);
                                                                                                 entry->entry_type=ENTRY_PARAMETER;
-                                                                                                entry->e.parameter.type=type_basic(TYPE_ref);
+                                                                                                entry->e.parameter.type=type_ref(TYPE_unknown);
                                                                                             }
                         ;
 nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN                 
@@ -526,11 +571,71 @@ decl_statements:          declarations statements
                         | statements
                         | %empty {}
                         ;
-declarations:             declarations decltype typename variabledefs T_SEMI
-                        | decltype typename variabledefs T_SEMI
+declarations:             declarations decltype typename variabledefs T_SEMI                {   // TODO: HANDLE STATIC
+                                                                                                EntryList list = $4; 
+                                                                                                Type type;
+                                                                                                while(list != NULL){
+                                                                                                    entry = list->entry;
+                                                                                                    switch(entry->entry_type){
+                                                                                                        case ENTRY_CONSTANT:
+                                                                                                            entry->e.constant.type = $3;
+                                                                                                            break;
+                                                                                                        case ENTRY_VARIABLE:
+                                                                                                            type = entry->e.variable.type;
+                                                                                                            ASSERT(type != NULL);
+                                                                                                            switch(type->kind){
+                                                                                                                case TYPE_list:
+                                                                                                                    type->u.t_list.type = $3;
+                                                                                                                    break;
+                                                                                                                case TYPE_array:
+                                                                                                                    set_array_type(type, $3);
+                                                                                                                    break;
+                                                                                                                default:
+                                                                                                                    *type = *($3);  
+                                                                                                                    break;
+                                                                                                            }                                                                               
+                                                                                                            break;
+                                                                                                        default:
+                                                                                                            printf("Entry type not defined (1)\n");
+                                                                                                            break;
+                                                                                                    }
+                                                                                                    list = list->next;
+                                                                                                }
+                                                                                            }
+                        | decltype typename variabledefs T_SEMI                             {
+                                                                                                EntryList list = $3; 
+                                                                                                Type type;
+                                                                                                while(list != NULL){
+                                                                                                    entry = list->entry;
+                                                                                                    switch(entry->entry_type){
+                                                                                                        case ENTRY_CONSTANT:
+                                                                                                            entry->e.constant.type = $2;
+                                                                                                            break;
+                                                                                                        case ENTRY_VARIABLE:
+                                                                                                            type = entry->e.variable.type;
+                                                                                                            ASSERT(type != NULL);
+                                                                                                            switch(type->kind){
+                                                                                                                case TYPE_list:
+                                                                                                                    type->u.t_list.type = $2;
+                                                                                                                    break;
+                                                                                                                case TYPE_array:
+                                                                                                                    set_array_type(type, $2);
+                                                                                                                    break;
+                                                                                                                default:
+                                                                                                                    *type = *($2);  
+                                                                                                                    break;
+                                                                                                            }                                                                               
+                                                                                                            break;
+                                                                                                        default:
+                                                                                                            printf("Entry type not defined (1)\n");
+                                                                                                            break;
+                                                                                                    }
+                                                                                                    list = list->next;
+                                                                                                }
+                                                                                            }
                         ;
-decltype:                 T_STATIC 
-                        | %empty {}
+decltype:                 T_STATIC                                                          {$$=1;}
+                        | %empty                                                            {$$=0;}
                         ;
 statements:               statements statement
                         | statement
