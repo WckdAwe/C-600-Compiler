@@ -251,14 +251,22 @@ void scope_print (Scope scope, int go_deeper)
             case ENTRY_CONSTANT:
                 type = e->e.constant.type;
                 ASSERT(type != NULL);
-                printf(" | %-5s", reverse_type_kind[type->kind]);
+                printf(" | %-5s ", reverse_type_kind[type->kind]);
                 switch(type->kind){
-                    case TYPE_list:
-                        ASSERT(type->u.t_list.type != NULL);
-                        printf(" of %s\n", reverse_type_kind[type->u.t_list.type->kind]);
+                    case TYPE_char:
+                        printf("| Value: %c\n", e->e.constant.value.v_char);
+                        break;
+                    case TYPE_int:
+                        printf("| Value: %d\n", e->e.constant.value.v_int);
+                        break;
+                    case TYPE_float:
+                        printf("| Value: %f\n", e->e.constant.value.v_float);
+                        break;
+                    case TYPE_str:
+                        printf("| Value: %s\n", e->e.constant.value.v_str);
                         break;
                     default:
-                        printf("\n");
+                        printf("| Unknown?\n");
                 }
                 break;
             case ENTRY_TYPE:
@@ -284,12 +292,12 @@ void scope_print (Scope scope, int go_deeper)
                     }
                     arguments = arguments->next;
                 }
-                ASSERT(e->e.function.parent != NULL);
-                ASSERT(e->e.function.parent->id != NULL);
+                // ASSERT(e->e.function.parent != NULL);
+                // ASSERT(e->e.function.parent->id != NULL);
                 if(str_bfr != '\0'){
-                    printf(" [%s] of %s that returns %s\n", str_bfr+2, id_name(e->e.function.parent->id), reverse_type_kind[e->e.function.result_type->kind]);
+                    printf(" [%s] of %s that returns %s\n", str_bfr+2, e->e.function.parent ? id_name(e->e.function.parent->id) : "N/A", reverse_type_kind[e->e.function.result_type->kind]);
                 }else{
-                    printf(" [%s] of %s that returns %s\n", str_bfr, id_name(e->e.function.parent->id), reverse_type_kind[e->e.function.result_type->kind]);
+                    printf(" [%s] of %s that returns %s\n", str_bfr, e->e.function.parent ? id_name(e->e.function.parent->id) : "N/A", reverse_type_kind[e->e.function.result_type->kind]);
                 }
                 break;
             case ENTRY_FUNCTION_DECLARATION:
@@ -350,4 +358,18 @@ EntryList entry_list_add(EntryList list, SymbolEntry entry){
     tmp->next = node;
 	
 	return list;
+}
+
+void entry_list_reverse(EntryList *head){
+    EntryList prev = NULL;
+    EntryList current = *head;
+    EntryList next = NULL;
+
+    while(current != NULL){
+        next = current->next;
+        current->next = prev;
+        prev = current;
+        current = next;
+    }
+    *head = prev;
 }

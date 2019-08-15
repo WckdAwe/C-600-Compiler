@@ -40,8 +40,15 @@ typedef struct SymbolTable_tag * SymbolTable;
 /* Εγγραφή στον πίνακα συμβόλων */
 
 typedef struct SymbolEntry_tag * SymbolEntry;
-typedef union const_data ConstantData;
-typedef struct Constant_tag Constant;
+typedef struct Constant_tag{
+    Type type;
+    union const_data{
+        int v_int;
+        char v_char;
+        float v_float;
+        char *v_str;
+    } value;
+}Constant;
 
 /* Λίστα απο εγγραφές του πίνακα συμβόλων */
 
@@ -89,15 +96,7 @@ struct SymbolEntry_tag {
    } entry_type;
 
    union {
-       struct Constant_tag{
-           Type type;
-           union const_data{
-               int v_int;
-               char v_char;
-               float v_float;
-               char *v_str;
-           } value;
-       } constant;
+      Constant constant;
 
       struct {
         //   SymbolEntry *first_argument;
@@ -177,4 +176,5 @@ SymbolEntry symbol_lookup (SymbolTable table, Identifier id, LookupType type,
 void        scope_print   (Scope scope, int go_deeper);
 
 EntryList   entry_list_add(EntryList list, SymbolEntry entry);
+void        entry_list_reverse(EntryList *list);
 #endif

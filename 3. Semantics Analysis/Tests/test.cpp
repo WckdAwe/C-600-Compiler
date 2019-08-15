@@ -8,7 +8,7 @@ enum days
 {
    monday = 1,
    tuesday,
-   wednesday,
+   wednesday,  // = 2 | Semantic check values ascending/descending
    thursday,
    friday
 };

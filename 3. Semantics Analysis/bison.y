@@ -30,13 +30,10 @@ extern char *yytext;
    --------------------- Local variables & functions  ------------------
    --------------------------------------------------------------------- */
 
-// Type type;
 SymbolEntry entry;
 SymbolTable symbol_table;
 Scope scope;
 // Constant constant;
-// ConstantData data;
-// int function_counter = 0;
 
 /** TODO: Write why split T_ICONST/T_FCONST **/
 /** TODO: constant Union with type and val **/
@@ -61,14 +58,10 @@ void set_array_type(Type array, Type t){
     char charval;
     char *strval;
     Type type_t;
-    // ConstantData data;
-    // struct Constant_tag constant;
-    struct SymbolEntry_tag * symbol_entry; //SymbolEntry symbol_entry;
-    struct EntryList_tag * entry_list;
-    struct TypeList_tag * type_list;
-    // Type typeval;
-    // Type_Struct *tsval;
-    // List *listval;
+    Constant *constant;
+    SymbolEntry symbol_entry;
+    EntryList entry_list;
+    TypeList type_list;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -134,7 +127,7 @@ void set_array_type(Type array, Type t){
 %token <strval>     T_EOF   0       "end of file"
     
 %type <strval> program global_declaration global_declarations enum_declaration
-%type <strval> enum_body id_list initializer init_value expression variable general_expression assignment expression_list listexpression
+%type <strval> enum_body id_list variable general_expression assignment expression_list listexpression
 %type <strval> init_values class_declaration class_body members_methods access member_or_method member var_declaration
 %type <strval> anonymous_union union_body fields field method short_func_declaration short_par_func_header
 %type <strval> nopar_func_header union_declaration global_var_declaration func_declaration full_func_declaration 
@@ -142,7 +135,7 @@ void set_array_type(Type array, Type t){
 %type <strval> statements statement expression_statement if_statement if_tail while_statement for_statement optexpr switch_statement switch_tail decl_cases 
 %type <strval> casestatements casestatement single_casestatement return_statement io_statement in_list in_item out_list out_item comp_statement main_function main_header
 
-//%type <constant> constant
+%type <constant> constant expression init_value initializer
 %type <intval> listspec decltype
 %type <type_t> standard_type typename dim dims pass_list_dims
 %type <symbol_entry> init_variabledef variabledef pass_variabledef func_class typedef_declaration func_header_start class_func_header_start
@@ -241,19 +234,52 @@ dim:                      T_LBRACK T_ICONST T_RBRACK                            
                         | T_LBRACK T_RBRACK                                                 {$$ = type_array(-1, type_basic(TYPE_unknown));}// TODO: Dynamic memory? Assign later
                         ;
 enum_declaration:         T_ENUM T_ID                                                       {entry = symbol_enter(symbol_table, id_make($2), 1);entry->entry_type = ENTRY_TYPE;entry->e.type.type=type_basic(TYPE_enum);scope=scope_open(symbol_table);entry->e.type.scope=scope;}
-                            enum_body                                                       {scope_close(symbol_table);}
+                            enum_body                                                       {
+                                                                                                printf("YOOO\n");
+                                                                                                SymbolEntry e;
+                                                                                                Constant *prev_constant = NULL;
+                                                                                                EntryList el = NULL;
+                                                                                                for (e = scope->entries; e != NULL; e = e->nextInScope) {
+                                                                                                    el = entry_list_add(el, e);
+                                                                                                }
+
+                                                                                                entry_list_reverse(&el);
+                                                                                                while(el != NULL){
+                                                                                                    e = el->entry;
+                                                                                                    if(e->e.constant.type->kind == TYPE_unknown && !prev_constant){ // First entry..
+                                                                                                        e->e.constant.type=type_basic(TYPE_int);
+                                                                                                        e->e.constant.value.v_int=0;
+                                                                                                    }else if(e->e.constant.type->kind != TYPE_unknown){
+                                                                                                        // Should verify ascending values...
+                                                                                                    }else{
+                                                                                                        e->e.constant.type=type_basic(TYPE_int);
+                                                                                                        e->e.constant.value.v_int = prev_constant->value.v_int + 1;
+                                                                                                    }
+                                                                                                    prev_constant = &(e->e.constant);
+                                                                                                    el = el->next;
+                                                                                                }
+                                                                                                scope_close(symbol_table);
+                                                                                            }
                             T_SEMI                                                  
                         ;
 enum_body:                T_LBRACE id_list T_RBRACE
                         ;
-id_list:                  id_list T_COMMA T_ID initializer                                  {entry = symbol_enter(symbol_table, id_make($3), 1);entry->entry_type = ENTRY_CONSTANT;entry->e.constant.type=type_basic(TYPE_int);} 
-                        | T_ID                                                              {entry = symbol_enter(symbol_table, id_make($1), 1);entry->entry_type = ENTRY_CONSTANT;entry->e.constant.type=type_basic(TYPE_int);}
-                          initializer
+id_list:                  id_list T_COMMA T_ID initializer                                  {
+                                                                                                entry = symbol_enter(symbol_table, id_make($3), 1);entry->entry_type = ENTRY_CONSTANT;
+                                                                                                if($4) entry->e.constant = *($4);
+                                                                                                else entry->e.constant.type = type_basic(TYPE_unknown);
+                                                                                            } 
+                        | T_ID initializer                                                  {
+                                                                                                entry = symbol_enter(symbol_table, id_make($1), 1);entry->entry_type = ENTRY_CONSTANT;
+                                                                                                if($2) entry->e.constant = *($2);
+                                                                                                else entry->e.constant.type = type_basic(TYPE_unknown);
+                                                                                            }
                         ;
-initializer:              T_ASSIGN init_value                                               // TODO: ASSIGN INITIAL VALUES
-                        | %empty {}                                                         // TODO: Assign default values
-init_value:               expression
-                        | T_LBRACE init_values T_RBRACE
+initializer:              T_ASSIGN init_value                                               {$$=$2;}// TODO: ASSIGN INITIAL VALUES
+                        | %empty                                                            {$$=NULL;} // TODO: Assign default values
+                        ;
+init_value:               expression                                                        {$$=$1;}
+                        | T_LBRACE init_values T_RBRACE                                     {$$=NULL;} // TODO: Assign multi-value logic
                         ;
 expression:               expression T_OROP expression
                         | expression T_ANDOP expression
@@ -270,7 +296,7 @@ expression:               expression T_OROP expression
                         | variable T_LPAREN expression_list T_RPAREN
                         | T_LENGTH T_LPAREN general_expression T_RPAREN
                         | T_NEW T_LPAREN general_expression T_RPAREN
-                        | constant                                                          {}                                                          
+                        | constant                                                          {$$=$1;}                                                          
                         | T_LPAREN general_expression T_RPAREN
                         | T_LPAREN standard_type T_RPAREN
                         | listexpression
@@ -288,12 +314,12 @@ assignment:               variable T_ASSIGN assignment
                         | expression
                         ;
 expression_list:          general_expression
-                        | %empty {}
+                        | %empty                                                            {}
                         ;
-constant:                 T_CCONST
-                        | T_ICONST
-                        | T_FCONST
-                        | T_SCONST
+constant:                 T_CCONST                                                          {Constant constant;$$=&constant;constant.type=type_basic(TYPE_char);constant.value.v_char=$1;}
+                        | T_ICONST                                                          {Constant constant;$$=&constant;constant.type=type_basic(TYPE_int);constant.value.v_int=$1;}
+                        | T_FCONST                                                          {Constant constant;$$=&constant;constant.type=type_basic(TYPE_float);constant.value.v_float=$1;}
+                        | T_SCONST                                                          {Constant constant;$$=&constant;constant.type=type_basic(TYPE_str);constant.value.v_str=$1;}
                         ;
 listexpression:           T_LBRACK expression_list T_RBRACK
                         ;

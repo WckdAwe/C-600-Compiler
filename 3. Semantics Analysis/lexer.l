@@ -2,6 +2,7 @@
 #include <string.h>
 #include <math.h>
 #include "c600.h"
+#include "symbol.h"
 #include "bison.h"
 
 
