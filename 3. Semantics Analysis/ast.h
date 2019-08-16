@@ -29,8 +29,8 @@
 // typedef struct AST_expr_tag    * AST_expr;
 // typedef struct AST_clause_tag  * AST_clause;
 
-                
-
+typedef struct AST_parameter_tag                * AST_parameter;              
+typedef struct AST_passvar_tag                  * AST_passvar;
 typedef struct AST_typedef_tag                  * AST_typedef;
 typedef struct AST_class_func_header_start_tag  * AST_class_func_header_start;
 typedef struct AST_func_header_start_tag        * AST_func_header_start;
@@ -258,7 +258,26 @@ typedef struct List_tag                 * List;  // TODO: Extract to library?
 //     AST_pattern pattern;
 //     AST_expr expr;
 //     int lineno;
+//
 // };
+
+struct AST_parameter_tag{
+    Type typename;
+    AST_passvar passvar;
+    int lineno;
+};
+
+struct AST_passvar_tag{
+    enum{
+        PASSVAR_variable,
+        PASSVAR_ref
+    } kind;
+    union{
+        AST_variabledef variabledef;
+        Type ref;
+    }u;
+    int lineno;
+};
 
 struct AST_typedef_tag{
     Identifier id;
@@ -325,6 +344,9 @@ struct List_tag{
     List next;
 };
 
+AST_parameter ast_parameter(Type typename, AST_passvar passvar);
+AST_passvar ast_passvar_variable(AST_variabledef variable);
+AST_passvar ast_passvar_ref(Identifier id);
 AST_typedef ast_typedef(Identifier id, Type typename, Type list, Type array);
 AST_class_func_header_start ast_class_func_header_start(Identifier id, Identifier class, Type typename, Type list);
 AST_func_header_start ast_func_header_start(Identifier id, Type typename, Type list);

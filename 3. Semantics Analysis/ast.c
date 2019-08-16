@@ -6,6 +6,31 @@ extern int lineno;
 /* ---------------------------------------------------------------------
    --------------------- Υλοποίηση συναρτήσεων -------------------------
    --------------------------------------------------------------------- */
+
+AST_parameter ast_parameter(Type typename, AST_passvar passvar){
+    AST_parameter result = new(sizeof(*result));
+    result->typename = typename;
+    result->passvar = passvar;
+    result->lineno = lineno;
+    return result;    
+}
+
+AST_passvar ast_passvar_variable(AST_variabledef variable){
+    AST_passvar result = new(sizeof(*result));
+    result->kind = PASSVAR_variable;
+    result->u.variabledef = variable;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_passvar ast_passvar_ref(Identifier id){
+    AST_passvar result = new(sizeof(*result));
+    result->kind = PASSVAR_ref;
+    result->u.ref = type_ref(type_id(id));
+    result->lineno = lineno;
+    return result;
+}
+
 AST_typedef ast_typedef(Identifier id, Type typename, Type list, Type array){
     AST_typedef result = new(sizeof(*result));
     result->id = id;
@@ -87,6 +112,9 @@ AST_constant ast_constant_sconst(char* r) {
     result->lineno = lineno;
     return result;
 }
+
+
+
 
 
 List list_add(List list, void *data){

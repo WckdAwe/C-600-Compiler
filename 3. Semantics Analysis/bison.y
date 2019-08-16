@@ -36,12 +36,14 @@ extern char *yytext;
     Identifier identifier;
 
     Type type;
+    List list;
 
     AST_constant constant;
     AST_variabledef variabledef;
     AST_func_header_start func_header_start;
     AST_class_func_header_start class_func_header_start;
     AST_typedef typedef_dcl;
+    AST_passvar passvar;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -118,13 +120,16 @@ extern char *yytext;
 
 %type <intval> decltype // As booleans
 
+%type <passvar> pass_variabledef
 %type <typedef_dcl> typedef_declaration
 %type <class_func_header_start> class_func_header_start
 %type <func_header_start> func_header_start
 %type <variabledef> variabledef
 %type <constant> constant 
 %type <type> typename standard_type dim dims listspec pass_list_dims
-%type <identifier> func_class
+%type <identifier> func_class parent
+%type <list> init_variabledefs parameter_list
+
 // expression init_value initializer
 // %type <type_t> standard_type typename dim dims pass_list_dims
 // %type <symbol_entry> init_variabledef variabledef pass_variabledef func_class typedef_declaration func_header_start class_func_header_start
@@ -251,8 +256,8 @@ class_declaration:        T_CLASS T_ID
                         ;
 class_body:               parent T_LBRACE members_methods T_RBRACE                          {}
                         ;
-parent:                   T_COLON T_ID                                                      {}  
-                        | %empty                                                            {} 
+parent:                   T_COLON T_ID                                                      {$$ = id_make($2);}  
+                        | %empty                                                            {$$ = NULL;} 
                         ;
 members_methods:          members_methods access member_or_method
                         | access member_or_method
@@ -308,8 +313,8 @@ union_declaration:        T_UNION T_ID union_body T_SEMI
                                                                                             // Should we handle globals differently? Probably.. but yeah..
 global_var_declaration:   typename init_variabledefs T_SEMI                                 {}
                         ;
-init_variabledefs:        init_variabledefs T_COMMA init_variabledef                         
-                        | init_variabledef                                                   
+init_variabledefs:        init_variabledefs T_COMMA init_variabledef                         // {$$ = list_add($1, $3);}
+                        | init_variabledef                                                   // {$$ = list_add(NULL, $1);}
                         ;
 init_variabledef:         variabledef initializer                                            // TODO: Update this to include initializer
                         ;
@@ -327,11 +332,11 @@ class_func_header_start:  typename listspec func_class T_ID                     
                         ;
 func_class:               T_ID T_METH                                                       {$$ = id_make($1);}
                         ;
-parameter_list:           parameter_list T_COMMA typename pass_variabledef                  {}
-                        | typename pass_variabledef                                         {}
+parameter_list:           parameter_list T_COMMA typename pass_variabledef                  {$$ = list_add($1, (void *) ast_parameter($3, $4));}
+                        | typename pass_variabledef                                         {$$ = list_add(NULL, (void *) ast_parameter($1, $2));}
                         ;
-pass_variabledef:         variabledef                                                       
-                        | T_REFER T_ID                                                      {}
+pass_variabledef:         variabledef                                                       {$$ = ast_passvar_variable($1);}
+                        | T_REFER T_ID                                                      {$$ = ast_passvar_ref(id_make($2));}
                         ;
 nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN                 
                         ;
@@ -343,8 +348,8 @@ decl_statements:          declarations statements
 declarations:             declarations decltype typename variabledefs T_SEMI                {}
                         | decltype typename variabledefs T_SEMI                             {}
                         ;
-decltype:                 T_STATIC                                                          
-                        | %empty                                                            
+decltype:                 T_STATIC                                                          {$$=1;} // Is static
+                        | %empty                                                            {$$=0;} // Is not static
                         ;
 statements:               statements statement
                         | statement
