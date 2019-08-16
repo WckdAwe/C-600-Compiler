@@ -29,6 +29,7 @@
 // typedef struct AST_expr_tag    * AST_expr;
 // typedef struct AST_clause_tag  * AST_clause;
 
+typedef struct AST_var_declaration_tag          * AST_var_declaration;
 typedef struct AST_parameter_tag                * AST_parameter;              
 typedef struct AST_passvar_tag                  * AST_passvar;
 typedef struct AST_typedef_tag                  * AST_typedef;
@@ -261,6 +262,12 @@ typedef struct List_tag                 * List;  // TODO: Extract to library?
 //
 // };
 
+struct AST_var_declaration_tag{
+    Type typename;
+    List list;
+    int lineno;
+};
+
 struct AST_parameter_tag{
     Type typename;
     AST_passvar passvar;
@@ -344,6 +351,7 @@ struct List_tag{
     List next;
 };
 
+AST_var_declaration ast_var_declaration(Type typename, List list);
 AST_parameter ast_parameter(Type typename, AST_passvar passvar);
 AST_passvar ast_passvar_variable(AST_variabledef variable);
 AST_passvar ast_passvar_ref(Identifier id);

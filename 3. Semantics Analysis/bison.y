@@ -44,6 +44,8 @@ extern char *yytext;
     AST_class_func_header_start class_func_header_start;
     AST_typedef typedef_dcl;
     AST_passvar passvar;
+    AST_var_declaration var_declaration;
+
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -110,7 +112,7 @@ extern char *yytext;
     
 %type <strval> program global_declaration global_declarations enum_declaration
 %type <strval> enum_body id_list variable general_expression assignment expression_list listexpression
-%type <strval> init_values class_declaration class_body members_methods access member_or_method member var_declaration
+%type <strval> init_values class_declaration class_body members_methods access member_or_method member
 %type <strval> anonymous_union union_body fields field method short_func_declaration short_par_func_header
 %type <strval> nopar_func_header union_declaration global_var_declaration func_declaration full_func_declaration 
 %type <strval> full_par_func_header nopar_class_func_header decl_statements declarations 
@@ -128,8 +130,8 @@ extern char *yytext;
 %type <constant> constant 
 %type <type> typename standard_type dim dims listspec pass_list_dims
 %type <identifier> func_class parent
-%type <list> init_variabledefs parameter_list
-
+%type <list> init_variabledefs variabledefs parameter_list
+%type<var_declaration> var_declaration
 // expression init_value initializer
 // %type <type_t> standard_type typename dim dims pass_list_dims
 // %type <symbol_entry> init_variabledef variabledef pass_variabledef func_class typedef_declaration func_header_start class_func_header_start
@@ -273,10 +275,10 @@ member_or_method:         member
 member:                   var_declaration
                         | anonymous_union
                         ;
-var_declaration:          typename variabledefs T_SEMI                                      {}                         
+var_declaration:          typename variabledefs T_SEMI                                      {$$ = ast_var_declaration($1, $2);}                         
                         ;
-variabledefs:             variabledefs T_COMMA variabledef                                  
-                        | variabledef                                                       
+variabledefs:             variabledefs T_COMMA variabledef                                  {$$ = list_add($1, (void*) $3);}
+                        | variabledef                                                       {$$ = list_add(NULL, (void *) $1);}
                         ;
 variabledef:              listspec T_ID dims                                                {$$ = ast_variabledef(id_make($2), $1, $3);}
                         ;

@@ -7,6 +7,14 @@ extern int lineno;
    --------------------- Υλοποίηση συναρτήσεων -------------------------
    --------------------------------------------------------------------- */
 
+AST_var_declaration ast_var_declaration(Type typename, List list){
+    AST_var_declaration result = new(sizeof(*result));
+    result->typename = typename;
+    result->list = list;
+    result->lineno = lineno;
+    return result;
+}
+
 AST_parameter ast_parameter(Type typename, AST_passvar passvar){
     AST_parameter result = new(sizeof(*result));
     result->typename = typename;
