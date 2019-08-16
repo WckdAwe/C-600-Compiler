@@ -3,6 +3,9 @@
 
 extern int lineno;
 
+/* ---------------------------------------------------------------------
+   --------------------- Υλοποίηση συναρτήσεων -------------------------
+   --------------------------------------------------------------------- */
 AST_typedef ast_typedef(Identifier id, Type typename, Type list, Type array){
     AST_typedef result = new(sizeof(*result));
     result->id = id;
@@ -117,6 +120,7 @@ void list_reverse(List *head){
     *head = prev;
 }
 
+AST_letdef ast_letdef(bool recFlag, AST_def_list l) {
 Type set_list_or_typename(Type list, Type typename){
     if(list){
         ASSERT(list->kind == TYPE_list);
@@ -176,6 +180,13 @@ void set_array_type(Type array, Type type){
 // 	return (AST_Node *) ast_node;
 // }
 
+AST_tdef ast_tdef(Identifier id, AST_constr_list l) {
+    AST_tdef result = new(sizeof(*result));
+    result->id = id;
+    result->list = l;
+    result->lineno = lineno;
+    return result;
+}
 
 // AST_Node *create_ast_while_node(AST_Node *condition, AST_Node *while_branch){
 	
@@ -189,6 +200,14 @@ void set_array_type(Type array, Type type){
 // 	return (AST_Node *) ast_node;
 // }
 
+AST_expr ast_expr_iconst(int r) {
+    AST_expr result = new(sizeof(*result));
+    result->kind = EXPR_iconst;
+    result->u.e_iconst.rep = r;
+    result->lineno = lineno;
+    result->type = type_int();
+    return result;
+}
 
 // AST_Node *create_ast_for_node(AST_Node *start_condition, AST_Node *end_condition, int increment, AST_Node *for_branch){
 // 	AST_FOR_Node *ast_node = emalloc(sizeof(AST_FOR_Node));
@@ -226,7 +245,23 @@ void set_array_type(Type array, Type type){
 	
 // }
 
+// AST_expr ast_expr_call(Identifier id, AST_expr_list l) {
+//     AST_expr result = new(sizeof(*result));
+//     result->kind = EXPR_call;
+//     result->u.e_call.id = id;
+//     result->u.e_call.list = l;
+//     result->lineno = lineno;
+//     return result;
+// }
 
+// AST_expr ast_expr_Call(Identifier id, AST_expr_list l) {
+//     AST_expr result = new(sizeof(*result));
+//     result->kind = EXPR_Call;
+//     result->u.e_Call.id = id;
+//     result->u.e_Call.list = l;
+//     result->lineno = lineno;
+//     return result;
+// }
 
 // AST_DECL_Node* new_single_decl_node(Type variable_type, char* id)
 // {   	AST_DECL_Node* new_node;
@@ -277,6 +312,13 @@ void set_array_type(Type array, Type type){
 // 	return new_node;	
 // }
 
+AST_pattern ast_pattern_fconst(float r) {
+    AST_pattern result = new(sizeof(*result));
+    result->kind = PATTERN_fconst;
+    result->u.p_fconst.rep = r;
+    result->lineno = lineno;
+    return result;
+}
 
 // //const data nodes
 // AST_Node* new_iconst_node(int data)
@@ -306,6 +348,14 @@ void set_array_type(Type array, Type type){
 
 // }
 
+AST_ltdef_list ast_ltdef_list_let(AST_letdef ld, AST_ltdef_list l) {
+    AST_ltdef_list result = new(sizeof(*result));
+    result->kind = LTDEF_let;
+    result->head.letdef = ld;
+    result->tail = l;
+    result->lineno = lineno;
+    return result;
+}
 
 // AST_Node* new_cconst_node(char data)
 // {
