@@ -19,16 +19,8 @@
 
 /* Δηλώσεις */
 
-// typedef struct AST_program_tag * AST_program;
-// typedef struct AST_letdef_tag  * AST_letdef;
-// typedef struct AST_typedef_tag * AST_typedef;
-// typedef struct AST_def_tag     * AST_def;
-// typedef struct AST_tdef_tag    * AST_tdef;
-// typedef struct AST_constr_tag  * AST_constr;
-// typedef struct AST_par_tag     * AST_par;
-// typedef struct AST_expr_tag    * AST_expr;
-// typedef struct AST_clause_tag  * AST_clause;
-
+typedef struct AST_member_tag                   * AST_member;
+typedef struct AST_declaration_tag              * AST_declaration;
 typedef struct AST_var_declaration_tag          * AST_var_declaration;
 typedef struct AST_parameter_tag                * AST_parameter;              
 typedef struct AST_passvar_tag                  * AST_passvar;
@@ -36,22 +28,10 @@ typedef struct AST_typedef_tag                  * AST_typedef;
 typedef struct AST_class_func_header_start_tag  * AST_class_func_header_start;
 typedef struct AST_func_header_start_tag        * AST_func_header_start;
 typedef struct AST_variabledef_tag              * AST_variabledef;
-// typedef struct AST_id_type_tag               * AST_id_type;
 typedef struct AST_casestatement_tag            * AST_casestatement;
 typedef struct AST_constant_tag                 * AST_constant;
 
 typedef struct List_tag                 * List;  // TODO: Extract to library?
-
-// typedef struct AST_ltdef_list_tag   * AST_ltdef_list;
-// typedef struct AST_def_list_tag     * AST_def_list;
-// typedef struct AST_tdef_list_tag    * AST_tdef_list;
-// typedef struct AST_constr_list_tag  * AST_constr_list;
-// typedef struct AST_par_list_tag     * AST_par_list;
-// typedef struct AST_expr_list_tag    * AST_expr_list;
-// typedef struct AST_clause_list_tag  * AST_clause_list;
-// typedef struct AST_pattern_list_tag * AST_pattern_list;
-
-// typedef struct Type_list_tag * Type_list;
 
 
 /* Απαριθμήσεις τελεστών */
@@ -262,6 +242,25 @@ typedef struct List_tag                 * List;  // TODO: Extract to library?
 //
 // };
 
+struct AST_member_tag{
+    enum{
+        MEMBER_VARIABLE,
+        MEMBER_ANON_UNION,
+    } kind;
+    union{
+        AST_var_declaration var_declaration;
+        List union_fields;
+    } u;
+    int lineno;
+};
+
+struct AST_declaration_tag{
+    Type typename;
+    int is_static;
+    List list;
+    int lineno;
+};
+
 struct AST_var_declaration_tag{
     Type typename;
     List list;
@@ -351,6 +350,10 @@ struct List_tag{
     List next;
 };
 
+
+AST_member ast_member_anon_union(List union_fields);
+AST_member ast_member_variable(AST_var_declaration var_declaration);
+AST_declaration ast_declaration(Type typename, int is_static, List list);
 AST_var_declaration ast_var_declaration(Type typename, List list);
 AST_parameter ast_parameter(Type typename, AST_passvar passvar);
 AST_passvar ast_passvar_variable(AST_variabledef variable);
@@ -371,5 +374,7 @@ void list_reverse(List *head);
 Type set_list_or_typename(Type list, Type typename);
 Type set_list_or_array_or_typename(Type list, Type array, Type typename);
 void set_array_type(Type array, Type type);
+Type get_parameter_type(Type typename, Type pass_list_dims);
+
 #endif
 

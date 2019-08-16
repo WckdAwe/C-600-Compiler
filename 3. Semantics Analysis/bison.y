@@ -45,7 +45,7 @@ extern char *yytext;
     AST_typedef typedef_dcl;
     AST_passvar passvar;
     AST_var_declaration var_declaration;
-
+    AST_member ast_member;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -113,9 +113,9 @@ extern char *yytext;
 %type <strval> program global_declaration global_declarations enum_declaration
 %type <strval> enum_body id_list variable general_expression assignment expression_list listexpression
 %type <strval> init_values class_declaration class_body members_methods access member_or_method member
-%type <strval> anonymous_union union_body fields field method short_func_declaration short_par_func_header
+%type <strval> short_func_declaration short_par_func_header
 %type <strval> nopar_func_header union_declaration global_var_declaration func_declaration full_func_declaration 
-%type <strval> full_par_func_header nopar_class_func_header decl_statements declarations 
+%type <strval> full_par_func_header nopar_class_func_header decl_statements
 %type <strval> statements statement expression_statement if_statement if_tail while_statement for_statement optexpr switch_statement switch_tail decl_cases 
 %type <strval> casestatements casestatement single_casestatement return_statement io_statement in_list in_item out_list out_item comp_statement main_function main_header
 
@@ -130,14 +130,9 @@ extern char *yytext;
 %type <constant> constant 
 %type <type> typename standard_type dim dims listspec pass_list_dims
 %type <identifier> func_class parent
-%type <list> init_variabledefs variabledefs parameter_list
-%type<var_declaration> var_declaration
-// expression init_value initializer
-// %type <type_t> standard_type typename dim dims pass_list_dims
-// %type <symbol_entry> init_variabledef variabledef pass_variabledef func_class typedef_declaration func_header_start class_func_header_start
-// %type <symbol_entry> parent
-// %type <entry_list> init_variabledefs variabledefs parameter_list
-// %type <type_list> parameter_types
+%type <list> init_variabledefs variabledefs parameter_list parameter_types declarations fields union_body anonymous_union
+%type <var_declaration> var_declaration field
+
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -272,26 +267,24 @@ access:                   T_PRIVATE T_COLON
 member_or_method:         member
                         | method
                         ;
-member:                   var_declaration
-                        | anonymous_union
+member:                   var_declaration                                                   {$$ = ast_member_variable($1);}
+                        | anonymous_union                                                   {$$ = ast_member_anon_union($1);}
                         ;
 var_declaration:          typename variabledefs T_SEMI                                      {$$ = ast_var_declaration($1, $2);}                         
                         ;
-variabledefs:             variabledefs T_COMMA variabledef                                  {$$ = list_add($1, (void*) $3);}
+variabledefs:             variabledefs T_COMMA variabledef                                  {$$ = list_add($1, (void *) $3);}
                         | variabledef                                                       {$$ = list_add(NULL, (void *) $1);}
                         ;
 variabledef:              listspec T_ID dims                                                {$$ = ast_variabledef(id_make($2), $1, $3);}
                         ;
-anonymous_union:          T_UNION                                                           {}
-                            union_body                                                      {}
-                            T_SEMI                                                  
+anonymous_union:          T_UNION union_body T_SEMI                                         {$$ = $2;}
                         ;
-union_body:               T_LBRACE fields T_RBRACE
+union_body:               T_LBRACE fields T_RBRACE                                          {$$ = $2;}
                         ;
-fields:                   fields field
-                        | field
+fields:                   fields field                                                      {$$ = list_add($1, (void *) $2);}
+                        | field                                                             {$$ = list_add(NULL, (void *) $1);}
                         ;
-field:                    var_declaration
+field:                    var_declaration                                                   {$$ = $1;}
                         ;
 method:                   short_func_declaration                                    
                         ;
@@ -302,8 +295,8 @@ short_par_func_header:    func_header_start T_LPAREN parameter_types T_RPAREN   
                         ;
 func_header_start:        typename listspec T_ID                                            {$$ = ast_func_header_start(id_make($3), $1, $2);}
                         ;
-parameter_types:          parameter_types T_COMMA typename pass_list_dims                   {}
-                        | typename pass_list_dims                                           {}
+parameter_types:          parameter_types T_COMMA typename pass_list_dims                   {$$ = list_add($1, (void *) get_parameter_type($3, $4));}
+                        | typename pass_list_dims                                           {$$ = list_add(NULL, (void *) get_parameter_type($1, $2));}
                         ;
 pass_list_dims:           T_REFER                                                           {$$ = type_ref(NULL);}
                         | listspec dims                                                     {$$ = $1 ? $1 : $2;}
@@ -315,8 +308,8 @@ union_declaration:        T_UNION T_ID union_body T_SEMI
                                                                                             // Should we handle globals differently? Probably.. but yeah..
 global_var_declaration:   typename init_variabledefs T_SEMI                                 {}
                         ;
-init_variabledefs:        init_variabledefs T_COMMA init_variabledef                         // {$$ = list_add($1, $3);}
-                        | init_variabledef                                                   // {$$ = list_add(NULL, $1);}
+init_variabledefs:        init_variabledefs T_COMMA init_variabledef                         // {$$ = list_add($1, (void *) $3);}
+                        | init_variabledef                                                   // {$$ = list_add(NULL, (void *) $1);}
                         ;
 init_variabledef:         variabledef initializer                                            // TODO: Update this to include initializer
                         ;
@@ -347,8 +340,8 @@ decl_statements:          declarations statements
                         | statements
                         | %empty {}
                         ;
-declarations:             declarations decltype typename variabledefs T_SEMI                {}
-                        | decltype typename variabledefs T_SEMI                             {}
+declarations:             declarations decltype typename variabledefs T_SEMI                {$$ = list_add($1, (void *) ast_declaration($3, $2, $4));}
+                        | decltype typename variabledefs T_SEMI                             {$$ = list_add(NULL, (void *) ast_declaration($2, $1, $3));}
                         ;
 decltype:                 T_STATIC                                                          {$$=1;} // Is static
                         | %empty                                                            {$$=0;} // Is not static
