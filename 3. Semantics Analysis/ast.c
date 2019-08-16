@@ -114,6 +114,8 @@ AST_variabledef ast_variabledef(Identifier id, Type list, Type array){
     result->lineno = lineno;
     return result;
 }
+                  
+
 
 Type ast_dims(Type outer_array, Type inner_array){ //  Good for semantic... Maybe need different for ast?
     if(outer_array){
@@ -252,3 +254,4 @@ Type get_parameter_type(Type typename, Type pass_list_dims){
         return pass_list_dims;
     }
 }
+
