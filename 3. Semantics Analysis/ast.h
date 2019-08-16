@@ -79,7 +79,7 @@ typedef enum {
 
 //First symbol of c++600
 typedef struct AST_program_tag{
-	AST_letdef_list list;
+	AST_ltdef_list list;
 	int lineno;
 };
 
@@ -88,6 +88,11 @@ struct AST_letdef_tag{
 	bool recFlag; //do we need this?
 	AST_def_list list;
 	int lineno;
+};
+
+struct AST_typedef_tag {
+    AST_tdef_list list;
+    int lineno;
 };
 
 struct AST_def_tag {
@@ -232,7 +237,7 @@ struct AST_expr_tag {
         } e_match;
         struct{
             Identifier name;            //Class Name
-            AST_expr_list members;          // ex: int i , char c
+            TypeList members;          // ex: int i , char c   
             AST_expr_list methods;      // doSomething()
         }e_class;
     } u;
@@ -275,6 +280,67 @@ struct AST_pattern_tag {
             AST_pattern_list list;
         } p_Id;
     } u;
+    int lineno;
+};
+
+struct AST_ltdef_list_tag {
+    enum {
+        LTDEF_let,
+        LTDEF_type
+    } kind;
+    union {
+        AST_letdef  letdef;
+        AST_typedef typdef;
+    } head;
+    AST_ltdef_list tail;
+    int lineno;
+};
+
+struct AST_def_list_tag {
+    AST_def head;
+    AST_def_list tail;
+    int lineno;
+};
+
+struct AST_tdef_list_tag {
+    AST_tdef head;
+    AST_tdef_list tail;
+    int lineno;
+};
+
+struct AST_constr_list_tag {
+    AST_constr head;
+    AST_constr_list tail;
+    int lineno;
+};
+
+struct AST_par_list_tag {
+    AST_par head;
+    AST_par_list tail;
+    int lineno;
+};
+
+struct AST_expr_list_tag {
+    AST_expr head;
+    AST_expr_list tail;
+    int lineno;
+};
+
+struct AST_clause_list_tag {
+    AST_clause head;
+    AST_clause_list tail;
+    int lineno;
+};
+
+struct AST_pattern_list_tag {
+    AST_pattern head;
+    AST_pattern_list tail;
+    int lineno;
+};
+
+struct Type_list_tag {
+    Type head;
+    Type_list tail;
     int lineno;
 };
 
