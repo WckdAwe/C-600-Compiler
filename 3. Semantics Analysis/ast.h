@@ -18,7 +18,8 @@
    --------------------------------------------------------------------- */
 
 /* Δηλώσεις */
-
+typedef struct AST_short_func_dcl_tag           * AST_short_func_dcl;
+typedef struct AST_union_dcl_tag                * AST_union_dcl;
 typedef struct AST_member_tag                   * AST_member;
 typedef struct AST_declaration_tag              * AST_declaration;
 typedef struct AST_var_declaration_tag          * AST_var_declaration;
@@ -242,6 +243,22 @@ typedef struct List_tag                 * List;  // TODO: Extract to library?
 //
 // };
 
+struct AST_short_func_dcl_tag{
+    enum{
+        SHORT_FUNC_NO_PARAMS,
+        SHORT_FUNC_WITH_PARAMS,
+    } kind;
+    AST_func_header_start func_header_start;
+    List parameters;
+    int lineno;
+};
+
+struct AST_union_dcl_tag{
+    Identifier id;
+    List union_fields;
+    int lineno;
+};
+
 struct AST_member_tag{
     enum{
         MEMBER_VARIABLE,
@@ -350,7 +367,8 @@ struct List_tag{
     List next;
 };
 
-
+AST_short_func_dcl ast_short_func_dcl(AST_func_header_start func_header_start, List parameters);
+AST_union_dcl ast_union_dcl(Identifier id, List union_fields);
 AST_member ast_member_anon_union(List union_fields);
 AST_member ast_member_variable(AST_var_declaration var_declaration);
 AST_declaration ast_declaration(Type typename, int is_static, List list);

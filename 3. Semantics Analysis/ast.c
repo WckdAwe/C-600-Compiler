@@ -7,6 +7,23 @@ extern int lineno;
    --------------------- Υλοποίηση συναρτήσεων -------------------------
    --------------------------------------------------------------------- */
 
+AST_short_func_dcl ast_short_func_dcl(AST_func_header_start func_header_start, List parameters){
+    AST_short_func_dcl result = new(sizeof(*result));
+    result->kind = parameters ? SHORT_FUNC_WITH_PARAMS : SHORT_FUNC_NO_PARAMS;
+    result->func_header_start = func_header_start;
+    result->parameters = parameters;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_union_dcl ast_union_dcl(Identifier id, List union_fields){
+    AST_union_dcl result = new(sizeof(*result));
+    result->id = id;
+    result->union_fields = union_fields;
+    result->lineno = lineno;
+    return result;
+}
+
 AST_member ast_member_anon_union(List union_fields){
     AST_member result = new(sizeof(*result));
     result->kind = MEMBER_ANON_UNION;

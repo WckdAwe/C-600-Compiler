@@ -45,7 +45,9 @@ extern char *yytext;
     AST_typedef typedef_dcl;
     AST_passvar passvar;
     AST_var_declaration var_declaration;
-    AST_member ast_member;
+    AST_member member;
+    AST_union_dcl union_dcl;
+    AST_short_func_dcl short_func_dcl;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -112,10 +114,9 @@ extern char *yytext;
     
 %type <strval> program global_declaration global_declarations enum_declaration
 %type <strval> enum_body id_list variable general_expression assignment expression_list listexpression
-%type <strval> init_values class_declaration class_body members_methods access member_or_method member
-%type <strval> short_func_declaration short_par_func_header
-%type <strval> nopar_func_header union_declaration global_var_declaration func_declaration full_func_declaration 
-%type <strval> full_par_func_header nopar_class_func_header decl_statements
+%type <strval> init_values class_declaration class_body members_methods access member_or_method
+%type <strval> global_var_declaration func_declaration full_func_declaration 
+%type <strval> full_par_func_header decl_statements
 %type <strval> statements statement expression_statement if_statement if_tail while_statement for_statement optexpr switch_statement switch_tail decl_cases 
 %type <strval> casestatements casestatement single_casestatement return_statement io_statement in_list in_item out_list out_item comp_statement main_function main_header
 
@@ -124,15 +125,17 @@ extern char *yytext;
 
 %type <passvar> pass_variabledef
 %type <typedef_dcl> typedef_declaration
-%type <class_func_header_start> class_func_header_start
-%type <func_header_start> func_header_start
+%type <class_func_header_start> class_func_header_start nopar_class_func_header
+%type <func_header_start> func_header_start nopar_func_header
 %type <variabledef> variabledef
 %type <constant> constant 
 %type <type> typename standard_type dim dims listspec pass_list_dims
 %type <identifier> func_class parent
 %type <list> init_variabledefs variabledefs parameter_list parameter_types declarations fields union_body anonymous_union
 %type <var_declaration> var_declaration field
-
+%type <member> member
+%type <union_dcl> union_declaration
+%type <short_func_dcl> short_func_declaration short_par_func_header
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -154,8 +157,7 @@ extern char *yytext;
 
 %%
 program:                                                                                    
-                        global_declarations main_function     
-                                                                                            
+                          global_declarations main_function     
                         ;
 global_declarations:      global_declarations global_declaration
                         | %empty {}
@@ -235,7 +237,7 @@ assignment:               variable T_ASSIGN assignment
                         | expression
                         ;
 expression_list:          general_expression
-                        | %empty                                                            {}
+                        | %empty                                                            {$$ = NULL;}
                         ;
 constant:                 T_CCONST                                                          {$$ = ast_constant_cconst($1);}
                         | T_ICONST                                                          {$$ = ast_constant_iconst($1);}
@@ -286,12 +288,12 @@ fields:                   fields field                                          
                         ;
 field:                    var_declaration                                                   {$$ = $1;}
                         ;
-method:                   short_func_declaration                                    
+method:                   short_func_declaration                                            {}
                         ;
-short_func_declaration:   short_par_func_header T_SEMI                                      
-                        | nopar_func_header T_SEMI                                          
+short_func_declaration:   short_par_func_header T_SEMI                                      {$$ = $1;}
+                        | nopar_func_header T_SEMI                                          {$$ = ast_short_func_dcl($1, NULL);}
                         ;
-short_par_func_header:    func_header_start T_LPAREN parameter_types T_RPAREN               {}
+short_par_func_header:    func_header_start T_LPAREN parameter_types T_RPAREN               {$$ = ast_short_func_dcl($1, $3);}
                         ;
 func_header_start:        typename listspec T_ID                                            {$$ = ast_func_header_start(id_make($3), $1, $2);}
                         ;
@@ -301,9 +303,9 @@ parameter_types:          parameter_types T_COMMA typename pass_list_dims       
 pass_list_dims:           T_REFER                                                           {$$ = type_ref(NULL);}
                         | listspec dims                                                     {$$ = $1 ? $1 : $2;}
                         ;
-nopar_func_header:        func_header_start T_LPAREN T_RPAREN                               
+nopar_func_header:        func_header_start T_LPAREN T_RPAREN                               {$$ = $1;}
                         ;
-union_declaration:        T_UNION T_ID union_body T_SEMI                                                          
+union_declaration:        T_UNION T_ID union_body T_SEMI                                    {$$ = ast_union_dcl(id_make($2), $3);}                     
                         ;
                                                                                             // Should we handle globals differently? Probably.. but yeah..
 global_var_declaration:   typename init_variabledefs T_SEMI                                 {}
@@ -333,7 +335,7 @@ parameter_list:           parameter_list T_COMMA typename pass_variabledef      
 pass_variabledef:         variabledef                                                       {$$ = ast_passvar_variable($1);}
                         | T_REFER T_ID                                                      {$$ = ast_passvar_ref(id_make($2));}
                         ;
-nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN                 
+nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN                         {$$ = $1;}
                         ;
 decl_statements:          declarations statements
                         | declarations
