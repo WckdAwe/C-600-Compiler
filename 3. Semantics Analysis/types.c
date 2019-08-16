@@ -52,7 +52,7 @@ Type type_ref (Type type)
    Type result = new(sizeof(struct Type_tag));
 
    result->kind = TYPE_ref;
-   result->u.t_ref.type = type;
+   result->u.t_ref.type = (type ? type : type_basic(TYPE_unknown));
    return result;
 }
 
@@ -62,7 +62,7 @@ Type type_array (int dim, Type type)
 
    	result->kind = TYPE_array;
    	result->u.t_array.dim = dim;
-   	result->u.t_array.type = type;
+   	result->u.t_array.type = (type ? type : type_basic(TYPE_unknown));
    	return result;
 }
 
@@ -70,8 +70,8 @@ Type type_list (Type type)
 {
    Type result = new(sizeof(struct Type_tag));
 
-   result->kind = TYPE_ref;
-   result->u.t_list.type = type;
+   result->kind = TYPE_list;
+   result->u.t_list.type = (type ? type : type_basic(TYPE_unknown));
    return result;
 }
 

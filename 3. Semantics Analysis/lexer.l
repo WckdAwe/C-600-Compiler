@@ -3,6 +3,7 @@
 #include <math.h>
 #include "c600.h"
 #include "symbol.h"
+#include "ast.h"
 #include "bison.h"
 
 
