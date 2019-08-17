@@ -326,15 +326,15 @@ init_variabledefs:        init_variabledefs T_COMMA init_variabledef            
                         ;
 init_variabledef:         variabledef initializer                                           {} // TODO: Update this to include initializer
                         ;
-func_declaration:         short_func_declaration                                            {}
-                        | full_func_declaration                                             {}
+func_declaration:         short_func_declaration                                              {$$ = $1;}
+                        | full_func_declaration                                               {$$ = $1;}   
                         ;
-full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE            {}
-                        | nopar_class_func_header T_LBRACE decl_statements T_RBRACE         {}
-                        | nopar_func_header T_LBRACE decl_statements T_RBRACE               {}
+full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE              {$$ = ast_full_func_dcl_full_par($1, $3);}    
+                        | nopar_class_func_header T_LBRACE decl_statements T_RBRACE           {$$ = ast_full_func_dcl_nopar_class($1, $3);}
+                        | nopar_func_header T_LBRACE decl_statements T_RBRACE                 {$$ = ast_full_func_dcl_nopar($1, $3);}
                         ;
-full_par_func_header:     class_func_header_start T_LPAREN parameter_list T_RPAREN          {}     
-                        | func_header_start T_LPAREN parameter_list T_RPAREN                {}
+full_par_func_header:     class_func_header_start T_LPAREN parameter_list T_RPAREN            {$$ = ast_full_par_func_header_class($1, $3);}
+                        | func_header_start T_LPAREN parameter_list T_RPAREN                  {$$ = ast_full_par_func_header_noclass($1, $3);}
                         ;
 class_func_header_start:  typename listspec func_class T_ID                                 {$$ = ast_class_func_header_start(id_make($4), $3, $1, $2);} 
                         ;
@@ -359,8 +359,8 @@ declarations:             declarations decltype typename variabledefs T_SEMI    
 decltype:                 T_STATIC                                                          {$$=1;} // Is static
                         | %empty                                                            {$$=0;} // Is not static
                         ;
-statements:               statements statement                                              {$$ = list_add($1, (void *) $2);}
-                        | statement                                                         {$$ = list_add(NULL, (void *) $1);}
+statements:               statements statement
+                        | statement
                         ;
 statement:                expression_statement                                              {$$ = $1;}
                         | if_statement                                                      {$$ = $1;}

@@ -200,6 +200,7 @@ AST_class_func_header_start ast_class_func_header_start(Identifier id, Identifie
     return result;
 }
 
+
 AST_func_header_start ast_func_header_start(Identifier id, Type typename, Type list){
     AST_func_header_start result = new(sizeof(*result));
     result->id = id;
@@ -267,8 +268,50 @@ AST_constant ast_constant_sconst(char* r) {
     return result;
 }
 
+AST_full_par_func_header ast_full_par_func_header_class(AST_class_func_header_start h, List p){
+    AST_full_par_func_header result = new(sizeof(*result));
+    result->kind = CLASS;
+    result->u.class.header = h;
+    result->parameters = p;
+    result->lineno = lineno;
+    return result;
+}
 
+AST_full_par_func_header ast_full_par_func_header_noclass(AST_func_header_start h, List p){
+     AST_full_par_func_header result = new(sizeof(*result));
+     result->kind = NOCLASS;
+     result->u.noclass.header = h;
+     result->parameters = p;
+     result->lineno = lineno;
+     return result;
+}
 
+AST_full_func_dcl ast_full_func_dcl_full_par(AST_full_par_func_header h, List s){
+    AST_full_func_dcl result = new(sizeof(*result));
+    result->kind = FULL_PAR;
+    result->u.full_par.header = h;
+    result->statements = s;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_full_func_dcl ast_full_func_dcl_nopar_class(AST_class_func_header_start h, List s){
+    AST_full_func_dcl result = new(sizeof(*result));
+    result->kind = NOPAR_CLASS;
+    result->u.nopar_class.header = h;
+    result->statements = s;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_full_func_dcl ast_full_func_dcl_nopar(AST_func_header_start h, List s){
+    AST_full_func_dcl result = new(sizeof(*result));
+    result->kind = NOPAR;
+    result->u.nopar.header = h;
+    result->statements = s;
+    result->lineno = lineno;
+    return result;
+}
 
 
 List list_add(List list, void *data){

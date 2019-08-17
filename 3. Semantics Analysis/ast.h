@@ -37,6 +37,9 @@ typedef struct AST_func_header_start_tag        * AST_func_header_start;
 typedef struct AST_variabledef_tag              * AST_variabledef;
 typedef struct AST_casestatement_tag            * AST_casestatement;
 typedef struct AST_constant_tag                 * AST_constant;
+typedef struct AST_full_par_func_header_tag     * AST_full_par_func_header;
+typedef struct AST_full_func_dcl_tag            * AST_full_func_dcl;
+
 
 typedef struct List_tag                 * List;  // TODO: Extract to library?
 
@@ -459,15 +462,52 @@ struct AST_constant_tag {
     int lineno;
 };
 
+struct AST_full_par_func_header_tag{
+    enum{
+        NOCLASS,
+        CLASS,
+    }kind;
+    union{
+        struct{
+            AST_func_header_start header;
+        } noclass;
+        struct{
+            AST_class_func_header_start header;
+        } class;
+    }u;
+    List parameters;
+    int lineno;
+};
+
+struct AST_full_func_dcl_tag{
+    enum{
+        NOPAR,
+        NOPAR_CLASS,
+        FULL_PAR,
+    }kind;
+    union{
+        struct{
+            AST_func_header_start header;
+        } nopar;
+        struct{
+            AST_class_func_header_start header;
+        } nopar_class;
+        struct{
+            AST_full_par_func_header header;
+        } full_par;
+    }u;
+    List statements;
+    int lineno;
+};
+
 struct List_tag{
     void *data;
     List next;
 };
 
-struct AST_full_func_declaration{
-    // ?
-    int lineno;
-};
+
+
+
 
 AST_stmt ast_io_stmt(int in_or_out, List list);
 AST_stmt ast_expr_stmt(AST_general_expr general_expr);
@@ -499,6 +539,11 @@ AST_constant ast_constant_iconst (int r);
 AST_constant ast_constant_fconst (float r);
 AST_constant ast_constant_cconst (char r);
 AST_constant ast_constant_sconst (char* r);
+AST_full_par_func_header ast_full_par_func_header_class(AST_class_func_header_start h, List p);
+AST_full_par_func_header ast_full_par_func_header_noclass(AST_func_header_start h, List p);
+AST_full_func_dcl ast_full_func_dcl_full_par();
+AST_full_func_dcl ast_full_func_dcl_nopar_class();
+AST_full_func_dcl ast_full_func_dcl_nopar();
 
 List list_add(List list, void *data);
 void list_reverse(List *head);
