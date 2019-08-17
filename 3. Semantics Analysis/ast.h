@@ -18,6 +18,7 @@
    --------------------------------------------------------------------- */
 
 /* Δηλώσεις */
+typedef struct AST_switch_tail_tag              * AST_switch_tail;
 typedef struct AST_decl_cases_tag               * AST_decl_cases;
 typedef struct AST_casestmt_tag                 * AST_casestmt;
 typedef struct AST_stmt_tag                     * AST_stmt;
@@ -37,7 +38,6 @@ typedef struct AST_typedef_tag                  * AST_typedef;
 typedef struct AST_class_func_header_start_tag  * AST_class_func_header_start;
 typedef struct AST_func_header_start_tag        * AST_func_header_start;
 typedef struct AST_variabledef_tag              * AST_variabledef;
-typedef struct AST_casestatement_tag            * AST_casestatement;
 typedef struct AST_constant_tag                 * AST_constant;
 typedef struct AST_full_par_func_header_tag     * AST_full_par_func_header;
 typedef struct AST_full_func_dcl_tag            * AST_full_func_dcl;
@@ -261,6 +261,20 @@ typedef enum access_enum{
 //     int lineno;
 //
 // };
+struct AST_switch_tail_tag{
+    enum{
+        SWITCH_SINGLE_CASE,
+        SWITCH_DECL_CASES,
+    } kind;
+    union{
+        struct{
+            AST_casestmt casestmt;
+        } single_case;
+        struct{
+            AST_decl_cases decl_cases;
+        } decl_cases;
+    } u;
+};
 
 struct AST_decl_cases_tag{
     enum{
@@ -319,7 +333,7 @@ struct AST_stmt_tag{
         STMT_RETURN,
         STMT_INPUT,
         STMT_OUTPUT,
-        STMT_CMP,
+        STMT_COMP,
         STMT_CONTINUE,
         STMT_BREAK,
         STMT_SEMI // ? | Nothing
@@ -345,7 +359,7 @@ struct AST_stmt_tag{
         } for_stmt;
         struct{
             AST_general_expr general_expr;
-            // switch_tail
+            AST_switch_tail switch_tail;
         } switch_stmt;
         struct{
             AST_general_expr optexpr;
@@ -353,6 +367,9 @@ struct AST_stmt_tag{
         struct{
             List io_list;
         } io_stmt;
+        struct{
+            AST_dcl_stmt dcl_stmt;
+        } comp_stmt;
     } u;
     int lineno;
 };
@@ -564,7 +581,10 @@ struct List_tag{
     List next;
 };
 
-
+AST_stmt ast_comp_stmt(AST_dcl_stmt dcl_stmt);
+AST_stmt ast_switch_stmt(AST_general_expr general_expr, AST_switch_tail switch_tail);
+AST_switch_tail ast_switch_tail_decl(AST_decl_cases decl_case);
+AST_switch_tail ast_switch_tail_single(AST_casestmt casestmt);
 AST_decl_cases ast_decl_cases_empty();
 AST_decl_cases ast_decl_cases_single(int type, List list);
 AST_decl_cases ast_decl_cases_both(List declarations, List casestmts);

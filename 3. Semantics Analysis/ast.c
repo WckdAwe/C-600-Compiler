@@ -7,6 +7,37 @@ extern int lineno;
    --------------------- Υλοποίηση συναρτήσεων -------------------------
    --------------------------------------------------------------------- */
 
+AST_stmt ast_comp_stmt(AST_dcl_stmt dcl_stmt){
+    AST_stmt result = new(sizeof(*result));
+    result->kind = STMT_COMP;
+    result->u.comp_stmt.dcl_stmt = dcl_stmt;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_stmt ast_switch_stmt(AST_general_expr general_expr, AST_switch_tail switch_tail){
+    AST_stmt result = new(sizeof(*result));
+    result->kind = STMT_SWITCH;
+    result->u.switch_stmt.general_expr = general_expr;
+    result->u.switch_stmt.switch_tail = switch_tail;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_switch_tail ast_switch_tail_decl(AST_decl_cases decl_case){
+    AST_switch_tail result = new(sizeof(*result));
+    result->kind = SWITCH_DECL_CASES;
+    result->u.decl_cases.decl_cases = decl_case;
+    return result;
+}
+
+AST_switch_tail ast_switch_tail_single(AST_casestmt casestmt){
+    AST_switch_tail result = new(sizeof(*result));
+    result->kind = SWITCH_SINGLE_CASE;
+    result->u.single_case.casestmt = casestmt; 
+    return result;
+}
+
 AST_decl_cases ast_decl_cases_empty(){
     AST_decl_cases result = new(sizeof(*result));
     result->kind = DC_EMPTY;

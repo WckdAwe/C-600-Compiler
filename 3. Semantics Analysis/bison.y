@@ -59,6 +59,7 @@ extern char *yytext;
     AST_full_par_func_header full_par_func_header;
     AST_full_func_dcl full_func_dcl;
     AST_dcl_stmt dcl_stmt;
+    AST_switch_tail switch_tail;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -127,8 +128,7 @@ extern char *yytext;
 %type <strval> enum_body id_list variable assignment expression_list listexpression
 %type <strval> init_values
 %type <strval> global_var_declaration func_declaration full_func_declaration 
-%type <strval> full_par_func_header decl_statements
-%type <strval> switch_tail
+%type <strval> full_par_func_header
 %type <strval> in_item main_function main_header
 
 %type <access> access
@@ -158,7 +158,8 @@ extern char *yytext;
 %type <stmt> comp_statement
 %type <casestmt> casestatement single_casestatement
 %type <decl_cases> decl_cases
-
+%type <switch_tail> switch_tail
+%type <dcl_stmt> decl_statements
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -374,10 +375,10 @@ statement:                expression_statement                                  
                         | if_statement                                                      {$$ = $1;}
                         | while_statement                                                   {$$ = $1;}
                         | for_statement                                                     {$$ = $1;}
-                        | switch_statement                                                  // {$$ = $1;}
+                        | switch_statement                                                  {$$ = $1;}
                         | return_statement                                                  {$$ = $1;}
                         | io_statement                                                      {$$ = $1;}
-                        | comp_statement                                                    {}
+                        | comp_statement                                                    {$$ = $1;}
                         | T_CONTINUE T_SEMI                                                 {$$ = ast_stmt_basic(STMT_CONTINUE);}
                         | T_BREAK T_SEMI                                                    {$$ = ast_stmt_basic(STMT_BREAK);}
                         | T_SEMI                                                            {$$ = ast_stmt_basic(STMT_SEMI);}
@@ -402,10 +403,10 @@ optexpr:                  general_expression                                    
                         | %empty                                                            {$$ = NULL;} 
                         ;
 switch_statement:         T_SWITCH T_LPAREN                                                 
-                            general_expression T_RPAREN switch_tail                         {} // {$$ = ast_switch_stmt($3, $5);}
+                            general_expression T_RPAREN switch_tail                         {$$ = ast_switch_stmt($3, $5);}
                         ;
-switch_tail:              T_LBRACE decl_cases T_RBRACE                                      {}
-                        | single_casestatement                                              {}
+switch_tail:              T_LBRACE decl_cases T_RBRACE                                      {$$ = ast_switch_tail_decl($2);}
+                        | single_casestatement                                              {$$ = ast_switch_tail_single($1);}
                         ;
 decl_cases:               declarations casestatements                                       {$$ = ast_decl_cases_both($1, $2);}
                         | declarations                                                      {$$ = ast_decl_cases_single(DC_DECLARATION_ONLY, $1);}    
@@ -437,7 +438,7 @@ out_list:                 out_list T_OUT out_item                               
                         ;
 out_item:                 general_expression                                                {$$ = $1;}
                         ;
-comp_statement:           T_LBRACE decl_statements T_RBRACE                                 {}
+comp_statement:           T_LBRACE decl_statements T_RBRACE                                 {$$ = ast_comp_stmt($2);}
                         ;
 main_function:            main_header T_LBRACE decl_statements T_RBRACE                     {}                               
                         ;
