@@ -348,9 +348,9 @@ pass_variabledef:         variabledef                                           
                         ;
 nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN                         {$$ = $1;}
                         ;
-decl_statements:          declarations statements
-                        | declarations
-                        | statements
+decl_statements:          declarations statements                                           {$$ = list_add($1, (void*)$2)}
+                        | declarations                                                      {$$ = list_add(NULL, (void *)$1) }  
+                        | statements                                                        {$$ = list_add(NULL, (void *)$1) }
                         | %empty                                                            {}
                         ;
 declarations:             declarations decltype typename variabledefs T_SEMI                {$$ = list_add($1, (void *) ast_declaration($3, $2, $4));}
@@ -359,8 +359,8 @@ declarations:             declarations decltype typename variabledefs T_SEMI    
 decltype:                 T_STATIC                                                          {$$=1;} // Is static
                         | %empty                                                            {$$=0;} // Is not static
                         ;
-statements:               statements statement
-                        | statement
+statements:               statements statement                                              {$$ = list_add($1, (void *)$2);}
+                        | statement                                                         {$$ = list_add(NULL, (void *)$1);}
                         ;
 statement:                expression_statement                                              {$$ = $1;}
                         | if_statement                                                      {$$ = $1;}
