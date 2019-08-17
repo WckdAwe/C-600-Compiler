@@ -35,6 +35,7 @@ extern char *yytext;
 
     Identifier identifier;
 
+    Access access;
     Type type;
     List list;
 
@@ -49,6 +50,8 @@ extern char *yytext;
     AST_union_dcl union_dcl;
     AST_short_func_dcl short_func_dcl;
     AST_member_or_method member_or_method;
+    AST_class_body class_body;
+    AST_class_dcl class_dcl;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -115,15 +118,17 @@ extern char *yytext;
     
 %type <strval> program global_declaration global_declarations enum_declaration
 %type <strval> enum_body id_list variable general_expression assignment expression_list listexpression
-%type <strval> init_values class_declaration class_body members_methods access
+%type <strval> init_values
 %type <strval> global_var_declaration func_declaration full_func_declaration 
 %type <strval> full_par_func_header decl_statements
 %type <strval> statements statement expression_statement if_statement if_tail while_statement for_statement optexpr switch_statement switch_tail decl_cases 
 %type <strval> casestatements casestatement single_casestatement return_statement io_statement in_list in_item out_list out_item comp_statement main_function main_header
 
-
+%type <access> access
 %type <intval> decltype // As booleans
 
+%type <class_dcl> class_declaration 
+%type <class_body> class_body
 %type <passvar> pass_variabledef
 %type <typedef_dcl> typedef_declaration
 %type <class_func_header_start> class_func_header_start nopar_class_func_header
@@ -132,7 +137,8 @@ extern char *yytext;
 %type <constant> constant 
 %type <type> typename standard_type dim dims listspec pass_list_dims
 %type <identifier> func_class parent
-%type <list> init_variabledefs variabledefs parameter_list parameter_types declarations fields union_body anonymous_union
+%type <list> init_variabledefs variabledefs parameter_list parameter_types
+%type <list> declarations fields union_body anonymous_union members_methods 
 %type <var_declaration> var_declaration field
 %type <member> member
 %type <union_dcl> union_declaration
@@ -159,17 +165,17 @@ extern char *yytext;
 
 %%
 program:                                                                                    
-                          global_declarations main_function     
+                          global_declarations main_function                                 {}
                         ;
-global_declarations:      global_declarations global_declaration
-                        | %empty {}
+global_declarations:      global_declarations global_declaration                            {}
+                        | %empty                                                            {}
                         ;
-global_declaration:       typedef_declaration                                               {}
-                        | enum_declaration
-                        | class_declaration
-                        | union_declaration
-                        | global_var_declaration
-                        | func_declaration
+global_declaration:       typedef_declaration                                               {} // Completed
+                        | enum_declaration                                                  {}
+                        | class_declaration                                                 {} // Completed
+                        | union_declaration                                                 {}
+                        | global_var_declaration                                            {}
+                        | func_declaration                                                  {}
                         ;
 typedef_declaration:      T_TYPEDEF typename listspec T_ID dims T_SEMI                      {$$ = ast_typedef(id_make($4), $2, $3, $5);}
                         ;
@@ -191,54 +197,52 @@ dims:                     dims dim                                              
 dim:                      T_LBRACK T_ICONST T_RBRACK                                        {$$ = type_array($2, NULL);}                                        
                         | T_LBRACK T_RBRACK                                                 {$$ = type_array(-1, NULL);} // -1 stands for "Dynamically Find/Allocate memory"
                         ;
-enum_declaration:         T_ENUM T_ID                                                       
-                            enum_body                                                       {}
-                            T_SEMI                                                  
+enum_declaration:         T_ENUM T_ID enum_body T_SEMI                                      {}
                         ;
-enum_body:                T_LBRACE id_list T_RBRACE
+enum_body:                T_LBRACE id_list T_RBRACE                                         {}
                         ;
 id_list:                  id_list T_COMMA T_ID initializer                                  {} 
                         | T_ID initializer                                                  {}
                         ;
-initializer:              T_ASSIGN init_value                                              
-                        | %empty                                                            
+initializer:              T_ASSIGN init_value                                               {}
+                        | %empty                                                            {}
                         ;
-init_value:               expression                                                        
-                        | T_LBRACE init_values T_RBRACE                                     
+init_value:               expression                                                        {}
+                        | T_LBRACE init_values T_RBRACE                                     {}
                         ;
-expression:               expression T_OROP expression
-                        | expression T_ANDOP expression
-                        | expression T_EQUOP expression
-                        | expression T_RELOP expression
-                        | expression T_ADDOP expression
-                        | expression T_MULOP expression
-                        | T_NOTOP expression
-                        | T_ADDOP expression %prec UMINUS
-                        | T_SIZEOP expression
-                        | T_INCDEC variable
-                        | variable T_INCDEC
-                        | variable
-                        | variable T_LPAREN expression_list T_RPAREN
-                        | T_LENGTH T_LPAREN general_expression T_RPAREN
-                        | T_NEW T_LPAREN general_expression T_RPAREN
-                        | constant                                                          {}                                                          
-                        | T_LPAREN general_expression T_RPAREN
-                        | T_LPAREN standard_type T_RPAREN
-                        | listexpression
+expression:               expression T_OROP expression                                      {}
+                        | expression T_ANDOP expression                                     {}
+                        | expression T_EQUOP expression                                     {}
+                        | expression T_RELOP expression                                     {}
+                        | expression T_ADDOP expression                                     {}
+                        | expression T_MULOP expression                                     {}
+                        | T_NOTOP expression                                                {}
+                        | T_ADDOP expression %prec UMINUS                                   {}
+                        | T_SIZEOP expression                                               {} // ^ 
+                        | T_INCDEC variable                                                 {}
+                        | variable T_INCDEC                                                 {}
+                        | variable                                                          {} // ^ Variable Required
+                        | variable T_LPAREN expression_list T_RPAREN                        {} 
+                        | T_LENGTH T_LPAREN general_expression T_RPAREN                     {}
+                        | T_NEW T_LPAREN general_expression T_RPAREN                        {}
+                        | constant                                                          {} // Complete                                                          
+                        | T_LPAREN general_expression T_RPAREN                              {}
+                        | T_LPAREN standard_type T_RPAREN                                   {} // Complete
+                        | listexpression                                                    {}
                         ;
-variable:                 variable T_LBRACK general_expression T_RBRACK
-                        | variable T_DOT T_ID                                               
-                        | T_LISTFUNC T_LPAREN general_expression T_RPAREN
-                        | decltype T_ID                                                     
-                        | T_THIS
+variable:                 variable T_LBRACK general_expression T_RBRACK                     {} 
+                        | variable T_DOT T_ID                                               {}                 
+                        | T_LISTFUNC T_LPAREN general_expression T_RPAREN                   {} 
+                        | decltype T_ID                                                     {}                 
+                        | T_THIS                                                            {}
                         ;
-general_expression:       general_expression T_COMMA general_expression
-                        | assignment
+general_expression:       general_expression T_COMMA general_expression                     {}
+                        | assignment                                                        {}
                         ;
-assignment:               variable T_ASSIGN assignment
-                        | expression
+assignment:               variable T_ASSIGN assignment                                      {}
+                        | expression                                                        {}
                         ;
-expression_list:          general_expression
+expression_list:          general_expression                                                {} // Abstract
                         | %empty                                                            {$$ = NULL;}
                         ;
 constant:                 T_CCONST                                                          {$$ = ast_constant_cconst($1);}
@@ -246,27 +250,25 @@ constant:                 T_CCONST                                              
                         | T_FCONST                                                          {$$ = ast_constant_fconst($1);}
                         | T_SCONST                                                          {$$ = ast_constant_sconst($1);}
                         ;
-listexpression:           T_LBRACK expression_list T_RBRACK
+listexpression:           T_LBRACK expression_list T_RBRACK                                 {}
                         ;
-init_values:              init_values T_COMMA init_value
-                        | init_value
+init_values:              init_values T_COMMA init_value                                    {}
+                        | init_value                                                        {}
                         ;
-class_declaration:        T_CLASS T_ID                                                      
-                            class_body                                              
-                            T_SEMI                                                          
+class_declaration:        T_CLASS T_ID class_body T_SEMI                                    {$$ = ast_class_dcl(id_make($2), $3);}     
                         ;
-class_body:               parent T_LBRACE members_methods T_RBRACE                          {}
+class_body:               parent T_LBRACE members_methods T_RBRACE                          {$$ = ast_class_body($1, $3);}
                         ;
 parent:                   T_COLON T_ID                                                      {$$ = id_make($2);}  
                         | %empty                                                            {$$ = NULL;} 
                         ;
-members_methods:          members_methods access member_or_method
-                        | access member_or_method
+members_methods:          members_methods access member_or_method                           {$$ = list_add($1, (void *) ast_members_method($2, $3));}
+                        | access member_or_method                                           {$$ = list_add(NULL, (void *) ast_members_method($1, $2));}
                         ;
-access:                   T_PRIVATE T_COLON 
-                        | T_PROTECTED T_COLON 
-                        | T_PUBLIC T_COLON 
-                        | %empty {}
+access:                   T_PRIVATE T_COLON                                                 {$$=ACCESS_PRIVATE;}
+                        | T_PROTECTED T_COLON                                               {$$=ACCESS_PROTECTED;}
+                        | T_PUBLIC T_COLON                                                  {$$=ACCESS_PUBLIC;}
+                        | %empty                                                            {$$=ACCESS_DEFAULT;}
                         ;
 member_or_method:         member                                                            {$$ = ast_mom_member($1);}
                         | method                                                            {$$ = ast_mom_method($1);}
@@ -312,20 +314,20 @@ union_declaration:        T_UNION T_ID union_body T_SEMI                        
                                                                                             // Should we handle globals differently? Probably.. but yeah..
 global_var_declaration:   typename init_variabledefs T_SEMI                                 {}
                         ;
-init_variabledefs:        init_variabledefs T_COMMA init_variabledef                         // {$$ = list_add($1, (void *) $3);}
-                        | init_variabledef                                                   // {$$ = list_add(NULL, (void *) $1);}
+init_variabledefs:        init_variabledefs T_COMMA init_variabledef                        {} // {$$ = list_add($1, (void *) $3);}
+                        | init_variabledef                                                  {} // {$$ = list_add(NULL, (void *) $1);}
                         ;
-init_variabledef:         variabledef initializer                                            // TODO: Update this to include initializer
+init_variabledef:         variabledef initializer                                           {} // TODO: Update this to include initializer
                         ;
-func_declaration:         short_func_declaration
-                        | full_func_declaration
+func_declaration:         short_func_declaration                                            {}
+                        | full_func_declaration                                             {}
                         ;
-full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE            
-                        | nopar_class_func_header T_LBRACE decl_statements T_RBRACE         
-                        | nopar_func_header T_LBRACE decl_statements T_RBRACE               
+full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE            {}
+                        | nopar_class_func_header T_LBRACE decl_statements T_RBRACE         {}
+                        | nopar_func_header T_LBRACE decl_statements T_RBRACE               {}
                         ;
-full_par_func_header:     class_func_header_start T_LPAREN parameter_list T_RPAREN          
-                        | func_header_start T_LPAREN parameter_list T_RPAREN                
+full_par_func_header:     class_func_header_start T_LPAREN parameter_list T_RPAREN          {}     
+                        | func_header_start T_LPAREN parameter_list T_RPAREN                {}
                         ;
 class_func_header_start:  typename listspec func_class T_ID                                 {$$ = ast_class_func_header_start(id_make($4), $3, $1, $2);} 
                         ;
@@ -342,7 +344,7 @@ nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN             
 decl_statements:          declarations statements
                         | declarations
                         | statements
-                        | %empty {}
+                        | %empty                                                            {}
                         ;
 declarations:             declarations decltype typename variabledefs T_SEMI                {$$ = list_add($1, (void *) ast_declaration($3, $2, $4));}
                         | decltype typename variabledefs T_SEMI                             {$$ = list_add(NULL, (void *) ast_declaration($2, $1, $3));}
@@ -350,82 +352,80 @@ declarations:             declarations decltype typename variabledefs T_SEMI    
 decltype:                 T_STATIC                                                          {$$=1;} // Is static
                         | %empty                                                            {$$=0;} // Is not static
                         ;
-statements:               statements statement
-                        | statement
+statements:               statements statement                                              {}
+                        | statement                                                         {}
                         ;
-statement:                expression_statement
-                        | if_statement
-                        | while_statement
-                        | for_statement
-                        | switch_statement
-                        | return_statement
-                        | io_statement
-                        | comp_statement
-                        | T_CONTINUE T_SEMI
-                        | T_BREAK T_SEMI
-                        | T_SEMI
+statement:                expression_statement                                              {}
+                        | if_statement                                                      {}
+                        | while_statement                                                   {}
+                        | for_statement                                                     {}
+                        | switch_statement                                                  {}
+                        | return_statement                                                  {}
+                        | io_statement                                                      {}
+                        | comp_statement                                                    {}
+                        | T_CONTINUE T_SEMI                                                 {}
+                        | T_BREAK T_SEMI                                                    {}
+                        | T_SEMI                                                            {}
                         ;
-expression_statement:     general_expression T_SEMI
+expression_statement:     general_expression T_SEMI                                         {}
                         ;
 if_statement:             T_IF T_LPAREN                                                     
                             general_expression T_RPAREN statement                           
-                            if_tail
+                          if_tail                                                           {}
                         ;
 if_tail:                  T_ELSE                                                            
-                            statement                                                       
+                            statement                                                       {}
                         | %empty %prec LOWER_THAN_ELSE                                      {}
                         ;
 while_statement:          T_WHILE T_LPAREN                                                   
-                            general_expression T_RPAREN statement                           
+                            general_expression T_RPAREN statement                           {}
                         ;
 for_statement:            T_FOR T_LPAREN                                                     
-                            optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement        
+                            optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement        {}
                         ;
-optexpr:                  general_expression
-                        | %empty {}
+optexpr:                  general_expression                                                {}
+                        | %empty                                                            {} 
                         ;
 switch_statement:         T_SWITCH T_LPAREN                                                 
-                            general_expression T_RPAREN switch_tail                         
+                            general_expression T_RPAREN switch_tail                         {}
                         ;
-switch_tail:              T_LBRACE decl_cases T_RBRACE
-                        | single_casestatement
+switch_tail:              T_LBRACE decl_cases T_RBRACE                                      {}
+                        | single_casestatement                                              {}
                         ;
-decl_cases:               declarations casestatements
-                        | declarations
-                        | casestatements
-                        | %empty {}
+decl_cases:               declarations casestatements                                       {}
+                        | declarations                                                      {}    
+                        | casestatements                                                    {}     
+                        | %empty                                                            {}
                         ;
-casestatements:           casestatements casestatement
-                        | casestatement
+casestatements:           casestatements casestatement                                      {}
+                        | casestatement                                                     {}
                         ;                                                                       
-casestatement:            T_CASE constant T_COLON casestatement                                 {}
-                        | T_CASE constant T_COLON statements                                    {}                  
-                        | T_DEFAULT T_COLON statements                                          {}            
+casestatement:            T_CASE constant T_COLON casestatement                             {}
+                        | T_CASE constant T_COLON statements                                {}                  
+                        | T_DEFAULT T_COLON statements                                      {}            
                         ;                                                                       
-single_casestatement:     T_CASE constant T_COLON single_casestatement                          
-                        | T_CASE constant T_COLON                                            
-                            statement                                                       
+single_casestatement:     T_CASE constant T_COLON single_casestatement                      {}    
+                        | T_CASE constant T_COLON statement                                 {}                                                       
                         ;
-return_statement:         T_RETURN optexpr T_SEMI
+return_statement:         T_RETURN optexpr T_SEMI                                           {}
                         ;
-io_statement:             T_CIN T_INP in_list T_SEMI
-                        | T_COUT T_OUT out_list T_SEMI
+io_statement:             T_CIN T_INP in_list T_SEMI                                        {}
+                        | T_COUT T_OUT out_list T_SEMI                                      {}
                         ;
-in_list:                  in_list T_INP in_item
-                        | in_item
+in_list:                  in_list T_INP in_item                                             {}
+                        | in_item                                                           {}
                         ;
-in_item:                  variable
+in_item:                  variable                                                          {}
                         ;
-out_list:                 out_list T_OUT out_item
-                        | out_item
+out_list:                 out_list T_OUT out_item                                           {}
+                        | out_item                                                          {}
                         ;
-out_item:                 general_expression
+out_item:                 general_expression                                                {}
                         ;
-comp_statement:           T_LBRACE decl_statements T_RBRACE
+comp_statement:           T_LBRACE decl_statements T_RBRACE                                 {}
                         ;
-main_function:            main_header                                                  
-                            T_LBRACE decl_statements T_RBRACE                               
+main_function:            main_header T_LBRACE decl_statements T_RBRACE                     {}                               
                         ;
-main_header:              T_INT T_MAIN T_LPAREN T_RPAREN                                    
+main_header:              T_INT T_MAIN T_LPAREN T_RPAREN                                    {}
                         ;
 %%

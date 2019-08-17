@@ -18,6 +18,9 @@
    --------------------------------------------------------------------- */
 
 /* Δηλώσεις */
+typedef struct AST_class_dcl_tag                * AST_class_dcl;
+typedef struct AST_class_body_tag               * AST_class_body;
+typedef struct AST_members_method_tag           * AST_members_method;
 typedef struct AST_member_or_method_tag         * AST_member_or_method;
 typedef struct AST_short_func_dcl_tag           * AST_short_func_dcl;
 typedef struct AST_union_dcl_tag                * AST_union_dcl;
@@ -35,6 +38,13 @@ typedef struct AST_constant_tag                 * AST_constant;
 
 typedef struct List_tag                 * List;  // TODO: Extract to library?
 
+
+typedef enum access_enum{
+    ACCESS_PRIVATE,
+    ACCESS_PROTECTED,
+    ACCESS_PUBLIC,
+    ACCESS_DEFAULT,
+} Access;
 
 /* Απαριθμήσεις τελεστών */
 
@@ -244,6 +254,24 @@ typedef struct List_tag                 * List;  // TODO: Extract to library?
 //
 // };
 
+struct AST_class_dcl_tag{
+    Identifier id;
+    AST_class_body class_body;
+    int lineno;
+};
+
+struct AST_class_body_tag{
+    Identifier parent;
+    List members_methods;
+    int lineno;
+};
+
+struct AST_members_method_tag{
+    Access access;
+    AST_member_or_method mom;
+    int lineno;
+};
+
 struct AST_member_or_method_tag{
     enum{
         MOM_MEMBER,
@@ -385,6 +413,9 @@ struct AST_full_func_declaration{
     int lineno;
 };
 
+AST_class_dcl ast_class_dcl(Identifier id, AST_class_body class_body);
+AST_class_body ast_class_body(Identifier parent, List members_methods);
+AST_members_method ast_members_method(Access access, AST_member_or_method mom);
 AST_member_or_method ast_mom_method(AST_short_func_dcl method);
 AST_member_or_method ast_mom_member(AST_member member);
 AST_short_func_dcl ast_short_func_dcl(AST_func_header_start func_header_start, List parameters);

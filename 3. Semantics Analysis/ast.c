@@ -6,6 +6,29 @@ extern int lineno;
 /* ---------------------------------------------------------------------
    --------------------- Υλοποίηση συναρτήσεων -------------------------
    --------------------------------------------------------------------- */
+AST_class_dcl ast_class_dcl(Identifier id, AST_class_body class_body){
+    AST_class_dcl result = new(sizeof(*result));
+    result->id = id;
+    result->class_body = class_body;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_class_body ast_class_body(Identifier parent, List members_methods){
+    AST_class_body result = new(sizeof(*result));
+    result->parent = parent;
+    result->members_methods = members_methods;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_members_method ast_members_method(Access access, AST_member_or_method mom){
+    AST_members_method result = new(sizeof(*result));
+    result->access = access;
+    result->mom = mom;
+    result->lineno = lineno;
+    return result;
+}
 
 AST_member_or_method ast_mom_method(AST_short_func_dcl method){
     AST_member_or_method result = new(sizeof(*result));
