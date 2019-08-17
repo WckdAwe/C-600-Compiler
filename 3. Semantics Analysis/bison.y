@@ -48,6 +48,7 @@ extern char *yytext;
     AST_member member;
     AST_union_dcl union_dcl;
     AST_short_func_dcl short_func_dcl;
+    AST_member_or_method member_or_method;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -114,7 +115,7 @@ extern char *yytext;
     
 %type <strval> program global_declaration global_declarations enum_declaration
 %type <strval> enum_body id_list variable general_expression assignment expression_list listexpression
-%type <strval> init_values class_declaration class_body members_methods access member_or_method
+%type <strval> init_values class_declaration class_body members_methods access
 %type <strval> global_var_declaration func_declaration full_func_declaration 
 %type <strval> full_par_func_header decl_statements
 %type <strval> statements statement expression_statement if_statement if_tail while_statement for_statement optexpr switch_statement switch_tail decl_cases 
@@ -135,7 +136,8 @@ extern char *yytext;
 %type <var_declaration> var_declaration field
 %type <member> member
 %type <union_dcl> union_declaration
-%type <short_func_dcl> short_func_declaration short_par_func_header
+%type <short_func_dcl> short_func_declaration short_par_func_header method
+%type <member_or_method> member_or_method
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -266,8 +268,8 @@ access:                   T_PRIVATE T_COLON
                         | T_PUBLIC T_COLON 
                         | %empty {}
                         ;
-member_or_method:         member
-                        | method
+member_or_method:         member                                                            {$$ = ast_mom_member($1);}
+                        | method                                                            {$$ = ast_mom_method($1);}
                         ;
 member:                   var_declaration                                                   {$$ = ast_member_variable($1);}
                         | anonymous_union                                                   {$$ = ast_member_anon_union($1);}
@@ -288,7 +290,7 @@ fields:                   fields field                                          
                         ;
 field:                    var_declaration                                                   {$$ = $1;}
                         ;
-method:                   short_func_declaration                                            {}
+method:                   short_func_declaration                                            {$$ = $1;}
                         ;
 short_func_declaration:   short_par_func_header T_SEMI                                      {$$ = $1;}
                         | nopar_func_header T_SEMI                                          {$$ = ast_short_func_dcl($1, NULL);}

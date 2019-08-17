@@ -18,6 +18,7 @@
    --------------------------------------------------------------------- */
 
 /* Δηλώσεις */
+typedef struct AST_member_or_method_tag         * AST_member_or_method;
 typedef struct AST_short_func_dcl_tag           * AST_short_func_dcl;
 typedef struct AST_union_dcl_tag                * AST_union_dcl;
 typedef struct AST_member_tag                   * AST_member;
@@ -243,6 +244,18 @@ typedef struct List_tag                 * List;  // TODO: Extract to library?
 //
 // };
 
+struct AST_member_or_method_tag{
+    enum{
+        MOM_MEMBER,
+        MOM_METHOD,
+    } kind;
+    union{
+        AST_short_func_dcl method;
+        AST_member member;
+    } u;
+    int lineno;
+};
+
 struct AST_short_func_dcl_tag{
     enum{
         SHORT_FUNC_NO_PARAMS,
@@ -372,6 +385,8 @@ struct AST_full_func_declaration{
     int lineno;
 };
 
+AST_member_or_method ast_mom_method(AST_short_func_dcl method);
+AST_member_or_method ast_mom_member(AST_member member);
 AST_short_func_dcl ast_short_func_dcl(AST_func_header_start func_header_start, List parameters);
 AST_union_dcl ast_union_dcl(Identifier id, List union_fields);
 AST_member ast_member_anon_union(List union_fields);

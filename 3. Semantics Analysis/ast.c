@@ -7,6 +7,22 @@ extern int lineno;
    --------------------- Υλοποίηση συναρτήσεων -------------------------
    --------------------------------------------------------------------- */
 
+AST_member_or_method ast_mom_method(AST_short_func_dcl method){
+    AST_member_or_method result = new(sizeof(*result));
+    result->kind = MOM_METHOD;
+    result->u.method = method;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_member_or_method ast_mom_member(AST_member member){
+    AST_member_or_method result = new(sizeof(*result));
+    result->kind = MOM_MEMBER;
+    result->u.member = member;
+    result->lineno = lineno;
+    return result;
+}
+
 AST_short_func_dcl ast_short_func_dcl(AST_func_header_start func_header_start, List parameters){
     AST_short_func_dcl result = new(sizeof(*result));
     result->kind = parameters ? SHORT_FUNC_WITH_PARAMS : SHORT_FUNC_NO_PARAMS;
