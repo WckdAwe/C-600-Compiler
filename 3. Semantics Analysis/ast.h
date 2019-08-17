@@ -559,7 +559,8 @@ struct AST_dcl_stmt_tag{
     enum{
         DCL_STMT_STMTS,
         DCL_STMT_DCLS,
-        DCL_STMT_STMTS_DCLS
+        DCL_STMT_STMTS_DCLS,
+        DCL_STMT_EMPTY
     } kind;
     union{
         struct{
@@ -630,6 +631,7 @@ AST_full_func_dcl ast_full_func_dcl_nopar(AST_func_header_start h, List s);
 AST_dcl_stmt ast_dcl_stmt_dcls_stmts(List d, List s);
 AST_dcl_stmt ast_dcl_stmt_dcls(List d);
 AST_dcl_stmt ast_dcl_stmt_stmts(List s);
+AST_dcl_stmt ast_dcl_stmt_empty();
 
 List list_add(List list, void *data);
 void list_reverse(List *head);

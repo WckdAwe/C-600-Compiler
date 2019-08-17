@@ -412,6 +412,13 @@ AST_dcl_stmt ast_dcl_stmt_dcls(List d){
     return result;
 }
 
+AST_dcl_stmt ast_dcl_stmt_empty(){
+    AST_dcl_stmt result = new(sizeof(*result));
+    result->kind = DCL_STMT_EMPTY;
+    result->lineno = lineno;
+    return result;
+}
+
 AST_dcl_stmt ast_dcl_stmt_stmts(List s){
     AST_dcl_stmt result = new(sizeof(*result));
     result->kind = DCL_STMT_STMTS;
