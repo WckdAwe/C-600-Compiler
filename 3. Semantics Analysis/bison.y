@@ -377,7 +377,7 @@ statement:                expression_statement                                  
                         | switch_statement                                                  // {$$ = $1;}
                         | return_statement                                                  {$$ = $1;}
                         | io_statement                                                      {$$ = $1;}
-                        | comp_statement                                                    {}
+                        | comp_statement                                                    {$$ = $1;}
                         | T_CONTINUE T_SEMI                                                 {$$ = ast_stmt_basic(STMT_CONTINUE);}
                         | T_BREAK T_SEMI                                                    {$$ = ast_stmt_basic(STMT_BREAK);}
                         | T_SEMI                                                            {$$ = ast_stmt_basic(STMT_SEMI);}
@@ -437,7 +437,7 @@ out_list:                 out_list T_OUT out_item                               
                         ;
 out_item:                 general_expression                                                {$$ = $1;}
                         ;
-comp_statement:           T_LBRACE decl_statements T_RBRACE                                 {}
+comp_statement:           T_LBRACE decl_statements T_RBRACE                                 {$$ = $2;}
                         ;
 main_function:            main_header T_LBRACE decl_statements T_RBRACE                     {}                               
                         ;
