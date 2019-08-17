@@ -56,6 +56,9 @@ extern char *yytext;
     AST_stmt stmt;
     AST_casestmt casestmt;
     AST_decl_cases decl_cases;
+    AST_full_par_func_header full_par_func_header;
+    AST_full_func_dcl full_func_dcl;
+    AST_dcl_stmt dcl_stmt;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -155,6 +158,7 @@ extern char *yytext;
 %type <stmt> comp_statement
 %type <casestmt> casestatement single_casestatement
 %type <decl_cases> decl_cases
+
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -352,9 +356,9 @@ pass_variabledef:         variabledef                                           
                         ;
 nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN                         {$$ = $1;}
                         ;
-decl_statements:          declarations statements                                           {$$ = list_add($1, (void *)$2);}
-                        | declarations                                                      {$$ = list_add(NULL, (void *)$1);}  
-                        | statements                                                        {$$ = list_add(NULL, (void *)$1);}
+decl_statements:          declarations statements                                           {$$ = ast_dcl_stmt_dcls_stmts($1, $2);}
+                        | declarations                                                      {$$ = ast_dcl_stmt_dcls($1);}
+                        | statements                                                        {$$ = ast_dcl_stmt_stmts($1);}
                         | %empty                                                            {}
                         ;
 declarations:             declarations decltype typename variabledefs T_SEMI                {$$ = list_add($1, (void *) ast_declaration($3, $2, $4));}

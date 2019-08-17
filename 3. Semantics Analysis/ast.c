@@ -321,8 +321,8 @@ AST_constant ast_constant_sconst(char* r) {
 
 AST_full_par_func_header ast_full_par_func_header_class(AST_class_func_header_start h, List p){
     AST_full_par_func_header result = new(sizeof(*result));
-    result->kind = CLASS;
-    result->u.class.header = h;
+    result->kind = FPF_CLASS;
+    result->u.fpf_class.header = h;
     result->parameters = p;
     result->lineno = lineno;
     return result;
@@ -330,8 +330,8 @@ AST_full_par_func_header ast_full_par_func_header_class(AST_class_func_header_st
 
 AST_full_par_func_header ast_full_par_func_header_noclass(AST_func_header_start h, List p){
      AST_full_par_func_header result = new(sizeof(*result));
-     result->kind = NOCLASS;
-     result->u.noclass.header = h;
+     result->kind = FPF_NOCLASS;
+     result->u.fpf_noclass.header = h;
      result->parameters = p;
      result->lineno = lineno;
      return result;
@@ -339,7 +339,7 @@ AST_full_par_func_header ast_full_par_func_header_noclass(AST_func_header_start 
 
 AST_full_func_dcl ast_full_func_dcl_full_par(AST_full_par_func_header h, List s){
     AST_full_func_dcl result = new(sizeof(*result));
-    result->kind = FULL_PAR;
+    result->kind = FFD_FULL_PAR;
     result->u.full_par.header = h;
     result->statements = s;
     result->lineno = lineno;
@@ -348,7 +348,7 @@ AST_full_func_dcl ast_full_func_dcl_full_par(AST_full_par_func_header h, List s)
 
 AST_full_func_dcl ast_full_func_dcl_nopar_class(AST_class_func_header_start h, List s){
     AST_full_func_dcl result = new(sizeof(*result));
-    result->kind = NOPAR_CLASS;
+    result->kind = FFD_NOPAR_CLASS;
     result->u.nopar_class.header = h;
     result->statements = s;
     result->lineno = lineno;
@@ -357,13 +357,37 @@ AST_full_func_dcl ast_full_func_dcl_nopar_class(AST_class_func_header_start h, L
 
 AST_full_func_dcl ast_full_func_dcl_nopar(AST_func_header_start h, List s){
     AST_full_func_dcl result = new(sizeof(*result));
-    result->kind = NOPAR;
+    result->kind = FFD_NOPAR;
     result->u.nopar.header = h;
     result->statements = s;
     result->lineno = lineno;
     return result;
 }
 
+AST_dcl_stmt ast_dcl_stmt_dcls_stmts(List s, List d){
+    AST_dcl_stmt result = new(sizeof(*result));
+    result->kind = DCL_STMT_STMTS_DCLS;
+    result->u.dcl_stmt_stmts_dcls.statements = s;
+    result->u.dcl_stmt_stmts_dcls.declares = d;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_dcl_stmt ast_dcl_stmt_dcls(List d){
+    AST_dcl_stmt result = new(sizeof(*result));
+    result->kind = DCL_STMT_DCLS;
+    result->u.dcl_stmt_dcls.declares = d;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_dcl_stmt ast_dcl_stmt_stmts(List s){
+    AST_dcl_stmt result = new(sizeof(*result));
+    result->kind = DCL_STMT_STMTS;
+    result->u.dcl_stmt_stmts.statements = s;
+    result->lineno = lineno;
+    return result;
+}
 
 List list_add(List list, void *data){
     List node = new(sizeof(struct List_tag));
