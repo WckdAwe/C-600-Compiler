@@ -54,6 +54,8 @@ extern char *yytext;
     AST_class_dcl class_dcl;
     AST_general_expr general_expr;
     AST_stmt stmt;
+    AST_casestmt casestmt;
+    AST_decl_cases decl_cases;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -123,8 +125,8 @@ extern char *yytext;
 %type <strval> init_values
 %type <strval> global_var_declaration func_declaration full_func_declaration 
 %type <strval> full_par_func_header decl_statements
-%type <strval> switch_tail decl_cases 
-%type <strval> casestatements casestatement single_casestatement in_item main_function main_header
+%type <strval> switch_tail
+%type <strval> in_item main_function main_header
 
 %type <access> access
 %type <intval> decltype // As booleans
@@ -141,7 +143,7 @@ extern char *yytext;
 %type <identifier> func_class parent
 %type <list> init_variabledefs variabledefs parameter_list parameter_types
 %type <list> declarations fields union_body anonymous_union members_methods 
-%type <list> statements in_list out_list 
+%type <list> statements in_list out_list casestatements 
 %type <var_declaration> var_declaration field
 %type <member> member
 %type <union_dcl> union_declaration
@@ -151,6 +153,8 @@ extern char *yytext;
 %type <stmt> statement if_tail expression_statement if_statement while_statement 
 %type <stmt> for_statement switch_statement return_statement io_statement 
 %type <stmt> comp_statement
+%type <casestmt> casestatement single_casestatement
+%type <decl_cases> decl_cases
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -399,20 +403,20 @@ switch_statement:         T_SWITCH T_LPAREN
 switch_tail:              T_LBRACE decl_cases T_RBRACE                                      {}
                         | single_casestatement                                              {}
                         ;
-decl_cases:               declarations casestatements                                       {}
-                        | declarations                                                      {}    
-                        | casestatements                                                    {}     
-                        | %empty                                                            {}
+decl_cases:               declarations casestatements                                       {$$ = ast_decl_cases_both($1, $2);}
+                        | declarations                                                      {$$ = ast_decl_cases_single(DC_DECLARATION_ONLY, $1);}    
+                        | casestatements                                                    {$$ = ast_decl_cases_single(DC_CASE_ONLY, $1);}     
+                        | %empty                                                            {$$ = ast_decl_cases_empty();}
                         ;
 casestatements:           casestatements casestatement                                      {$$ = list_add($1, (void *) $2);}
                         | casestatement                                                     {$$ = list_add(NULL, (void *) $1);}
                         ;                                                                       
-casestatement:            T_CASE constant T_COLON casestatement                             {}
-                        | T_CASE constant T_COLON statements                                {}                  
-                        | T_DEFAULT T_COLON statements                                      {}            
+casestatement:            T_CASE constant T_COLON casestatement                             {$$ = ast_casestmt_nextcase($2, $4);}
+                        | T_CASE constant T_COLON statements                                {$$ = ast_casestmt_multi($2, $4);}                  
+                        | T_DEFAULT T_COLON statements                                      {$$ = ast_casestmt_default($3);}            
                         ;                                                                       
-single_casestatement:     T_CASE constant T_COLON single_casestatement                      {}
-                        | T_CASE constant T_COLON statement                                 {}           
+single_casestatement:     T_CASE constant T_COLON single_casestatement                      {$$ = ast_casestmt_nextcase($2, $4);}
+                        | T_CASE constant T_COLON statement                                 {$$ = ast_casestmt_single($2, $4);}           
                         ;
 return_statement:         T_RETURN optexpr T_SEMI                                           {$$ = ast_return_stmt($2);}
                         ;

@@ -18,6 +18,8 @@
    --------------------------------------------------------------------- */
 
 /* Δηλώσεις */
+typedef struct AST_decl_cases_tag               * AST_decl_cases;
+typedef struct AST_casestmt_tag                 * AST_casestmt;
 typedef struct AST_stmt_tag                     * AST_stmt;
 typedef struct AST_general_expr_tag             * AST_general_expr;
 typedef struct AST_class_dcl_tag                * AST_class_dcl;
@@ -259,6 +261,52 @@ typedef enum access_enum{
 //
 // };
 
+struct AST_decl_cases_tag{
+    enum{
+        DC_BOTH,
+        DC_DECLARATION_ONLY,
+        DC_CASE_ONLY,
+        DC_EMPTY,
+    } kind;
+    union{
+        struct{
+            List declarations;
+            List casestmts;
+        } both;
+        struct{
+            List dcls_or_stmts;
+        } single;
+    } u;
+    int lineno;
+};
+
+struct AST_casestmt_tag{
+    enum{
+        CASE_DEFAULT,
+        CASE_NEXTCASE,
+        CASE_SINGLE_STMT,
+        CASE_MULTI_STMT,
+    } kind;
+    union{
+        struct{
+            List stmts;
+        } c_default;
+        struct{
+            AST_constant constant;
+            AST_casestmt casestmt;
+        } c_nextcase;
+        struct{
+            AST_constant constant;
+            AST_stmt stmt;
+        } c_single_stmt;
+        struct{
+            AST_constant constant;
+            List stmts;
+        } c_multi_stmt;
+    } u;
+    int lineno;
+};
+
 struct AST_stmt_tag{
     // ABSTRACT || FILL LATER
     enum{
@@ -427,17 +475,6 @@ struct AST_variabledef_tag{
     int lineno;
 };
 
-// struct AST_id_type_tag{
-//     Identifier id;
-//     Type type;
-// };
-
-struct AST_casestatement_tag {
-    AST_constant constant;
-    // AST_expr expr;
-    int lineno;
-};
-
 struct AST_constant_tag {
     enum {
         CONSTANT_iconst,
@@ -506,9 +543,13 @@ struct List_tag{
 };
 
 
-
-
-
+AST_decl_cases ast_decl_cases_empty();
+AST_decl_cases ast_decl_cases_single(int type, List list);
+AST_decl_cases ast_decl_cases_both(List declarations, List casestmts);
+AST_casestmt ast_casestmt_multi(AST_constant constant, List stmts);
+AST_casestmt ast_casestmt_single(AST_constant constant, AST_stmt stmt);
+AST_casestmt ast_casestmt_nextcase(AST_constant constant, AST_casestmt casestmt);
+AST_casestmt ast_casestmt_default(List stmts);
 AST_stmt ast_io_stmt(int in_or_out, List list);
 AST_stmt ast_expr_stmt(AST_general_expr general_expr);
 AST_stmt ast_return_stmt(AST_general_expr optexpr);

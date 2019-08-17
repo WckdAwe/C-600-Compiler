@@ -6,6 +6,66 @@ extern int lineno;
 /* ---------------------------------------------------------------------
    --------------------- Υλοποίηση συναρτήσεων -------------------------
    --------------------------------------------------------------------- */
+
+AST_decl_cases ast_decl_cases_empty(){
+    AST_decl_cases result = new(sizeof(*result));
+    result->kind = DC_EMPTY;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_decl_cases ast_decl_cases_single(int type, List list){
+    ASSERT(type == DC_CASE_ONLY || type == DC_DECLARATION_ONLY);
+    AST_decl_cases result = new(sizeof(*result));
+    result->kind = type;
+    result->u.single.dcls_or_stmts = list;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_decl_cases ast_decl_cases_both(List declarations, List casestmts){
+    AST_decl_cases result = new(sizeof(*result));
+    result->kind = DC_BOTH;
+    result->u.both.declarations = declarations;
+    result->u.both.casestmts = casestmts;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_casestmt ast_casestmt_multi(AST_constant constant, List stmts){
+    AST_casestmt result = new(sizeof(*result));
+    result->kind = CASE_MULTI_STMT;
+    result->u.c_multi_stmt.constant = constant;
+    result->u.c_multi_stmt.stmts = stmts;
+    return result;
+}
+
+AST_casestmt ast_casestmt_single(AST_constant constant, AST_stmt stmt){
+    AST_casestmt result = new(sizeof(*result));
+    result->kind = CASE_SINGLE_STMT;
+    result->u.c_single_stmt.constant = constant;
+    result->u.c_single_stmt.stmt = stmt;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_casestmt ast_casestmt_nextcase(AST_constant constant, AST_casestmt casestmt){
+    AST_casestmt result = new(sizeof(*result));
+    result->kind = CASE_NEXTCASE;
+    result->u.c_nextcase.constant = constant;
+    result->u.c_nextcase.casestmt = casestmt;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_casestmt ast_casestmt_default(List stmts){
+    AST_casestmt result = new(sizeof(*result));
+    result->kind = CASE_DEFAULT;
+    result->u.c_default.stmts = stmts;
+    result->lineno = lineno;
+    return result;
+}
+
 AST_stmt ast_io_stmt(int in_or_out, List list){
     ASSERT(in_or_out == STMT_INPUT || in_or_out == STMT_OUTPUT);
     AST_stmt result = new(sizeof(*result));
@@ -218,8 +278,6 @@ AST_variabledef ast_variabledef(Identifier id, Type list, Type array){
     return result;
 }
                   
-
-
 Type ast_dims(Type outer_array, Type inner_array){ //  Good for semantic... Maybe need different for ast?
     if(outer_array){
         outer_array->u.t_array.type = inner_array;
@@ -227,13 +285,6 @@ Type ast_dims(Type outer_array, Type inner_array){ //  Good for semantic... Mayb
     }else{
         return inner_array;
     }
-}
-
-AST_casestatement ast_casestatement(AST_constant constant){
-    AST_casestatement result = new(sizeof(*result));
-    result->constant = constant;
-    result->lineno = lineno;
-    return result;
 }
 
 AST_constant ast_constant_iconst(int r) {
