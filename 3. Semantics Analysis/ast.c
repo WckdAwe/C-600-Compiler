@@ -6,6 +6,69 @@ extern int lineno;
 /* ---------------------------------------------------------------------
    --------------------- Υλοποίηση συναρτήσεων -------------------------
    --------------------------------------------------------------------- */
+AST_stmt ast_io_stmt(int in_or_out, List list){
+    ASSERT(in_or_out == STMT_INPUT || in_or_out == STMT_OUTPUT);
+    AST_stmt result = new(sizeof(*result));
+    result->kind = in_or_out;
+    result->u.io_stmt.io_list = list;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_stmt ast_expr_stmt(AST_general_expr general_expr){
+    AST_stmt result = new(sizeof(*result));
+    result->kind = STMT_EXPR;
+    result->u.general_expr.general_expr = general_expr;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_stmt ast_return_stmt(AST_general_expr optexpr){
+    AST_stmt result = new(sizeof(*result));
+    result->kind = STMT_RETURN;
+    result->u.return_stmt.optexpr = optexpr;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_stmt ast_stmt_basic(int stmt_kind){
+    ASSERT(stmt_kind == STMT_CONTINUE || stmt_kind == STMT_BREAK || stmt_kind == STMT_SEMI);
+    AST_stmt result = new(sizeof(*result));
+    result->kind = stmt_kind;
+    result->lineno;
+    return result;
+}
+
+AST_stmt ast_for_stmt(AST_general_expr optexpr1, AST_general_expr optexpr2, AST_general_expr optexpr3, AST_stmt stmt){
+    AST_stmt result = new(sizeof(*result));
+    result->kind = STMT_FOR;
+    result->u.for_stmt.optexpr1 = optexpr1;
+    result->u.for_stmt.optexpr2 = optexpr2;
+    result->u.for_stmt.optexpr3 = optexpr3;
+    result->u.for_stmt.stmt = stmt;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_stmt ast_while_stmt(AST_general_expr general_expr, AST_stmt stmt){
+    AST_stmt result = new(sizeof(*result));
+    result->kind = STMT_WHILE;
+    result->u.while_stmt.general_expr = general_expr;
+    result->u.while_stmt.stmt = stmt;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_stmt ast_if_stmt(AST_general_expr general_expr, AST_stmt stmt, AST_stmt if_tail){
+    AST_stmt result = new(sizeof(*result));
+    result->kind = STMT_IF;
+    result->u.if_stmt.general_expr = general_expr;
+    result->u.if_stmt.stmt = stmt;
+    result->u.if_stmt.if_tail = if_tail;
+    result->lineno = lineno;
+    return result;
+}
+
 AST_class_dcl ast_class_dcl(Identifier id, AST_class_body class_body){
     AST_class_dcl result = new(sizeof(*result));
     result->id = id;

@@ -18,6 +18,8 @@
    --------------------------------------------------------------------- */
 
 /* Δηλώσεις */
+typedef struct AST_stmt_tag                     * AST_stmt;
+typedef struct AST_general_expr_tag             * AST_general_expr;
 typedef struct AST_class_dcl_tag                * AST_class_dcl;
 typedef struct AST_class_body_tag               * AST_class_body;
 typedef struct AST_members_method_tag           * AST_members_method;
@@ -254,6 +256,60 @@ typedef enum access_enum{
 //
 // };
 
+struct AST_stmt_tag{
+    // ABSTRACT || FILL LATER
+    enum{
+        STMT_EXPR,
+        STMT_IF,
+        STMT_WHILE,
+        STMT_FOR,
+        STMT_SWITCH,
+        STMT_RETURN,
+        STMT_INPUT,
+        STMT_OUTPUT,
+        STMT_CMP,
+        STMT_CONTINUE,
+        STMT_BREAK,
+        STMT_SEMI // ? | Nothing
+    } kind;
+    union{
+        struct{
+            AST_general_expr general_expr;
+        } general_expr;
+        struct{
+            AST_general_expr general_expr;
+            AST_stmt stmt;
+            AST_stmt if_tail;
+        } if_stmt;
+        struct{
+            AST_general_expr general_expr;
+            AST_stmt stmt;
+        } while_stmt;
+        struct{
+            AST_general_expr optexpr1; // Can be NULL
+            AST_general_expr optexpr2;
+            AST_general_expr optexpr3;
+            AST_stmt stmt;
+        } for_stmt;
+        struct{
+            AST_general_expr general_expr;
+            // switch_tail
+        } switch_stmt;
+        struct{
+            AST_general_expr optexpr;
+        } return_stmt;
+        struct{
+            List io_list;
+        } io_stmt;
+    } u;
+    int lineno;
+};
+
+struct AST_general_expr_tag{
+    // ABSTRACT || FILL LATER
+    int lineno;
+};
+
 struct AST_class_dcl_tag{
     Identifier id;
     AST_class_body class_body;
@@ -413,6 +469,13 @@ struct AST_full_func_declaration{
     int lineno;
 };
 
+AST_stmt ast_io_stmt(int in_or_out, List list);
+AST_stmt ast_expr_stmt(AST_general_expr general_expr);
+AST_stmt ast_return_stmt(AST_general_expr optexpr);
+AST_stmt ast_stmt_basic(int stmt_kind);
+AST_stmt ast_for_stmt(AST_general_expr optexpr1, AST_general_expr optexpr2, AST_general_expr optexpr3, AST_stmt stmt);
+AST_stmt ast_while_stmt(AST_general_expr general_expr, AST_stmt stmt);
+AST_stmt ast_if_stmt(AST_general_expr general_expr, AST_stmt stmt, AST_stmt if_tail);
 AST_class_dcl ast_class_dcl(Identifier id, AST_class_body class_body);
 AST_class_body ast_class_body(Identifier parent, List members_methods);
 AST_members_method ast_members_method(Access access, AST_member_or_method mom);

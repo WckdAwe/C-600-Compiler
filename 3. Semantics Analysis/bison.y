@@ -52,6 +52,8 @@ extern char *yytext;
     AST_member_or_method member_or_method;
     AST_class_body class_body;
     AST_class_dcl class_dcl;
+    AST_general_expr general_expr;
+    AST_stmt stmt;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -117,12 +119,12 @@ extern char *yytext;
 %token <strval>     T_EOF   0       "end of file"
     
 %type <strval> program global_declaration global_declarations enum_declaration
-%type <strval> enum_body id_list variable general_expression assignment expression_list listexpression
+%type <strval> enum_body id_list variable assignment expression_list listexpression
 %type <strval> init_values
 %type <strval> global_var_declaration func_declaration full_func_declaration 
 %type <strval> full_par_func_header decl_statements
-%type <strval> statements statement expression_statement if_statement if_tail while_statement for_statement optexpr switch_statement switch_tail decl_cases 
-%type <strval> casestatements casestatement single_casestatement return_statement io_statement in_list in_item out_list out_item comp_statement main_function main_header
+%type <strval> switch_tail decl_cases 
+%type <strval> casestatements casestatement single_casestatement in_item main_function main_header
 
 %type <access> access
 %type <intval> decltype // As booleans
@@ -139,11 +141,16 @@ extern char *yytext;
 %type <identifier> func_class parent
 %type <list> init_variabledefs variabledefs parameter_list parameter_types
 %type <list> declarations fields union_body anonymous_union members_methods 
+%type <list> statements in_list out_list 
 %type <var_declaration> var_declaration field
 %type <member> member
 %type <union_dcl> union_declaration
 %type <short_func_dcl> short_func_declaration short_par_func_header method
 %type <member_or_method> member_or_method
+%type <general_expr> general_expression optexpr out_item
+%type <stmt> statement if_tail expression_statement if_statement while_statement 
+%type <stmt> for_statement switch_statement return_statement io_statement 
+%type <stmt> comp_statement
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -352,42 +359,42 @@ declarations:             declarations decltype typename variabledefs T_SEMI    
 decltype:                 T_STATIC                                                          {$$=1;} // Is static
                         | %empty                                                            {$$=0;} // Is not static
                         ;
-statements:               statements statement                                              {}
-                        | statement                                                         {}
+statements:               statements statement                                              {$$ = list_add($1, (void *) $2);}
+                        | statement                                                         {$$ = list_add(NULL, (void *) $1);}
                         ;
-statement:                expression_statement                                              {}
-                        | if_statement                                                      {}
-                        | while_statement                                                   {}
-                        | for_statement                                                     {}
-                        | switch_statement                                                  {}
-                        | return_statement                                                  {}
-                        | io_statement                                                      {}
+statement:                expression_statement                                              {$$ = $1;}
+                        | if_statement                                                      {$$ = $1;}
+                        | while_statement                                                   {$$ = $1;}
+                        | for_statement                                                     {$$ = $1;}
+                        | switch_statement                                                  // {$$ = $1;}
+                        | return_statement                                                  {$$ = $1;}
+                        | io_statement                                                      {$$ = $1;}
                         | comp_statement                                                    {}
-                        | T_CONTINUE T_SEMI                                                 {}
-                        | T_BREAK T_SEMI                                                    {}
-                        | T_SEMI                                                            {}
+                        | T_CONTINUE T_SEMI                                                 {$$ = ast_stmt_basic(STMT_CONTINUE);}
+                        | T_BREAK T_SEMI                                                    {$$ = ast_stmt_basic(STMT_BREAK);}
+                        | T_SEMI                                                            {$$ = ast_stmt_basic(STMT_SEMI);}
                         ;
-expression_statement:     general_expression T_SEMI                                         {}
+expression_statement:     general_expression T_SEMI                                         {$$ = ast_expr_stmt($1);}
                         ;
 if_statement:             T_IF T_LPAREN                                                     
                             general_expression T_RPAREN statement                           
-                          if_tail                                                           {}
+                          if_tail                                                           {$$ = ast_if_stmt($3, $5, $6);}
                         ;
 if_tail:                  T_ELSE                                                            
-                            statement                                                       {}
-                        | %empty %prec LOWER_THAN_ELSE                                      {}
+                            statement                                                       {$$ = $2;}
+                        | %empty %prec LOWER_THAN_ELSE                                      {$$ = NULL;} // Careful with this null. ASSERT LATER?
                         ;
 while_statement:          T_WHILE T_LPAREN                                                   
-                            general_expression T_RPAREN statement                           {}
+                            general_expression T_RPAREN statement                           {$$ = ast_while_stmt($3, $5);}
                         ;
 for_statement:            T_FOR T_LPAREN                                                     
-                            optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement        {}
+                            optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement        {$$ = ast_for_stmt($3, $5, $7, $9);}
                         ;
-optexpr:                  general_expression                                                {}
-                        | %empty                                                            {} 
+optexpr:                  general_expression                                                {$$ = $1;}
+                        | %empty                                                            {$$ = NULL;} 
                         ;
 switch_statement:         T_SWITCH T_LPAREN                                                 
-                            general_expression T_RPAREN switch_tail                         {}
+                            general_expression T_RPAREN switch_tail                         {} // {$$ = ast_switch_stmt($3, $5);}
                         ;
 switch_tail:              T_LBRACE decl_cases T_RBRACE                                      {}
                         | single_casestatement                                              {}
@@ -397,30 +404,30 @@ decl_cases:               declarations casestatements                           
                         | casestatements                                                    {}     
                         | %empty                                                            {}
                         ;
-casestatements:           casestatements casestatement                                      {}
-                        | casestatement                                                     {}
+casestatements:           casestatements casestatement                                      {$$ = list_add($1, (void *) $2);}
+                        | casestatement                                                     {$$ = list_add(NULL, (void *) $1);}
                         ;                                                                       
 casestatement:            T_CASE constant T_COLON casestatement                             {}
                         | T_CASE constant T_COLON statements                                {}                  
                         | T_DEFAULT T_COLON statements                                      {}            
                         ;                                                                       
-single_casestatement:     T_CASE constant T_COLON single_casestatement                      {}    
-                        | T_CASE constant T_COLON statement                                 {}                                                       
+single_casestatement:     T_CASE constant T_COLON single_casestatement                      {}
+                        | T_CASE constant T_COLON statement                                 {}           
                         ;
-return_statement:         T_RETURN optexpr T_SEMI                                           {}
+return_statement:         T_RETURN optexpr T_SEMI                                           {$$ = ast_return_stmt($2);}
                         ;
-io_statement:             T_CIN T_INP in_list T_SEMI                                        {}
-                        | T_COUT T_OUT out_list T_SEMI                                      {}
+io_statement:             T_CIN T_INP in_list T_SEMI                                        {$$ = ast_io_stmt(STMT_INPUT, $3);}
+                        | T_COUT T_OUT out_list T_SEMI                                      {$$ = ast_io_stmt(STMT_OUTPUT, $3);}
                         ;
-in_list:                  in_list T_INP in_item                                             {}
-                        | in_item                                                           {}
+in_list:                  in_list T_INP in_item                                             {$$ = list_add($1, (void *) $3);}  
+                        | in_item                                                           {$$ = list_add(NULL, (void *) $1);}
                         ;
 in_item:                  variable                                                          {}
                         ;
-out_list:                 out_list T_OUT out_item                                           {}
-                        | out_item                                                          {}
+out_list:                 out_list T_OUT out_item                                           {$$ = list_add($1, (void *) $3);}  
+                        | out_item                                                          {$$ = list_add(NULL, (void *) $1);}
                         ;
-out_item:                 general_expression                                                {}
+out_item:                 general_expression                                                {$$ = $1;}
                         ;
 comp_statement:           T_LBRACE decl_statements T_RBRACE                                 {}
                         ;
