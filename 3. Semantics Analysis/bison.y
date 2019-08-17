@@ -348,7 +348,7 @@ pass_variabledef:         variabledef                                           
                         ;
 nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN                         {$$ = $1;}
                         ;
-decl_statements:          declarations statements                                           {$$ = list_add($1, (void*)$2);}
+decl_statements:          declarations statements                                           {$$ = list_add($1, (void *)$2);}
                         | declarations                                                      {$$ = list_add(NULL, (void *)$1);}  
                         | statements                                                        {$$ = list_add(NULL, (void *)$1);}
                         | %empty                                                            {}
