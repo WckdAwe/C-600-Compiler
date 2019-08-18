@@ -6,6 +6,105 @@ extern int lineno;
 /* ---------------------------------------------------------------------
    --------------------- Υλοποίηση συναρτήσεων -------------------------
    --------------------------------------------------------------------- */
+// AST_general_expr ast_general_expr(List list){
+//     AST_general_expr result = new(sizeof(*result));
+//     result->assignments = result->assignments; 
+//     result->lineno = lineno;
+//     return result;
+// }
+
+AST_general_expr ast_gexpr_gexpr(AST_general_expr general_expr1, AST_general_expr general_expr2){
+    AST_general_expr result = new(sizeof(*result));
+    result->kind = GEXPR_GEXPR;
+    result->u.gexpr.general_expr1 = general_expr1;
+    result->u.gexpr.general_expr2 = general_expr2;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_general_expr ast_gexpr_assignment(AST_assignment assignment){
+    AST_general_expr result = new(sizeof(*result));
+    result->kind = GEXPR_ASSIGNMENT;
+    result->u.assignment.assignment = assignment;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_variable ast_variable_list(AST_variable variable, AST_general_expr general_expr){
+    AST_variable result = new(sizeof(*result));
+    result->kind = VARIABLE_LIST;
+    result->u.list.variable = variable;
+    result->u.list.general_expr = general_expr;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_variable ast_variable_nested(AST_variable variable, Identifier id){
+    AST_variable result = new(sizeof(*result));
+    result->kind = VARIABLE_NESTED;
+    result->u.nested.id = id;
+    result->u.nested.variable = variable;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_variable ast_variable_listfunc(AST_general_expr general_expr){
+    AST_variable result = new(sizeof(*result));
+    result->kind = VARIABLE_LISTFUNC;
+    result->u.listfunc.general_expr = general_expr;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_variable ast_variable_definition(int is_static, Identifier id){
+    AST_variable result = new(sizeof(*result));
+    result->kind = VARIABLE_DEFINITION;
+    result->u.definition.is_static = is_static;
+    result->u.definition.id = id;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_variable ast_variable_this(){
+    AST_variable result = new(sizeof(*result));
+    result->kind = VARIABLE_THIS;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_assignment ast_assignment_var(AST_variable variable, AST_assignment assignment){
+    AST_assignment result = new(sizeof(*result));
+    result->kind = ASSIGNMENT_VAR;
+    result->u.var.variable = variable;
+    result->u.var.assignment = assignment;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_assignment ast_assignment_expr(AST_expr expr){
+    AST_assignment result = new(sizeof(*result));
+    result->kind = ASSIGNMENT_EXPR;
+    result->u.expr.expr = expr;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_global_var_declaration ast_global_var_declaration(Type typename, List init_variabledefs){
+    AST_global_var_declaration result = new(sizeof(*result));
+    result->typename = typename;
+    result->init_variabledefs = init_variabledefs;
+    result->lineno;
+    return result;
+}
+
+AST_init_variabledef ast_init_variabledef(AST_variabledef variabledef, AST_init_value init_value){
+    AST_init_variabledef result = new(sizeof(*result));
+    result->variabledef = variabledef;
+    result->init_value = init_value;
+    result->lineno = lineno;
+    return result;
+}
+
 AST_enum_dcl ast_enum_dcl(Identifier id, List id_list){
     AST_enum_dcl result = new(sizeof(*result));
     result->id = id;
