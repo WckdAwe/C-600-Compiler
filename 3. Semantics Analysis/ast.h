@@ -207,10 +207,6 @@ struct AST_init_value_tag{
     int lineno;
 };
 
-struct AST_expr_tag{
-    // Abstract...
-};
-
 struct AST_switch_tail_tag{
     enum{
         SWITCH_SINGLE_CASE,
