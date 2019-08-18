@@ -18,6 +18,10 @@
    --------------------------------------------------------------------- */
 
 /* Δηλώσεις */
+typedef struct AST_enum_dcl_tag                 * AST_enum_dcl;
+typedef struct AST_id_tag                       * AST_id;
+typedef struct AST_init_value_tag               * AST_init_value;
+typedef struct AST_expr_tag                     * AST_expr;
 typedef struct AST_switch_tail_tag              * AST_switch_tail;
 typedef struct AST_decl_cases_tag               * AST_decl_cases;
 typedef struct AST_casestmt_tag                 * AST_casestmt;
@@ -261,6 +265,41 @@ typedef enum access_enum{
 //     int lineno;
 //
 // };
+
+struct AST_enum_dcl_tag{
+    Identifier id;
+    List id_list;
+    int lineno;
+};
+
+
+struct AST_id_tag{
+    Identifier id;
+    AST_init_value init_value;
+    int lineno;
+};
+
+struct AST_init_value_tag{
+    enum{
+        INIT_SINGLE,
+        INIT_MULTI,
+        INIT_DEFAULT,
+    } kind;
+    union{
+        struct{
+            AST_expr expr;
+        } single;
+        struct{
+            List list_of_exprs;
+        } multi;
+    } u;
+    int lineno;
+};
+
+struct AST_expr_tag{
+    // Abstract...
+};
+
 struct AST_switch_tail_tag{
     enum{
         SWITCH_SINGLE_CASE,
@@ -323,7 +362,6 @@ struct AST_casestmt_tag{
 };
 
 struct AST_stmt_tag{
-    // ABSTRACT || FILL LATER
     enum{
         STMT_EXPR,
         STMT_IF,
@@ -582,6 +620,11 @@ struct List_tag{
     List next;
 };
 
+
+AST_id ast_id(Identifier id, AST_init_value init_value);
+AST_init_value ast_init_value_default();
+AST_init_value ast_init_value_multi(List list_of_exprs);
+AST_init_value ast_init_value_single(AST_expr expr);
 AST_stmt ast_comp_stmt(AST_dcl_stmt dcl_stmt);
 AST_stmt ast_switch_stmt(AST_general_expr general_expr, AST_switch_tail switch_tail);
 AST_switch_tail ast_switch_tail_decl(AST_decl_cases decl_case);

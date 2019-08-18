@@ -6,6 +6,44 @@ extern int lineno;
 /* ---------------------------------------------------------------------
    --------------------- Υλοποίηση συναρτήσεων -------------------------
    --------------------------------------------------------------------- */
+AST_enum_dcl ast_enum_dcl(Identifier id, List id_list){
+    AST_enum_dcl result = new(sizeof(*result));
+    result->id = id;
+    result->id_list = id_list;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_id ast_id(Identifier id, AST_init_value init_value){
+    AST_id result = new(sizeof(*result));
+    result->id = id;
+    result->init_value = init_value;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_init_value ast_init_value_default(){
+    AST_init_value result = new(sizeof(*result));
+    result->kind = INIT_DEFAULT;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_init_value ast_init_value_multi(List list_of_exprs){
+    AST_init_value result = new(sizeof(*result));
+    result->kind = INIT_MULTI;
+    result->u.multi.list_of_exprs = list_of_exprs;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_init_value ast_init_value_single(AST_expr expr){
+    AST_init_value result = new(sizeof(*result));
+    result->kind = INIT_SINGLE;
+    result->u.single.expr = expr;
+    result->lineno = lineno;
+    return result;
+}
 
 AST_stmt ast_comp_stmt(AST_dcl_stmt dcl_stmt){
     AST_stmt result = new(sizeof(*result));

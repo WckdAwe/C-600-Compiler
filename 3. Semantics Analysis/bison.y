@@ -60,6 +60,9 @@ extern char *yytext;
     AST_full_func_dcl full_func_dcl;
     AST_dcl_stmt dcl_stmt;
     AST_switch_tail switch_tail;
+    AST_init_value init_value;
+    AST_expr expr;
+    AST_enum_dcl enum_dcl;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -124,12 +127,10 @@ extern char *yytext;
 %token <strval>     T_LENGTH        "length"
 %token <strval>     T_EOF   0       "end of file"
     
-%type <strval> program global_declaration global_declarations enum_declaration
-%type <strval> enum_body id_list variable assignment expression_list listexpression
-%type <strval> init_values
-%type <strval> global_var_declaration func_declaration full_func_declaration 
-%type <strval> full_par_func_header
-%type <strval> in_item main_function main_header
+%type <strval> program global_declaration global_declarations
+%type <strval> variable assignment expression_list listexpression
+%type <strval> global_var_declaration func_declaration
+%type <strval> in_item main_header
 
 %type <access> access
 %type <intval> decltype // As booleans
@@ -146,7 +147,8 @@ extern char *yytext;
 %type <identifier> func_class parent
 %type <list> init_variabledefs variabledefs parameter_list parameter_types
 %type <list> declarations fields union_body anonymous_union members_methods 
-%type <list> statements in_list out_list casestatements 
+%type <list> statements in_list out_list casestatements init_values id_list 
+%type <list> enum_body
 %type <var_declaration> var_declaration field
 %type <member> member
 %type <union_dcl> union_declaration
@@ -159,7 +161,12 @@ extern char *yytext;
 %type <casestmt> casestatement single_casestatement
 %type <decl_cases> decl_cases
 %type <switch_tail> switch_tail
-%type <dcl_stmt> decl_statements
+%type <dcl_stmt> decl_statements main_function
+%type <init_value> init_value initializer
+%type <expr> expression
+%type <enum_dcl> enum_declaration 
+%type <full_func_dcl> full_func_declaration
+%type <full_par_func_header> full_par_func_header
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -187,11 +194,11 @@ global_declarations:      global_declarations global_declaration                
                         | %empty                                                            {}
                         ;
 global_declaration:       typedef_declaration                                               {} // Completed
-                        | enum_declaration                                                  {}
+                        | enum_declaration                                                  {} // Completed
                         | class_declaration                                                 {} // Completed
-                        | union_declaration                                                 {}
+                        | union_declaration                                                 {} // Completed
                         | global_var_declaration                                            {}
-                        | func_declaration                                                  {}
+                        | func_declaration                                                  {} // Completed
                         ;
 typedef_declaration:      T_TYPEDEF typename listspec T_ID dims T_SEMI                      {$$ = ast_typedef(id_make($4), $2, $3, $5);}
                         ;
@@ -213,18 +220,18 @@ dims:                     dims dim                                              
 dim:                      T_LBRACK T_ICONST T_RBRACK                                        {$$ = type_array($2, NULL);}                                        
                         | T_LBRACK T_RBRACK                                                 {$$ = type_array(-1, NULL);} // -1 stands for "Dynamically Find/Allocate memory"
                         ;
-enum_declaration:         T_ENUM T_ID enum_body T_SEMI                                      {}
+enum_declaration:         T_ENUM T_ID enum_body T_SEMI                                      {$$ = ast_enum_dcl(id_make($2), $3);}
                         ;
-enum_body:                T_LBRACE id_list T_RBRACE                                         {}
+enum_body:                T_LBRACE id_list T_RBRACE                                         {$$ = $2;}
                         ;
-id_list:                  id_list T_COMMA T_ID initializer                                  {} 
-                        | T_ID initializer                                                  {}
+id_list:                  id_list T_COMMA T_ID initializer                                  {$$ = list_add($1, ast_id(id_make($3), $4));} 
+                        | T_ID initializer                                                  {$$ = list_add(NULL, ast_id(id_make($1), $2));}
                         ;
-initializer:              T_ASSIGN init_value                                               {}
-                        | %empty                                                            {}
+initializer:              T_ASSIGN init_value                                               {$$ = $2;}
+                        | %empty                                                            {$$ = ast_init_value_default();}
                         ;
-init_value:               expression                                                        {}
-                        | T_LBRACE init_values T_RBRACE                                     {}
+init_value:               expression                                                        {$$ = ast_init_value_single($1);}
+                        | T_LBRACE init_values T_RBRACE                                     {$$ = ast_init_value_multi($2);}
                         ;
 expression:               expression T_OROP expression                                      {}
                         | expression T_ANDOP expression                                     {}
@@ -252,6 +259,7 @@ variable:                 variable T_LBRACK general_expression T_RBRACK         
                         | decltype T_ID                                                     {}                 
                         | T_THIS                                                            {}
                         ;
+// Might require change. Careful with this list!
 general_expression:       general_expression T_COMMA general_expression                     {}
                         | assignment                                                        {}
                         ;
@@ -266,10 +274,10 @@ constant:                 T_CCONST                                              
                         | T_FCONST                                                          {$$ = ast_constant_fconst($1);}
                         | T_SCONST                                                          {$$ = ast_constant_sconst($1);}
                         ;
-listexpression:           T_LBRACK expression_list T_RBRACK                                 {}
+listexpression:           T_LBRACK expression_list T_RBRACK                                 {$$ = $2;}
                         ;
-init_values:              init_values T_COMMA init_value                                    {}
-                        | init_value                                                        {}
+init_values:              init_values T_COMMA init_value                                    {$$ = list_add($1, (void * ) $3);}
+                        | init_value                                                        {$$ = list_add(NULL, $1);}
                         ;
 class_declaration:        T_CLASS T_ID class_body T_SEMI                                    {$$ = ast_class_dcl(id_make($2), $3);}     
                         ;
@@ -335,15 +343,15 @@ init_variabledefs:        init_variabledefs T_COMMA init_variabledef            
                         ;
 init_variabledef:         variabledef initializer                                           {} // TODO: Update this to include initializer
                         ;
-func_declaration:         short_func_declaration                                              {$$ = $1;}
-                        | full_func_declaration                                               {$$ = $1;}   
-                        ;
-full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE              {$$ = ast_full_func_dcl_full_par($1, $3);}    
-                        | nopar_class_func_header T_LBRACE decl_statements T_RBRACE           {$$ = ast_full_func_dcl_nopar_class($1, $3);}
-                        | nopar_func_header T_LBRACE decl_statements T_RBRACE                 {$$ = ast_full_func_dcl_nopar($1, $3);}
-                        ;
-full_par_func_header:     class_func_header_start T_LPAREN parameter_list T_RPAREN            {$$ = ast_full_par_func_header_class($1, $3);}
-                        | func_header_start T_LPAREN parameter_list T_RPAREN                  {$$ = ast_full_par_func_header_noclass($1, $3);}
+func_declaration:         short_func_declaration                                            {$$ = $1;}
+                        | full_func_declaration                                             {$$ = $1;}   
+                        ;                                                                   
+full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE            {$$ = ast_full_func_dcl_full_par($1, $3);}    
+                        | nopar_class_func_header T_LBRACE decl_statements T_RBRACE         {$$ = ast_full_func_dcl_nopar_class($1, $3);}
+                        | nopar_func_header T_LBRACE decl_statements T_RBRACE               {$$ = ast_full_func_dcl_nopar($1, $3);}
+                        ;                                                                     
+full_par_func_header:     class_func_header_start T_LPAREN parameter_list T_RPAREN          {$$ = ast_full_par_func_header_class($1, $3);}
+                        | func_header_start T_LPAREN parameter_list T_RPAREN                {$$ = ast_full_par_func_header_noclass($1, $3);}
                         ;
 class_func_header_start:  typename listspec func_class T_ID                                 {$$ = ast_class_func_header_start(id_make($4), $3, $1, $2);} 
                         ;
@@ -440,8 +448,8 @@ out_item:                 general_expression                                    
                         ;
 comp_statement:           T_LBRACE decl_statements T_RBRACE                                 {$$ = ast_comp_stmt($2);}
                         ;
-main_function:            main_header T_LBRACE decl_statements T_RBRACE                     {}                               
+main_function:            main_header T_LBRACE decl_statements T_RBRACE                     {$$ = $3;}                               
                         ;
-main_header:              T_INT T_MAIN T_LPAREN T_RPAREN                                    {}
+main_header:              T_INT T_MAIN T_LPAREN T_RPAREN                                    {} // Don't do anything here
                         ;
 %%
