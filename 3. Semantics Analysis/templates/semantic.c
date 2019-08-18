@@ -8,7 +8,7 @@
 
 #define SEMANTIC_ERROR(object, ...) \
     do { \
-        linecount = object->lineno; \
+        lineno = object->lineno; \
         error(__VA_ARGS__); \
     } while(0)
 
