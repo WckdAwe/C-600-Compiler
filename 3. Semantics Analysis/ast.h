@@ -67,6 +67,68 @@ typedef enum access_enum{
     ACCESS_DEFAULT,
 } Access;
 
+
+typedef enum {
+    ast_unop_plus,
+    ast_unop_minus,
+    ast_unop_not,
+    ast_unop_sizeop,
+} AST_unop;
+
+typedef enum {
+    ast_binop_plus,
+    ast_binop_minus,
+    ast_binop_times,
+    ast_binop_div,
+    ast_binop_mod,
+    ast_binop_eq,
+    ast_binop_ne,
+    ast_binop_lt,
+    ast_binop_gt,
+    ast_binop_le,
+    ast_binop_ge,
+    ast_binop_and,
+    ast_binop_or,
+    
+} AST_binop;
+
+
+
+
+struct AST_expr_tag {
+    enum {
+    
+        EXPR_unop,
+        EXPR_binop,
+       // EXPR_id,
+       // EXPR_Id,
+       
+    } kind;
+    union {
+        struct {
+            AST_unop op;
+            AST_expr expr;
+        } e_unop;
+        struct {
+            AST_expr expr1;
+            AST_binop op;
+            AST_expr expr2;
+        } e_binop;
+        struct {
+            Identifier id;
+        } e_id;
+        struct {
+            Identifier id;
+        } e_Id;
+    } u;
+    int lineno;
+    Type type;
+    SymbolEntry entry;
+}; 
+
+
+
+
 /* Απαριθμήσεις τελεστών */
 struct AST_variable_tag{
     // ABSTRACT
