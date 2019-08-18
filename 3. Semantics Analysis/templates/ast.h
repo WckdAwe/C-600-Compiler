@@ -257,10 +257,10 @@ struct AST_expr_tag {
             AST_clause_list list;
         } e_match;
         struct{
-            Identifier name;            //Class Name
+            Identifier name;                //Class Name
             AST_expr_list members;          // ex: int i , char c
-            AST_expr_list methods;      // doSomething()
-        }e_class;
+            AST_expr_list methods;          // doSomething()
+        }e_class;  
     } u;
     int lineno;
     Type type;
