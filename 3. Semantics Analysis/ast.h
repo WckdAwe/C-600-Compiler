@@ -51,6 +51,7 @@ typedef struct AST_full_par_func_header_tag     * AST_full_par_func_header;
 typedef struct AST_full_func_dcl_tag            * AST_full_func_dcl;
 typedef struct AST_dcl_stmt_tag                 * AST_dcl_stmt;
 typedef struct AST_func_dcl_tag                 * AST_func_dcl; 
+typedef struct AST_expr_list_tag                * AST_expr_list;
 
 typedef struct List_tag                 * List;  // TODO: Extract to library?
 
@@ -68,6 +69,8 @@ typedef enum {
     ast_unop_minus,
     ast_unop_not,
     ast_unop_sizeop,
+    ast_unop_inc,
+    ast_unop_dec,
 } AST_unop;
 
 typedef enum {
@@ -92,7 +95,8 @@ struct AST_expr_tag {
         EXPR_unop,
         EXPR_binop,
        // EXPR_id,
-       // EXPR_Id,       
+       // EXPR_Id,  
+        EXPR_call,     
     } kind;
     union {
         struct {
@@ -110,10 +114,15 @@ struct AST_expr_tag {
         struct {
             Identifier id;
         } e_Id;
+        struct {
+            Identifier id;
+            AST_expr_list list;
+        } e_call;
+ struct {
+            AST_general_expr expr;
+        } e_call_length;
     } u;
     int lineno;
-    Type type;
-    SymbolEntry entry;
 }; 
 
 
@@ -555,6 +564,12 @@ struct List_tag{
     List next;
 };
 
+struct AST_expr_list_tag {
+    AST_expr head;
+    AST_expr_list tail;
+    int lineno;
+};
+
 
 AST_general_expr ast_gexpr_gexpr(AST_general_expr general_expr1, AST_general_expr general_expr2);
 AST_general_expr ast_gexpr_assignment(AST_assignment assignment);
@@ -631,6 +646,8 @@ AST_expr ast_new_binop_REL_expr(AST_expr exp1 ,char *op ,AST_expr exp2);
 AST_expr ast_new_binop_ADD_expr(AST_expr exp1 ,char *op ,AST_expr exp2);
 AST_expr ast_new_binop_REL_expr(AST_expr exp1 ,char *op ,AST_expr exp2);
 AST_expr ast_unop_expr(char *op ,AST_expr expr);
+AST_expr ast_func_expr(AST_variable variable ,AST_expr_list expression_list);
+AST_expr ast_length_expr(AST_general_expr general_expression);
 
 List list_add(List list, void *data);
 void list_reverse(List *head);

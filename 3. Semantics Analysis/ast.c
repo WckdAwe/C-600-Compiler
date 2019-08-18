@@ -775,18 +775,39 @@ AST_expr ast_unop_expr(char *op ,AST_expr expr)
     else if(strcmp("+",op))
         result->u.e_unop.op = ast_unop_plus;
     else if(strcmp("-",op))
-        result->u.e_binop.op = ast_unop_minus;
+        result->u.e_unop.op = ast_unop_minus;
     else if(strcmp("sizeof",op))
         result->u.e_binop.op = ast_unop_sizeop;
+    else if (strcmp("++",op))
+        result->u.e_unop.op = ast_unop_inc;
+    else
+        result->u.e_unop.op = ast_unop_dec;
 
     result->lineno = lineno;
     return result;
     
 }
 
+AST_expr ast_func_expr(AST_variable variable ,AST_expr_list expression_list)
+{   AST_expr result = new(sizeof(result));
 
+    result->kind = EXPR_call;
+    result->u.e_call.id = variable->u.definition.id;
+    result->u.e_call.list = expression_list;
+    
+    result->lineno = lineno;
+    return result;
+}
 
+AST_expr ast_length_expr(AST_general_expr general_expression)
+{   AST_expr result = new(sizeof(result));
 
+    result->kind = EXPR_call;
+    result->u.e_call_length.expr = general_expression;
+    
+    result->lineno = lineno;
+    return result;  
+}
 
 
 

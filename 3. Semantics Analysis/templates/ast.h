@@ -169,7 +169,7 @@ struct AST_expr_tag {
         EXPR_binop,
         EXPR_id,
         EXPR_Id,
-        EXPR_call,
+       EXPR_call,
         EXPR_Call,
         EXPR_arrel,
         EXPR_dim,
@@ -265,7 +265,7 @@ struct AST_expr_tag {
     int lineno;
     Type type;
     SymbolEntry entry;
-};
+}; 
 
 struct AST_clause_tag {
     AST_pattern pattern;

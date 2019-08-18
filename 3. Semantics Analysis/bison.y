@@ -251,16 +251,16 @@ expression:               expression T_OROP expression                          
                         | T_NOTOP expression                                                {$$ = ast_unop_expr($1 ,$2);}
                         | T_ADDOP expression %prec UMINUS                                   {$$ = ast_unop_expr($1 ,$2);}
                         | T_SIZEOP expression                                               {$$ = ast_unop_expr($1 ,$2);}  
-                        | T_INCDEC variable                                                 {} //not sure about this.
-                        | variable T_INCDEC                                                 {}
-                        | variable                                                          {} // ^ Variable Required
-                        | variable T_LPAREN expression_list T_RPAREN                        {} 
-                        | T_LENGTH T_LPAREN general_expression T_RPAREN                     {}
-                        | T_NEW T_LPAREN general_expression T_RPAREN                        {}
-                        | constant                                                          {} // Complete                                                          
-                        | T_LPAREN general_expression T_RPAREN                              {}
-                        | T_LPAREN standard_type T_RPAREN                                   {} // Complete
-                        | listexpression                                                    {}
+                        | T_INCDEC variable                                                 {$$ = ast_unop_expr($1 ,NULL);} 
+                        | variable T_INCDEC                                                 {$$ = ast_unop_expr($2 ,NULL);} 
+                        | variable                                                          {$$ = $1;} 
+                        | variable T_LPAREN expression_list T_RPAREN                        {$$ = ast_func_expr($1 ,$3);} 
+                        | T_LENGTH T_LPAREN general_expression T_RPAREN                     {$$ = ast_length_expr($3);} 
+                        | T_NEW T_LPAREN general_expression T_RPAREN                        {$$ = ast_variable_list(NULL,$3);}
+                        | constant                                                          {$$ = $1;}                                                          
+                        | T_LPAREN general_expression T_RPAREN                              {$$ = $2;}
+                        | T_LPAREN standard_type T_RPAREN                                   {$$ = $2;} 
+                        | listexpression                                                    {$$ = $1;}
                         ;
 variable:                 variable T_LBRACK general_expression T_RBRACK                     {$$ = ast_variable_list($1, $3);} 
                         | variable T_DOT T_ID                                               {$$ = ast_variable_nested($1, id_make($3));}                 
@@ -275,7 +275,7 @@ general_expression:       general_expression T_COMMA general_expression         
 assignment:               variable T_ASSIGN assignment                                      {$$ = ast_assignment_var($1, $3);}
                         | expression                                                        {$$ = ast_assignment_expr($1);}
                         ;
-expression_list:          general_expression                                                {} // Abstract
+expression_list:          general_expression                                                {$$ = $1;} // Abstract
                         | %empty                                                            {$$ = NULL;}
                         ;
 constant:                 T_CCONST                                                          {$$ = ast_constant_cconst($1);}
