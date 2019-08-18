@@ -50,12 +50,7 @@ typedef struct AST_constant_tag                 * AST_constant;
 typedef struct AST_full_par_func_header_tag     * AST_full_par_func_header;
 typedef struct AST_full_func_dcl_tag            * AST_full_func_dcl;
 typedef struct AST_dcl_stmt_tag                 * AST_dcl_stmt;
-<<<<<<< Updated upstream
 typedef struct AST_func_dcl_tag                 * AST_func_dcl; 
-=======
-typedef struct AST_expr_tag                     * AST_expr;
-
->>>>>>> Stashed changes
 
 typedef struct List_tag                 * List;  // TODO: Extract to library?
 
@@ -92,17 +87,12 @@ typedef enum {
     
 } AST_binop;
 
-
-
-
 struct AST_expr_tag {
     enum {
-    
         EXPR_unop,
         EXPR_binop,
        // EXPR_id,
-       // EXPR_Id,
-       
+       // EXPR_Id,       
     } kind;
     union {
         struct {
@@ -125,8 +115,6 @@ struct AST_expr_tag {
     Type type;
     SymbolEntry entry;
 }; 
-
-
 
 
 /* Απαριθμήσεις τελεστών */
