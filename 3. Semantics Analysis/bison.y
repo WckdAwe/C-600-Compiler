@@ -64,7 +64,11 @@ extern char *yytext;
     AST_expr expr;
     AST_enum_dcl enum_dcl;
     AST_func_dcl func_dcl;
-}
+    AST_init_variabledef init_variabledef;
+    AST_global_var_declaration global_var_declaration;
+    AST_assignment assignment;
+    AST_variable variable;
+}  
 
 %token <intval>     T_ICONST        "integer constant"
 %token <floatval>   T_FCONST        "float constant"
@@ -129,8 +133,7 @@ extern char *yytext;
 %token <strval>     T_EOF   0       "end of file"
     
 %type <strval> program global_declaration global_declarations
-%type <strval> variable assignment expression_list listexpression
-%type <strval> global_var_declaration 
+%type <strval> expression_list listexpression
 %type <strval> in_item main_header
 
 %type <access> access
@@ -169,6 +172,10 @@ extern char *yytext;
 %type <full_func_dcl> full_func_declaration
 %type <full_par_func_header> full_par_func_header
 %type <func_dcl> func_declaration
+%type <init_variabledef> init_variabledef
+%type <global_var_declaration> global_var_declaration
+%type <assignment> assignment
+%type <variable> variable
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -199,7 +206,7 @@ global_declaration:       typedef_declaration                                   
                         | enum_declaration                                                  {} // Completed
                         | class_declaration                                                 {} // Completed
                         | union_declaration                                                 {} // Completed
-                        | global_var_declaration                                            {}
+                        | global_var_declaration                                            {} // Completed
                         | func_declaration                                                  {} // Completed
                         ;
 typedef_declaration:      T_TYPEDEF typename listspec T_ID dims T_SEMI                      {$$ = ast_typedef(id_make($4), $2, $3, $5);}
@@ -255,18 +262,18 @@ expression:               expression T_OROP expression                          
                         | T_LPAREN standard_type T_RPAREN                                   {} // Complete
                         | listexpression                                                    {}
                         ;
-variable:                 variable T_LBRACK general_expression T_RBRACK                     {} 
-                        | variable T_DOT T_ID                                               {}                 
-                        | T_LISTFUNC T_LPAREN general_expression T_RPAREN                   {} 
-                        | decltype T_ID                                                     {}                 
-                        | T_THIS                                                            {}
+variable:                 variable T_LBRACK general_expression T_RBRACK                     {$$ = ast_variable_list($1, $3);} 
+                        | variable T_DOT T_ID                                               {$$ = ast_variable_nested($1, id_make($3));}                 
+                        | T_LISTFUNC T_LPAREN general_expression T_RPAREN                   {$$ = ast_variable_listfunc($3);} 
+                        | decltype T_ID                                                     {$$ = ast_variable_definition($1, id_make($2));}                 
+                        | T_THIS                                                            {$$ = ast_variable_this();}
                         ;
 // Might require change. Careful with this list!
-general_expression:       general_expression T_COMMA general_expression                     {}
-                        | assignment                                                        {}
+general_expression:       general_expression T_COMMA general_expression                     {$$ = ast_gexpr_gexpr($1, $3);}
+                        | assignment                                                        {$$ = ast_gexpr_assignment($1);}
                         ;
-assignment:               variable T_ASSIGN assignment                                      {}
-                        | expression                                                        {}
+assignment:               variable T_ASSIGN assignment                                      {$$ = ast_assignment_var($1, $3);}
+                        | expression                                                        {$$ = ast_assignment_expr($1);}
                         ;
 expression_list:          general_expression                                                {} // Abstract
                         | %empty                                                            {$$ = NULL;}
@@ -337,13 +344,12 @@ nopar_func_header:        func_header_start T_LPAREN T_RPAREN                   
                         ;
 union_declaration:        T_UNION T_ID union_body T_SEMI                                    {$$ = ast_union_dcl(id_make($2), $3);}                     
                         ;
-                                                                                            // Should we handle globals differently? Probably.. but yeah..
-global_var_declaration:   typename init_variabledefs T_SEMI                                 {}
+global_var_declaration:   typename init_variabledefs T_SEMI                                 {$$ = ast_global_var_declaration($1, $2);}
                         ;
-init_variabledefs:        init_variabledefs T_COMMA init_variabledef                        {} // {$$ = list_add($1, (void *) $3);}
-                        | init_variabledef                                                  {} // {$$ = list_add(NULL, (void *) $1);}
+init_variabledefs:        init_variabledefs T_COMMA init_variabledef                        {$$ = list_add($1, (void *) $3);}
+                        | init_variabledef                                                  {$$ = list_add(NULL, (void *) $1);}
                         ;
-init_variabledef:         variabledef initializer                                           {} // TODO: Update this to include initializer
+init_variabledef:         variabledef initializer                                           {$$ = ast_init_variabledef($1, $2);} // TODO: Update this to include initializer
                         ;
 func_declaration:         short_func_declaration                                            {$$ = ast_func_dcl_short($1);}
                         | full_func_declaration                                             {$$ = ast_func_dcl_full($1);}   

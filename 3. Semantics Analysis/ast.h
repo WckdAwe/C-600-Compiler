@@ -18,6 +18,10 @@
    --------------------------------------------------------------------- */
 
 /* Δηλώσεις */
+typedef struct AST_variable_tag                 * AST_variable;
+typedef struct AST_assignment_tag               * AST_assignment;
+typedef struct AST_global_var_declaration_tag   * AST_global_var_declaration;
+typedef struct AST_init_variabledef_tag         * AST_init_variabledef;
 typedef struct AST_enum_dcl_tag                 * AST_enum_dcl;
 typedef struct AST_id_tag                       * AST_id;
 typedef struct AST_init_value_tag               * AST_init_value;
@@ -64,127 +68,64 @@ typedef enum access_enum{
 } Access;
 
 /* Απαριθμήσεις τελεστών */
-
-
-typedef enum{
-	ast_unop_plus,
-	ast_unop_minus,
-	ast_unop_not,
-	ast_unop_inc,
-	ast_unop_dec,	
-    ast_unop_sizeop
-}AST_unop;
-
-typedef enum {
-    ast_binop_plus,
-    ast_binop_minus,
-    ast_binop_times,
-    ast_binop_div,
-    ast_binop_mod,  
-    ast_binop_eq,
-    ast_binop_ne,
-    ast_binop_lt,
-    ast_binop_gt,
-    ast_binop_le,
-    ast_binop_ge,
-    ast_binop_pheq,   //do we need this ?
-    ast_binop_phne,	  //do we need this ?
-    ast_binop_and,
-    ast_binop_or,
-    
-} AST_binop;
-
-// //First symbol of c++600
-// typedef struct AST_program_tag{
-// 	AST_letdef_list list;
-// 	int lineno;
-// };
-
-// //change name ?
-// struct AST_letdef_tag{
-// 	bool recFlag; //do we need this?
-// 	AST_def_list list;
-// 	int lineno;
-// };
-
-// struct AST_def_tag {
-//     enum {
-//         DEF_normal,
-//         DEF_mutable,
-//     } kind;
-//     union {
-//         struct {
-//             Identifier id;
-//             AST_par_list list;
-//             Type type;
-//             AST_expr expr;
-//         } d_normal;
-//         struct {
-//             Identifier id;
-//             AST_expr_list list;
-//             Type type;
-//         } d_mutable; // change name?
-//     } u;
-//     int lineno;
-//     SymbolEntry entry;
-// };
-
-// struct AST_tdef_tag {
-//     Identifier id;
-//     AST_constr_list list;
-//     int lineno;
-// };
-
-// struct AST_constr_tag {
-//     Identifier id;
-//     Type_list list;
-//     int lineno;
-// };
-
-// struct AST_par_tag {
-//     Identifier id;
-//     Type type;
-//     int lineno;
-// };
-
-struct AST_expr_tag {
-    enum {
-       
-        EXPR_unop,
-        EXPR_binop,
-      //  EXPR_id,
-      //  EXPR_Id,
-        
+struct AST_variable_tag{
+    // ABSTRACT
+    enum{
+        VARIABLE_LIST,
+        VARIABLE_NESTED,
+        VARIABLE_LISTFUNC,
+        VARIABLE_DEFINITION,
+        VARIABLE_THIS,
     } kind;
-    union {
-        struct {
-            AST_unop op;
-            AST_expr expr;
-        } e_unop;
-        struct {
-            AST_expr expr1;
-            AST_binop op;
-            AST_expr expr2;
-        } e_binop;
-        struct {
+    union{
+        struct{
+            AST_variable variable;
+            AST_general_expr general_expr;
+        } list;
+        struct{
+            AST_variable variable;
             Identifier id;
-        } e_id;
+        } nested;
+        struct{
+            AST_general_expr general_expr;
+        } listfunc;
         struct {
+            int is_static;
             Identifier id;
-        } e_Id;
-        
+        } definition;
     } u;
+
     int lineno;
-    Type type;
-    SymbolEntry entry;
 };
 
-// struct AST_clause_tag {
-//     AST_pattern pattern;
-//     AST_expr expr;
-//     int lineno;
-//
-// };
+struct AST_assignment_tag{
+    enum{
+        ASSIGNMENT_EXPR,
+        ASSIGNMENT_VAR,
+    } kind;
+    union{
+        struct{
+            AST_expr expr;
+        } expr;
+        struct{
+            AST_variable variable;
+            AST_assignment assignment;
+        } var;
+    } u;
+    int lineno;
+};
+
+struct AST_global_var_declaration_tag{
+    Type typename;
+    List init_variabledefs;
+    int lineno;
+};
+
+struct AST_init_variabledef_tag{
+    AST_variabledef variabledef;
+    AST_init_value init_value;
+    int lineno;
+};
 
 struct AST_enum_dcl_tag{
     Identifier id;
@@ -333,7 +274,19 @@ struct AST_stmt_tag{
 };
 
 struct AST_general_expr_tag{
-    // ABSTRACT || FILL LATER
+    enum{
+        GEXPR_GEXPR,
+        GEXPR_ASSIGNMENT,
+    } kind;
+    union{
+        struct{
+            AST_general_expr general_expr1;
+            AST_general_expr general_expr2;
+        } gexpr;
+        struct{
+            AST_assignment assignment;
+        } assignment;
+    } u;
     int lineno;
 };
 
@@ -557,6 +510,18 @@ struct List_tag{
 };
 
 
+AST_general_expr ast_gexpr_gexpr(AST_general_expr general_expr1, AST_general_expr general_expr2);
+AST_general_expr ast_gexpr_assignment(AST_assignment assignment);
+AST_variable ast_variable_list(AST_variable variable, AST_general_expr general_expr);
+AST_variable ast_variable_nested(AST_variable variable, Identifier id);
+AST_variable ast_variable_listfunc(AST_general_expr general_expr);
+AST_variable ast_variable_definition(int is_static, Identifier id);
+AST_variable ast_variable_this();
+AST_assignment ast_assignment_var(AST_variable variable, AST_assignment assignment);
+AST_assignment ast_assignment_expr(AST_expr expr);
+AST_global_var_declaration ast_global_var_declaration(Type typename, List init_variabledefs);
+AST_init_variabledef ast_init_variabledef(AST_variabledef variabledef, AST_init_value init_value);
+AST_enum_dcl ast_enum_dcl(Identifier id, List id_list);
 AST_id ast_id(Identifier id, AST_init_value init_value);
 AST_init_value ast_init_value_default();
 AST_init_value ast_init_value_multi(List list_of_exprs);
