@@ -370,7 +370,7 @@ nopar_class_func_header:  class_func_header_start T_LPAREN T_RPAREN             
 decl_statements:          declarations statements                                           {$$ = ast_dcl_stmt_dcls_stmts($1, $2);}
                         | declarations                                                      {$$ = ast_dcl_stmt_dcls($1);}
                         | statements                                                        {$$ = ast_dcl_stmt_stmts($1);}
-                        | %empty                                                            {}
+                        | %empty                                                            {$$ = ast_dcl_stmt_empty();}
                         ;
 declarations:             declarations decltype typename variabledefs T_SEMI                {$$ = list_add($1, (void *) ast_declaration($3, $2, $4));}
                         | decltype typename variabledefs T_SEMI                             {$$ = list_add(NULL, (void *) ast_declaration($2, $1, $3));}
