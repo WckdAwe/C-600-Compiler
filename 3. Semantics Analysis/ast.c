@@ -566,3 +566,133 @@ Type get_parameter_type(Type typename, Type pass_list_dims){
     }
 }
 
+
+
+
+
+AST_expr ast_new_binop_AND_expr(AST_expr exp1 ,AST_expr exp2)
+{   AST_expr result = new(sizeof(result));
+
+    result->kind = EXPR_binop;
+    result->u.e_binop.expr1 = exp1;
+    result->u.e_binop.expr2 =exp2;
+    result->u.e_binop.op = ast_binop_and;
+    
+    result->lineno = lineno;
+    return result;
+}
+
+
+
+AST_expr ast_new_binop_OR_expr(AST_expr exp1 ,AST_expr exp2)
+{   AST_expr result = new(sizeof(result));
+
+    result->kind = EXPR_binop;
+    result->u.e_binop.expr1 = exp1;
+    result->u.e_binop.expr2 =exp2;
+    result->u.e_binop.op = ast_binop_or;
+    
+    result->lineno = lineno;
+    return result;
+}
+
+AST_expr ast_new_binop_EQ_expr(AST_expr exp1 ,AST_expr exp2)
+{   AST_expr result = new(sizeof(result));
+
+    result->kind = EXPR_binop;
+    result->u.e_binop.expr1 = exp1;
+    result->u.e_binop.expr2 =exp2;
+    result->u.e_binop.op = ast_binop_eq;
+   
+    result->lineno = lineno;
+    return result;
+}
+
+AST_expr ast_new_binop_REL_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
+{   AST_expr result = new(sizeof(result));
+
+    result->kind = EXPR_binop;
+    result->u.e_binop.expr1 = exp1;
+    result->u.e_binop.expr2 =exp2;
+
+    if(strcmp("<",op))
+        result->u.e_binop.op = ast_binop_lt;
+    else if(strcmp("<=",op))
+        result->u.e_binop.op = ast_binop_le;
+    else if(strcmp(">=",op))
+        result->u.e_binop.op = ast_binop_ge;
+    else
+        result->u.e_binop.op = ast_binop_gt;
+
+    result->lineno = lineno;
+    return result;
+}
+
+
+AST_expr ast_new_binop_ADD_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
+{   AST_expr result = new(sizeof(result));
+
+    result->kind = EXPR_binop;
+    result->u.e_binop.expr1 = exp1;
+    result->u.e_binop.expr2 =exp2;
+
+    if(strcmp("+",op))
+        result->u.e_binop.op = ast_binop_plus;
+    else
+        result->u.e_binop.op = ast_binop_minus;
+
+    result->lineno = lineno;
+    return result;
+}
+
+AST_expr ast_new_binop_REL_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
+{   AST_expr result = new(sizeof(result));
+
+    result->kind = EXPR_binop;
+    result->u.e_binop.expr1 = exp1;
+    result->u.e_binop.expr2 =exp2;
+
+    if(strcmp("*",op))
+        result->u.e_binop.op = ast_binop_times;
+    else if(strcmp("/",op))
+        result->u.e_binop.op = ast_binop_div;
+    else
+        result->u.e_binop.op = ast_binop_mod;
+
+    result->lineno = lineno;
+    return result;
+}
+
+AST_expr ast_unop_expr(char *op ,AST_expr expr)
+{
+    AST_expr result = new(sizeof(result));
+    
+    result->kind = EXPR_unop;
+    result->u.e_unop.expr= expr;
+
+
+    if(strcmp("!",op))
+        result->u.e_unop.op = ast_unop_not;
+    else if(strcmp("+",op))
+        result->u.e_unop.op = ast_unop_plus;
+    else if(strcmp("-",op))
+        result->u.e_binop.op = ast_unop_minus;
+    else if(strcmp("sizeof",op))
+        result->u.e_binop.op = ast_unop_sizeop;
+
+    result->lineno = lineno;
+    return result;
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+

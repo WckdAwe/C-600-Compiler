@@ -235,16 +235,16 @@ initializer:              T_ASSIGN init_value                                   
 init_value:               expression                                                        {$$ = ast_init_value_single($1);}
                         | T_LBRACE init_values T_RBRACE                                     {$$ = ast_init_value_multi($2);}
                         ;
-expression:               expression T_OROP expression                                      {}
-                        | expression T_ANDOP expression                                     {}
-                        | expression T_EQUOP expression                                     {}
-                        | expression T_RELOP expression                                     {}
-                        | expression T_ADDOP expression                                     {}
-                        | expression T_MULOP expression                                     {}
-                        | T_NOTOP expression                                                {}
-                        | T_ADDOP expression %prec UMINUS                                   {}
-                        | T_SIZEOP expression                                               {} // ^ 
-                        | T_INCDEC variable                                                 {}
+expression:               expression T_OROP expression                                      {$$ = ast_new_binop_OR_expr($1 ,$3);}
+                        | expression T_ANDOP expression                                     {$$ = ast_new_binop_AND_expr($1 ,$3);}
+                        | expression T_EQUOP expression                                     {$$ = ast_new_binop_EQ_expr($1 ,$3);}
+                        | expression T_RELOP expression                                     {$$ = ast_new_binop_REL_expr($1 ,$2 ,$3);}
+                        | expression T_ADDOP expression                                     {$$ = ast_new_binop_ADD_expr($1 ,$2 ,$3);}
+                        | expression T_MULOP expression                                     {$$ = ast_new_binop_MUL_expr($1 ,$2 ,$3);}
+                        | T_NOTOP expression                                                {$$ = ast_unop_expr($1 ,$2);}
+                        | T_ADDOP expression %prec UMINUS                                   {$$ = ast_unop_expr($1 ,$2);}
+                        | T_SIZEOP expression                                               {$$ = ast_unop_expr($1 ,$2);}  
+                        | T_INCDEC variable                                                 {} //not sure about this.
                         | variable T_INCDEC                                                 {}
                         | variable                                                          {} // ^ Variable Required
                         | variable T_LPAREN expression_list T_RPAREN                        {} 

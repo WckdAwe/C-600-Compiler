@@ -46,7 +46,12 @@ typedef struct AST_constant_tag                 * AST_constant;
 typedef struct AST_full_par_func_header_tag     * AST_full_par_func_header;
 typedef struct AST_full_func_dcl_tag            * AST_full_func_dcl;
 typedef struct AST_dcl_stmt_tag                 * AST_dcl_stmt;
+<<<<<<< Updated upstream
 typedef struct AST_func_dcl_tag                 * AST_func_dcl; 
+=======
+typedef struct AST_expr_tag                     * AST_expr;
+
+>>>>>>> Stashed changes
 
 typedef struct List_tag                 * List;  // TODO: Extract to library?
 
@@ -61,39 +66,33 @@ typedef enum access_enum{
 /* Απαριθμήσεις τελεστών */
 
 
-// typedef enum{
-// 	ast_unop_plus,
-// 	ast_unop_minus,
-// 	ast_unop_not,
-// 	ast_unop_inc,
-// 	ast_unop_dec,
-// 	//might need to add more	
-// }AST_unop;
+typedef enum{
+	ast_unop_plus,
+	ast_unop_minus,
+	ast_unop_not,
+	ast_unop_inc,
+	ast_unop_dec,	
+    ast_unop_sizeop
+}AST_unop;
 
-// typedef enum {
-//     ast_binop_plus,
-//     ast_binop_minus,
-//     ast_binop_times,
-//     ast_binop_div,
-//     ast_binop_fplus,
-//     ast_binop_fminus,
-//     ast_binop_ftimes,
-//     ast_binop_fdiv,
-//     ast_binop_mod,
-//     ast_binop_exp,
-//     ast_binop_eq,
-//     ast_binop_ne,
-//     ast_binop_lt,
-//     ast_binop_gt,
-//     ast_binop_le,
-//     ast_binop_ge,
-//     ast_binop_pheq,   //do we need this ?
-//     ast_binop_phne,	  //do we need this ?
-//     ast_binop_and,
-//     ast_binop_or,
-//     ast_binop_semicolon,
-//     ast_binop_assign
-// } AST_binop;
+typedef enum {
+    ast_binop_plus,
+    ast_binop_minus,
+    ast_binop_times,
+    ast_binop_div,
+    ast_binop_mod,  
+    ast_binop_eq,
+    ast_binop_ne,
+    ast_binop_lt,
+    ast_binop_gt,
+    ast_binop_le,
+    ast_binop_ge,
+    ast_binop_pheq,   //do we need this ?
+    ast_binop_phne,	  //do we need this ?
+    ast_binop_and,
+    ast_binop_or,
+    
+} AST_binop;
 
 // //First symbol of c++600
 // typedef struct AST_program_tag{
@@ -148,116 +147,37 @@ typedef enum access_enum{
 //     int lineno;
 // };
 
-// struct AST_expr_tag {
-//     enum {
-//         EXPR_iconst,
-//         EXPR_fconst,
-//         EXPR_cconst,
-//         EXPR_strlit, // do we need this?
-//         EXPR_true,
-//         EXPR_false,
-//         EXPR_unit,
-//         EXPR_unop,
-//         EXPR_binop,
-//         EXPR_id,
-//         EXPR_Id,
-//         //EXPR_call,
-//         //EXPR_Call,
-//        // EXPR_arrel,
-//         EXPR_dim,
-//         EXPR_new,
-//         EXPR_delete,
-//         //EXPR_let,
-//         EXPR_if,
-//         EXPR_while,
-//         EXPR_for,
-//         //EXPR_match, //check what we need and what we dont
-//         EXPR_class
-//     } kind;
-//     union {
-//         struct {
-//             int rep;
-//         } e_iconst;
-//         struct {
-//             float rep;
-//         } e_fconst;
-//         struct {
-//             char rep;
-//         } e_cconst;
-//         struct {
-//             char* rep;
-//         } e_strlit;
-//         struct {
-//             AST_unop op;
-//             AST_expr expr;
-//         } e_unop;
-//         struct {
-//             AST_expr expr1;
-//             AST_binop op;
-//             AST_expr expr2;
-//         } e_binop;
-//         struct {
-//             Identifier id;
-//         } e_id;
-//         struct {
-//             Identifier id;
-//         } e_Id;
-//         struct {
-//             Identifier id;
-//             AST_expr_list list;
-//         } e_call;
-//         struct {
-//             Identifier id;
-//             AST_expr_list list;
-//         } e_Call;
-//         struct {
-//             Identifier id;
-//             AST_expr_list list;
-//         } e_arrel;
-//         struct {
-//             int dim;
-//             Identifier id;
-//         } e_dim;
-//         struct {
-//             Type type;
-//         } e_new;
-//         struct {
-//             AST_expr expr;
-//         } e_delete;
-//         struct {
-//             AST_letdef def;
-//             AST_expr expr;
-//         } e_let;
-//         struct {
-//             AST_expr econd;
-//             AST_expr ethen;
-//             AST_expr eelse;
-//         } e_if;
-//         struct {
-//             AST_expr econd;
-//             AST_expr ebody;
-//         } e_while;
-//         struct {
-//             Identifier id;
-//             AST_expr expr1;
-//             bool downFlag;
-//             AST_expr expr2;
-//             AST_expr ebody;
-//         } e_for;
-//         struct {
-//             AST_expr expr;
-//             AST_clause_list list;
-//         } e_match;
-//         struct{
-//             Identifier name;            //Class Name
-//             AST_expr_list members;          // ex: int i , char c
-//             AST_expr_list methods;      // doSomething()
-//         }e_class;
-//     } u;
-//     int lineno;
-//     Type type;
-//     SymbolEntry entry;
-// };
+struct AST_expr_tag {
+    enum {
+       
+        EXPR_unop,
+        EXPR_binop,
+      //  EXPR_id,
+      //  EXPR_Id,
+        
+    } kind;
+    union {
+        struct {
+            AST_unop op;
+            AST_expr expr;
+        } e_unop;
+        struct {
+            AST_expr expr1;
+            AST_binop op;
+            AST_expr expr2;
+        } e_binop;
+        struct {
+            Identifier id;
+        } e_id;
+        struct {
+            Identifier id;
+        } e_Id;
+        
+    } u;
+    int lineno;
+    Type type;
+    SymbolEntry entry;
+};
 
 // struct AST_clause_tag {
 //     AST_pattern pattern;
@@ -693,6 +613,13 @@ AST_dcl_stmt ast_dcl_stmt_stmts(List s);
 AST_dcl_stmt ast_dcl_stmt_empty();
 AST_func_dcl ast_func_dcl_short(AST_short_func_dcl s);
 AST_func_dcl ast_func_dcl_full(AST_full_func_dcl f);
+AST_expr ast_new_binop_AND_expr(AST_expr exp1 ,AST_expr exp2);
+AST_expr ast_new_binop_OR_expr(AST_expr exp1 ,AST_expr exp2);
+AST_expr ast_new_binop_EQ_expr(AST_expr exp1 ,AST_expr exp2);
+AST_expr ast_new_binop_REL_expr(AST_expr exp1 ,char *op ,AST_expr exp2);
+AST_expr ast_new_binop_ADD_expr(AST_expr exp1 ,char *op ,AST_expr exp2);
+AST_expr ast_new_binop_REL_expr(AST_expr exp1 ,char *op ,AST_expr exp2);
+AST_expr ast_unop_expr(char *op ,AST_expr expr);
 
 List list_add(List list, void *data);
 void list_reverse(List *head);
