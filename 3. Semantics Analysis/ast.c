@@ -406,7 +406,7 @@ AST_full_par_func_header ast_full_par_func_header_noclass(AST_func_header_start 
      return result;
 }
 
-AST_full_func_dcl ast_full_func_dcl_full_par(AST_full_par_func_header h, List s){
+AST_full_func_dcl ast_full_func_dcl_full_par(AST_full_par_func_header h, AST_dcl_stmt s){
     AST_full_func_dcl result = new(sizeof(*result));
     result->kind = FFD_FULL_PAR;
     result->u.full_par.header = h;
@@ -415,7 +415,7 @@ AST_full_func_dcl ast_full_func_dcl_full_par(AST_full_par_func_header h, List s)
     return result;
 }
 
-AST_full_func_dcl ast_full_func_dcl_nopar_class(AST_class_func_header_start h, List s){
+AST_full_func_dcl ast_full_func_dcl_nopar_class(AST_class_func_header_start h, AST_dcl_stmt s){
     AST_full_func_dcl result = new(sizeof(*result));
     result->kind = FFD_NOPAR_CLASS;
     result->u.nopar_class.header = h;
@@ -424,7 +424,7 @@ AST_full_func_dcl ast_full_func_dcl_nopar_class(AST_class_func_header_start h, L
     return result;
 }
 
-AST_full_func_dcl ast_full_func_dcl_nopar(AST_func_header_start h, List s){
+AST_full_func_dcl ast_full_func_dcl_nopar(AST_func_header_start h, AST_dcl_stmt s){
     AST_full_func_dcl result = new(sizeof(*result));
     result->kind = FFD_NOPAR;
     result->u.nopar.header = h;
@@ -461,6 +461,21 @@ AST_dcl_stmt ast_dcl_stmt_stmts(List s){
     AST_dcl_stmt result = new(sizeof(*result));
     result->kind = DCL_STMT_STMTS;
     result->u.dcl_stmt_stmts.statements = s;
+    result->lineno = lineno;
+    return result;
+}
+
+AST_func_dcl ast_func_dcl_short(AST_short_func_dcl s){
+    AST_func_dcl result = new(sizeof(*result));
+    result->kind = FD_SHORT;
+    result->u.fd_short.func = s;
+    result->lineno = lineno;
+    return result;
+}
+AST_func_dcl ast_func_dcl_full(AST_full_func_dcl f){
+    AST_func_dcl result = new(sizeof(*result));
+    result->kind = FD_FULL;
+    result->u.fd_full.func = f;
     result->lineno = lineno;
     return result;
 }

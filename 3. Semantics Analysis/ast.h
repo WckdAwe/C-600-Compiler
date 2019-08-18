@@ -46,7 +46,7 @@ typedef struct AST_constant_tag                 * AST_constant;
 typedef struct AST_full_par_func_header_tag     * AST_full_par_func_header;
 typedef struct AST_full_func_dcl_tag            * AST_full_func_dcl;
 typedef struct AST_dcl_stmt_tag                 * AST_dcl_stmt;
-
+typedef struct AST_func_dcl_tag                 * AST_func_dcl; 
 
 typedef struct List_tag                 * List;  // TODO: Extract to library?
 
@@ -589,7 +589,7 @@ struct AST_full_func_dcl_tag{
             AST_full_par_func_header header;
         } full_par;
     }u;
-    List statements;
+    AST_dcl_stmt statements;
     int lineno;
 };
 
@@ -611,6 +611,22 @@ struct AST_dcl_stmt_tag{
             List statements;
             List declares;
         } dcl_stmt_stmts_dcls;
+    } u;
+    int lineno;
+};
+
+struct AST_func_dcl_tag{
+    enum{
+        FD_SHORT,
+        FD_FULL
+    } kind;
+    union{
+        struct{
+            AST_short_func_dcl func;
+        } fd_short;
+        struct{
+            AST_full_func_dcl func;
+        } fd_full;
     } u;
     int lineno;
 };
@@ -668,13 +684,15 @@ AST_constant ast_constant_cconst (char r);
 AST_constant ast_constant_sconst (char* r);
 AST_full_par_func_header ast_full_par_func_header_class(AST_class_func_header_start h, List p);
 AST_full_par_func_header ast_full_par_func_header_noclass(AST_func_header_start h, List p);
-AST_full_func_dcl ast_full_func_dcl_full_par(AST_full_par_func_header h, List s);
-AST_full_func_dcl ast_full_func_dcl_nopar_class(AST_class_func_header_start h, List s);
-AST_full_func_dcl ast_full_func_dcl_nopar(AST_func_header_start h, List s);
+AST_full_func_dcl ast_full_func_dcl_full_par(AST_full_par_func_header h, AST_dcl_stmt s);
+AST_full_func_dcl ast_full_func_dcl_nopar_class(AST_class_func_header_start h, AST_dcl_stmt s);
+AST_full_func_dcl ast_full_func_dcl_nopar(AST_func_header_start h, AST_dcl_stmt s);
 AST_dcl_stmt ast_dcl_stmt_dcls_stmts(List d, List s);
 AST_dcl_stmt ast_dcl_stmt_dcls(List d);
 AST_dcl_stmt ast_dcl_stmt_stmts(List s);
 AST_dcl_stmt ast_dcl_stmt_empty();
+AST_func_dcl ast_func_dcl_short(AST_short_func_dcl s);
+AST_func_dcl ast_func_dcl_full(AST_full_func_dcl f);
 
 List list_add(List list, void *data);
 void list_reverse(List *head);

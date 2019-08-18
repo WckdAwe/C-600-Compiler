@@ -63,6 +63,7 @@ extern char *yytext;
     AST_init_value init_value;
     AST_expr expr;
     AST_enum_dcl enum_dcl;
+    AST_func_dcl func_dcl;
 }
 
 %token <intval>     T_ICONST        "integer constant"
@@ -129,7 +130,7 @@ extern char *yytext;
     
 %type <strval> program global_declaration global_declarations
 %type <strval> variable assignment expression_list listexpression
-%type <strval> global_var_declaration func_declaration
+%type <strval> global_var_declaration 
 %type <strval> in_item main_header
 
 %type <access> access
@@ -167,6 +168,7 @@ extern char *yytext;
 %type <enum_dcl> enum_declaration 
 %type <full_func_dcl> full_func_declaration
 %type <full_par_func_header> full_par_func_header
+%type <func_dcl> func_declaration
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -343,8 +345,8 @@ init_variabledefs:        init_variabledefs T_COMMA init_variabledef            
                         ;
 init_variabledef:         variabledef initializer                                           {} // TODO: Update this to include initializer
                         ;
-func_declaration:         short_func_declaration                                            {$$ = $1;}
-                        | full_func_declaration                                             {$$ = $1;}   
+func_declaration:         short_func_declaration                                            {$$ = ast_func_dcl_short($1);}
+                        | full_func_declaration                                             {$$ = ast_func_dcl_full($1);}   
                         ;                                                                   
 full_func_declaration:    full_par_func_header T_LBRACE decl_statements T_RBRACE            {$$ = ast_full_func_dcl_full_par($1, $3);}    
                         | nopar_class_func_header T_LBRACE decl_statements T_RBRACE         {$$ = ast_full_func_dcl_nopar_class($1, $3);}
