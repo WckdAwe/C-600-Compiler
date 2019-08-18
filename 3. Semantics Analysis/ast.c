@@ -744,7 +744,7 @@ AST_expr ast_new_binop_ADD_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
     return result;
 }
 
-AST_expr ast_new_binop_REL_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
+AST_expr ast_new_binop_MUL_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
 {   AST_expr result = new(sizeof(result));
 
     result->kind = EXPR_binop;
