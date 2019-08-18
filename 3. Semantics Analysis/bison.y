@@ -251,7 +251,7 @@ expression:               expression T_OROP expression                          
                         | T_NOTOP expression                                                {$$ = ast_unop_expr($1 ,$2);}
                         | T_ADDOP expression %prec UMINUS                                   {$$ = ast_unop_expr($1 ,$2);}
                         | T_SIZEOP expression                                               {$$ = ast_unop_expr($1 ,$2);}  
-                        | T_INCDEC variable                                                 {$$ = ast_unop_expr($1 ,NULL);} 
+                        | T_INCDEC variable                                                 {$$ = ast_unop_expr($1 ,NULL);  } 
                         | variable T_INCDEC                                                 {$$ = ast_unop_expr($2 ,NULL);} 
                         | variable                                                          {$$ = $1;} 
                         | variable T_LPAREN expression_list T_RPAREN                        {$$ = ast_func_expr($1 ,$3);} 
