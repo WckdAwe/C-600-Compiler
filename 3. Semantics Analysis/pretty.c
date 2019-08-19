@@ -119,14 +119,12 @@ void AST_expr_print(FILE *f, int prec, AST_expr e){
    switch(e->kind){
        case EXPR_unop:
             fprintf(f, "ast_expr: unop(\n");
-            Type_print(f, prec+1, e->type);
             AST_unop_print(f, prec+1, e->u.e_unop.op);
             AST_expr_print(f, prec+1, e->u.e_unop.expr);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case EXPR_binop:
             fprintf(f, "ast_expr: binop(\n");
-            Type_print(f, prec+1, e->type);
             AST_expr_print(f, prec+1, e->u.e_binop.expr1);
             AST_binop_print(f, prec+1, e->u.e_binop.op);
             AST_expr_print(f, prec+1, e->u.e_binop.expr2);
@@ -208,7 +206,7 @@ void AST_global_var_declaration_print(FILE *f, int prec, AST_global_var_declarat
     }
     fprintf(f, "Type: ast_global_var_declaration");
     AST_type_print(f, prec+1, g->typename);
-    AST_variabledef_list(f, prec+1, g->init_variabledefs);
+    ast_init_value_default_print(f, prec+1, g->init_variabledefs);
     indent(f, prec); fprintf(f, ")\n");
 }
 
@@ -262,7 +260,7 @@ void AST_init_value_print(FILE *f, int prec, AST_init_value i){
             break;
         case INIT_MULTI:
             fprintf(f, "ast_init_value: init multi");
-            AST_Init_values_list_print(f, prec+1, i->u.multi.list_of_exprs);
+            AST_expr_list_print(f, prec+1, i->u.multi.list_of_exprs);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case INIT_DEFAULT:
@@ -306,18 +304,235 @@ void AST_decl_cases_print(FILE *f, int prec, AST_decl_cases d){
         case DC_BOTH:
             fprintf(f, "AST_decl_cases: both");
             AST_decl_cases_list_print(f, prec+1, d->u.both.declarations);
-            AST_decl_ccases_list_print(f, prec+1, d->u.both.casestmts);
+            AST_casestmt_list_print(f, prec+1, d->u.both.casestmts);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case DC_DECLARATION_ONLY:
             fprintf(f, "AST_decl_cases: declarations only");
-            AST_decl_cases_list(f, prec+1, d->u.single.dcls_or_stmts);
+            AST_decl_cases_list_print(f, prec+1, d->u.single.dcls_or_stmts);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
         case DC_CASE_ONLY:
             fprintf(f, "AST_decl_cases: declarations only");
-            AST_decl_class_list(f, prec+1, d->u.single.dcls_or_stmts);
+            AST_casestmt_list_print(f, prec+1, d->u.single.dcls_or_stmts);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
         case DC_EMPTY:
             break;
         default:
             internal("Invalid AST");
     }
 }
+
+void AST_casestmt_print(FILE *f, int prec, AST_casestmt c){
+    indent(f, prec);
+    if(c == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    switch(c->kind){
+        case CASE_DEFAULT:
+            fprintf(f, "AST_casestmt: case defaulft");
+            AST_stmt_list_print(f, prec+1, c->u.c_default.stmts);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case CASE_NEXTCASE:
+            fprintf(f, "AST_casestmt: case nextcase");
+            AST_constant_print(f, prec+1, c->u.c_nextcase.constant);
+            AST_casestmt_print(f, prec+1, c->u.c_nextcase.casestmt);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case CASE_SINGLE_STMT:
+            fprintf(f, "AST_casestmt: case single stmt");
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case CASE_MULTI_STMT:
+            fprintf(f, "AST_casestmt: case multi stmt");
+            AST_constant_print(f, prec+1, c->u.c_multi_stmt.constant);
+            AST_stmt_list_print(f, prec+1, c->u.c_multi_stmt.stmts);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        default:
+            internal("Invalid AST");
+    }
+}
+
+void AST_stmt_print(FILE *f, int prec, AST_stmt s){
+    indent(f, prec);
+    if(s == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    switch(s->kind){
+        case STMT_EXPR:
+            fprintf(f, "AST_stmt: stmt expr");
+            AST_general_expr_print(f, prec+1, s->u.general_expr.general_expr);
+            indent(f, prec); fprintf(f, ")\n");
+            break; 
+        case STMT_IF:
+            fprintf(f, "AST_stmt: stmt if");
+            AST_general_expr_print(f, prec+1, s->u.if_stmt.general_expr);
+            AST_stmt_print(f, prec+1, s->u.if_stmt.stmt);
+            AST_stmt_print(f, prec+1, s->u.if_stmt.if_tail);
+            indent(f, prec); fprintf(f, ")\n");
+            break; 
+        case STMT_WHILE:
+            fprintf(f, "AST_stmt: stmt while");
+            AST_general_expr_print(f, prec+1, s->u.if_stmt.general_expr);
+            AST_stmt_print(f, prec+1, s->u.if_stmt.stmt);
+            indent(f, prec); fprintf(f, ")\n");
+            break; 
+        case STMT_FOR:
+            fprintf(f, "AST_stmt: stmt for");
+            AST_general_expr_print(f, prec+1, s->u.for_stmt.optexpr1);
+            AST_general_expr_print(f, prec+1, s->u.for_stmt.optexpr2);
+            AST_general_expr_print(f, prec+1, s->u.for_stmt.optexpr3);
+            AST_stmt_print(f, prec+1, s->u.for_stmt.stmt);
+            indent(f, prec); fprintf(f, ")\n");
+            break; 
+        case STMT_SWITCH:
+            fprintf(f, "AST_stmt: stmt switch");
+            AST_general_expr_print(f, prec+1, s->u.switch_stmt.general_expr);
+            AST_switch_tail_print(f, prec+1, s->u.switch_stmt.switch_tail);
+            indent(f, prec); fprintf(f, ")\n");
+            break; 
+        case STMT_RETURN:
+            fprintf(f, "AST_stmt: stmt switch");
+            AST_general_expr_print(f, prec+1, s->u.return_stmt.optexpr);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case STMT_OUTPUT:
+            fprintf(f, "AST_stmt: stmt switch");
+            AST_io_stmt_list_print(f, prec+1, s->u.io_stmt);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case STMT_COMP:
+            fprintf(f, "AST_stmt: stmt switch");
+            AST_dcl_stmt_print(f, prec+1, s->u.comp_stmt.dcl_stmt);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        //MORE CASES:
+        default:
+            internal("Invalid AST");
+    }   
+}
+
+
+void AST_general_expr_print(FILE *f, int prec, AST_general_expr g){
+    indent(f, prec);
+    if(g == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    switch(g->kind){
+        case GEXPR_GEXPR:
+            fprintf(f, "AST_general_expr: gexpr gexpr");
+            AST_general_expr_print(f, prec+1, g->u.gexpr.general_expr1);
+            AST_assignment_print(f, prec+1, g->u.gexpr.general_expr2);
+            indent(f, prec); fprintf(f, ")\n");
+            break; 
+        case GEXPR_ASSIGNMENT: 
+            fprintf(f, "AST_general_expr: gexpr gexpr");
+            AST_assignment_print(f, prec+1, g->u.assignment.assignment);
+            indent(f, prec); fprintf(f, ")\n");
+            break; 
+        default:
+            internal("Invalid AST");
+    }
+}
+
+void AST_class_dcl_print(FILE *f, int prec, AST_class_dcl c){
+    indent(f, prec);
+    if(c == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    fprintf(f, "Type: AST_class_dcl");
+    Identifier_print(f, prec+1, c->id);
+    AST_class_body_print(f, prec+1, c->class_body);
+    indent(f, prec); fprintf(f, ")\n");
+}
+
+void AST_class_body_print(FILE *f, int prec, AST_class_body c){
+    indent(f, prec);
+    if(c == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    fprintf(f, "Type: AST_class_body");
+    Identifier_print(f, prec+1, c->parent);
+    AST_members_method_list_print(f, prec+1, c->members_methods);
+    indent(f, prec); fprintf(f, ")\n");
+}
+
+//check this
+// void AST_member_or_method_print(FILE *f, int prec, AST_member_or_method m){
+//     indent(f, prec);
+//     if(m == NULL){
+//         fprintf(f, "<<NULL>>\n");
+//         return;
+//     }
+//     switch(m->kind){
+//         case MOM_MEMBER:
+//             fprintf(f, "AST_mebmer_or_method: mom member");
+            
+//             indent(f, prec); fprintf(f, ")\n");
+//             break;
+//     }
+// }
+
+void AST_short_func_dcl_print(FILE *f, int prec, AST_short_func_dcl s){
+    indent(f, prec);
+    if(s == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    switch(s->kind){
+        case SHORT_FUNC_NO_PARAMS:
+            fprintf(f, "short_func_dcl: short func no params");
+            AST_func_header_start_print(f, prec+1, s->func_header_start);
+            AST_parameter_list(f, prec+1, s->parameters);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case SHORT_FUNC_WITH_PARAMS:
+            fprintf(f, "short_func_dcl: short func with params");
+            AST_func_header_start_print(f, prec+1, s->func_header_start);
+            AST_parameter_list(f, prec+1, s->parameters);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        default:
+            internal("Invalid AST");
+    }
+}
+
+void AST_union_dcl_print(FILE *f, int prec, AST_union_dcl u){
+    fprintf(f, "Type: AST_union_dcl");
+    Identifier_print(f, prec+1, u->id);
+    AST_var_declaration_list_print(f, prec+1, u->union_fields);
+    indent(f, prec); fprintf(f, ")\n");    
+}
+
+void AST_member_print(FILE *f, int prec, AST_member m){
+    indent(f, prec);
+    if(m == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    switch(m->kind){
+        case MEMBER_VARIABLE:
+            fprintf(f, "AST_member: member variable");
+            AST_var_declaration_print(f, prec+1, m->u.var_declaration);
+            AST_var_declaration_list_print(f, prec+1, m->u.union_fields);
+            indent(f, prec); fprintf(f, ")\n");
+            break;  
+        case MEMBER_ANON_UNION:
+            fprintf(f, "AST_member: member anon union");
+            AST_var_declaration_print(f, prec+1, m->u.var_declaration);
+            AST_var_declaration_list_print(f, prec+1, m->u.union_fields);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        default:
+            internal("Invalid AST");
+    }
+}
+

@@ -242,7 +242,7 @@ struct AST_decl_cases_tag{
     union{
         struct{
             List declarations;
-            List casestmts;
+            List casestmts; 
         } both;
         struct{
             List dcls_or_stmts;
@@ -370,7 +370,7 @@ struct AST_member_or_method_tag{
         MOM_METHOD,
     } kind;
     union{
-        AST_short_func_dcl method;
+        AST_short_func_dcl method;          // CHECH THIS!!!!!!!! probably needs structs
         AST_member member;
     } u;
     int lineno;
