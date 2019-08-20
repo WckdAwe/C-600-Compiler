@@ -536,3 +536,102 @@ void AST_member_print(FILE *f, int prec, AST_member m){
     }
 }
 
+void AST_declaration_print(FILE *f, int prec, AST_declaration d){
+    indent(f, prec);
+    if(d == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+
+    fprintf(f, "Type: AST_declaration");
+    Type_print(f, prec+1, d->typename);
+    RepInt_print(f, prec+1, d->is_static);
+    AST_declaration_list_print(f, prec+1, d->list);
+    indent(f, prec); fprintf(f, ")\n");
+}
+
+void AST_var_declaration_print(FILE *f, int prec, AST_var_declaration v){
+    indent(f, prec);
+    if(v == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+
+    fprintf(f, "Type: AST var declaration");
+    Type_print(f, prec+1, v->typename);
+    AST_var_declaration_list_print(f, prec+1, v->list);
+    indent(f, prec); fprintf(f, ")\n");
+}
+
+void AST_parameter_print(FILE *f, int prec, AST_parameter p){
+    indent(f, prec);
+    if(p == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+
+    fprintf(f, "Type: AST parameter");
+    Type_print(f, prec+1, p->typename);
+    AST_passvar_print(f, prec+1, p->passvar);
+    indent(f, prec); fprintf(f, ")\n");
+}
+
+void AST_passvar_print(FILE *f, int prec, AST_passvar p){
+    indent(f, prec);
+    if(p == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    switch(p->kind){
+        case PASSVAR_variable:
+            fprintf(f, "passvar: passvar variable");
+            AST_variabledef_print(f, prec+1, p->u.variabledef);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case PASSVAR_ref:
+            fprintf(f, "passvar: passvar ref");
+            Type_print(f, prec+1, p->u.ref);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        default:
+            interval("Invalid AST");
+    }   
+       
+}
+
+void AST_typedef_print(FILE *f, int prec, AST_typedef t ){
+    indent(f, prec);
+    if(t == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    fprintf(f, "Type: typedef");
+    Identifier_print(f, prec+1, t->id);
+    Type_print(f, prec+1, t->typename);
+    indent(f, prec); fprintf(f, ")\n");
+}
+
+void AST_class_func_header_start_print(FILE *f, int prec, AST_class_func_header_start c){
+    indent(f, prec);
+    if(c == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    fprintf(f, "Type: class_func_header_start");
+    Type_print(f, prec+1, c->typename);
+    Identifier_print(f, prec+1, c->id);
+    Identifier_print(f, prec+1, c->class);
+    indent(f, prec); fprintf(f, ")\n");
+}
+
+void AST_func_header_start_print(FILE *f, int prec, AST_func_header_start h){
+    indent(f, prec);
+    if(h == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    fprintf(f, "Type: AST_class_func_header_start");
+    Type_print(f, prec+1, h->typename);
+    Identifier_print(f, prec+1, h->id);
+    indent(f, prec); fprintf(f, ")\n");
+}
