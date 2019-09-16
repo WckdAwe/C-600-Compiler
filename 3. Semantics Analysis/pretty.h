@@ -16,8 +16,11 @@ void RepFloat_print (FILE *, int, float);
 void RepChar_print (FILE *, int, char);
 void RepString_print (FILE *, int, char *);
 
+void AST_binop_print(FILE *, int, AST_binop);
+void AST_unop_print(FILE *, int, AST_unop);
 
 void AST_expr_print(FILE *, int, AST_expr);
+void AST_exprlist_print(FILE *, int, AST_exprlist);
 void AST_variable_print(FILE *, int, AST_variable);
 void AST_assingment_print(FILE *, int, AST_assignment);
 void AST_global_var_declaration_print(FILE *, int, AST_global_var_declaration);
@@ -53,6 +56,6 @@ void AST_dcl_stmt_print(FILE *, int, AST_dcl_stmt);
 void AST_func_dcl_print(FILE *, int, AST_func_dcl);
 
 void List_print(FILE *, int, List);
-void AST_expr_list_print(FILE *, int, AST_expr_list);
+
 
 #endif

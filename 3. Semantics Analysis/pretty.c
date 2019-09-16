@@ -129,6 +129,79 @@ void RepString_print (FILE * f, int prec, char *r)
    fprintf(f, "%s\n", r);
 }
 
+void AST_binop_print(FILE *f, int prec, AST_binop b){
+    indent(f, prec);
+    switch(b){
+        case ast_binop_plus:
+            fprint(f, "ast_binop_plus\n");
+            break;
+        case ast_binop_minus:
+            fprint(f, "ast_binop_minus\n");
+            break;
+        case ast_binop_times:
+            fprint(f, "ast_binop_times\n");
+            break;
+        case ast_binop_div:
+            fprint(f, "ast_binop_div\n");
+            break;
+        case ast_binop_mod:
+            fprint(f, "ast_binop_mod\n");
+            break;
+        case ast_binop_eq:
+            fprint(f, "ast_binop_eq\n");
+            break;
+        case ast_binop_ne:
+            fprint(f, "ast_binop_ne\n");
+            break;
+        case ast_binop_lt:
+            fprint(f, "ast_binop_lt\n");
+            break;
+        case ast_binop_gt:
+            fprint(f, "ast_binop_gt\n");
+            break;
+        case ast_binop_le:
+            fprint(f, "ast_binop_le\n");
+            break;
+        case ast_binop_ge:
+            fprint(f, "ast_binop_ge\n");
+            break;
+        case ast_binop_and:
+            fprint(f, "ast_binop_and\n");
+            break;
+        case ast_binop_or:
+            fprint(f, "ast_binop_or\n");
+            break;
+        default:
+            internal("invalid AST");
+    }
+}
+
+void AST_unop_print(FILE *f, int prec, AST_unop u){
+    indent(f, prec);
+    switch(u){
+        case ast_unop_plus:
+            fprint(f, "ast_unop_plus\n");
+            break;
+        case ast_unop_minus:
+            fprint(f, "ast_unop_minus\n");
+            break;
+        case ast_unop_not:
+            fprint(f, "ast_unop_not\n");
+            break;
+        case ast_unop_sizeop:
+            fprint(f, "ast_unop_sizeop\n");
+            break;
+        case ast_unop_inc:
+            fprint(f, "ast_unop_inc\n");
+            break;
+        case ast_unop_dec:
+            fprint(f, "ast_unop_dec\n");
+            break;
+        default:
+            internal("invalid AST");
+    }
+}
+
 
 void AST_expr_print(FILE *f, int prec, AST_expr e){
     indent(f, prec);
@@ -138,28 +211,84 @@ void AST_expr_print(FILE *f, int prec, AST_expr e){
    }
    switch(e->kind){
        case EXPR_unop:
-            fprintf(f, "ast_expr: unop(\n");
+            fprintf(f, "ast_expr: expr unop(\n");
             AST_unop_print(f, prec+1, e->u.e_unop.op);
             AST_expr_print(f, prec+1, e->u.e_unop.expr);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case EXPR_binop:
-            fprintf(f, "ast_expr: binop(\n");
+            fprintf(f, "ast_expr: expr binop(\n");
             AST_expr_print(f, prec+1, e->u.e_binop.expr1);
             AST_binop_print(f, prec+1, e->u.e_binop.op);
             AST_expr_print(f, prec+1, e->u.e_binop.expr2);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case EXPR_call:
-            fprint(f, "ast_expr:(\n");
-            Identifier_print(f, prec+1, e->u.e_call.id);
-            AST_expr_list_print(f, prec+1, e->u.e_call.list);
+            fprint(f, "ast_expr: expr call(\n");
+            AST_variable_print(f, prec+1, e->u.e_call.variable);
+            AST_exprlist_print(f, prec+1, e->u.e_call.list);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        // call length? 
+        case EXPR_incdec:
+            fprint(f, "ast_expr: expr incdec(\n");
+            AST_variable_print(f, prec+1, e->u.e_incdec.variable);
+            AST_unop_print(f, prec+1, e->u.e_incdec.op);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case EXPR_variable:
+            fprint(f, "ast_expr: expr variable(\n");
+            AST_variable_print(f, prec+1, e->u.e_variable.variable);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case EXPR_constant:
+            fprint(f, "ast_expr: epxr constant(\n");
+            AST_constant_print(f, prec+1, e->u.e_constant.constant);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case EXPR_type:
+            fprint(f, "ast_expr: expr type(\n");
+            Type_print(f, prec+1, e->u.e_type.type);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case EXPR_new:
+            fprintf(f, "ast_expr: expr new(\n");
+            AST_general_expr_print(f, prec+1, e->u.e_new.general_expr);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case EXPR_general_expr:
+            fprintf(f, "ast_expr: expr general expr(\n");
+            AST_general_expr_print(f, prec+1, e->u.e_general_expr.general_expr);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case EXPR_list_expr:
+            fprintf(f, "ast_expr: expr listexpr(\n");
+            AST_exprlist_print(f, prec+1, e->u.e_listexpr.exprlist);
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:
             internal("invalid AST");
    }
 
+}
+
+void AST_exprlist_print(FILE *f, int prec, AST_exprlist l){
+    indent(f, prec);
+    if (l == NULL) {
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    switch(l->kind){
+        case EXPRLIST_general:
+            fprintf(f, "AST_exprlist: exprlist general(\n");
+            AST_general_expr_print(f, prec+1, l->u.e_general.general_expr);
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case EXPRLIST_empty:
+            break;
+        default:
+            internal("invalid AST");
+    }
 }
 
 void AST_variable_print(FILE *f, int prec, AST_variable v){
@@ -551,7 +680,7 @@ void AST_short_func_dcl_print(FILE *f, int prec, AST_short_func_dcl s){
         case SHORT_FUNC_NO_PARAMS:
             fprintf(f, "short_func_dcl: short func no params(\n");
             AST_func_header_start_print(f, prec+1, s->func_header_start);
-            AST_parameter_list(f, prec+1, s->parameters);
+            List_print(f, prec+1, s->parameters);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case SHORT_FUNC_WITH_PARAMS:
@@ -869,17 +998,5 @@ void List_print(FILE *f, int prec, List l){
     //RepString_print(f, prec+1, l->data); 
     Type_print(f, prec+1, l->data);         //TODO: check this !
     List_print(f, prec+1, l->next);
-    indent(f, prec); fprintf(f, ")\n");
-}
-
-void AST_expr_list_print(FILE *f, int prec, AST_expr_list l){
-   indent(f, prec);
-    if(l == NULL){
-        fprintf(f, "<<NULL>>\n");
-        return;
-    }
-    fprintf(f, "AST_expr_list(\n");
-    AST_expr_head_print(f, prec+1, l->head);
-    AST_expr_list_print(f, prec+1, l->tail);
     indent(f, prec); fprintf(f, ")\n");
 }
