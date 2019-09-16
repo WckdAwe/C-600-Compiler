@@ -866,7 +866,7 @@ void List_print(FILE *f, int prec, List l){
         return;
     }
     fprintf(f, "list(\n");
-    RepString_print(f, prec+1, l->data);  //void ?
+    RepString_print(f, prec+1, l->data);  //TODO: change that we someting more appropriate | Void ? 
     List_print(f, prec+1, l->next);
     indent(f, prec); fprintf(f, ")\n");
 }
