@@ -19,6 +19,25 @@ void Identifier_print(FILE *f, int prec, Identifier id){
     fprintf(f, "Identifier: \%s\"\n", id_name(id));
 }
 
+void Access_print(FILE *f, int prec, Access a){
+    indent(f, prec);
+    switch(a){
+        case ACCESS_PRIVATE:
+            fprintf(f, "Access private");
+            break;
+        case ACCESS_PROTECTED:
+            fprintf(f, "Access protected");
+            break;
+        case ACCESS_PUBLIC:
+            fprintf(f, "Access public");
+            break;
+        case ACCESS_DEFAULT:
+            fprintf(f, "Access default");
+            break;
+        default:
+            internal("invalid AST");
+    }
+}
 void Type_print(FILE *f, int prec, Type type){
     indent(f, prec);
     if(type == NULL){
@@ -213,7 +232,8 @@ void AST_global_var_declaration_print(FILE *f, int prec, AST_global_var_declarat
     }
     fprintf(f, "Type: ast_global_var_declaration");
     AST_type_print(f, prec+1, g->typename);
-    AST_init_variabledef_print_list(f, prec+1, g->init_variabledefs);
+    //AST_init_variabledef_print_list(f, prec+1, g->init_variabledefs);
+    List_print(f, prec+1, g->init_variabledefs);
     indent(f, prec); fprintf(f, ")\n");
 }
 
@@ -237,7 +257,8 @@ void AST_enum_dcl_print(FILE *f, int prec, AST_enum_dcl e){
     }
     fprintf(f, "Type: ast_enum_dcl(\n");
     Identifier_print(f, prec+1, e->id);
-    Identifier_list_print(f, prec+1, e->id_list);
+    //Identifier_list_print(f, prec+1, e->id_list);
+    List_print(f, prec+1, e->id_list);
     indent(f, prec); fprintf(f, ")\n");
 }
 
@@ -267,7 +288,8 @@ void AST_init_value_print(FILE *f, int prec, AST_init_value i){
             break;
         case INIT_MULTI:
             fprintf(f, "ast_init_value: init multi(\n");
-            AST_expr_list_print(f, prec+1, i->u.multi.list_of_exprs);
+            //AST_expr_list_print(f, prec+1, i->u.multi.list_of_exprs);
+            List_print(f, prec+1, i->u.multi.list_of_exprs);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case INIT_DEFAULT:
@@ -310,18 +332,22 @@ void AST_decl_cases_print(FILE *f, int prec, AST_decl_cases d){
     switch(d->kind){
         case DC_BOTH:
             fprintf(f, "AST_decl_cases: both(\n");
-            AST_declaration_list_print(f, prec+1, d->u.both.declarations);
-            AST_casestmt_list_print(f, prec+1, d->u.both.casestmts);
+            //AST_declaration_list_print(f, prec+1, d->u.both.declarations);
+            List_print(f, prec+1, d->u.both.declarations);
+            //AST_casestmt_list_print(f, prec+1, d->u.both.casestmts);
+            List_print(f, prec+1, d->u.both.casestmts);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case DC_DECLARATION_ONLY:
             fprintf(f, "AST_decl_cases: declarations only(\n");
-            AST_declaration_list_print(f, prec+1, d->u.single.dcls_or_stmts);
+            //AST_declaration_list_print(f, prec+1, d->u.single.dcls_or_stmts);
+            List_print(f, prec+1, d->u.single.dcls_or_stmts);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case DC_CASE_ONLY:
             fprintf(f, "AST_decl_cases: case only(\n");
-            AST_casestmt_list_print(f, prec+1, d->u.single.dcls_or_stmts);
+            //AST_casestmt_list_print(f, prec+1, d->u.single.dcls_or_stmts);
+            List_print(f, prec+1, d->u.single.dcls_or_stmts);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case DC_EMPTY:
@@ -340,7 +366,8 @@ void AST_casestmt_print(FILE *f, int prec, AST_casestmt c){
     switch(c->kind){
         case CASE_DEFAULT:
             fprintf(f, "AST_casestmt: case defaulft(\n");
-            AST_stmt_list_print(f, prec+1, c->u.c_default.stmts);
+            //AST_stmt_list_print(f, prec+1, c->u.c_default.stmts);
+            List_print(f, prec+1, c->u.c_default.stmts);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case CASE_NEXTCASE:
@@ -358,7 +385,8 @@ void AST_casestmt_print(FILE *f, int prec, AST_casestmt c){
         case CASE_MULTI_STMT:
             fprintf(f, "AST_casestmt: case multi stmt(\n");
             AST_constant_print(f, prec+1, c->u.c_multi_stmt.constant);
-            AST_stmt_list_print(f, prec+1, c->u.c_multi_stmt.stmts);
+            //AST_stmt_list_print(f, prec+1, c->u.c_multi_stmt.stmts);
+            List_print(f, prec+1, c->u.c_multi_stmt.stmts);
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:
@@ -412,7 +440,8 @@ void AST_stmt_print(FILE *f, int prec, AST_stmt s){
             break;
         case STMT_OUTPUT:
             fprintf(f, "AST_stmt: stmt output(\n");
-            AST_stmt_list_print(f, prec+1, s->u.io_stmt);
+            //AST_stmt_list_print(f, prec+1, s->u.io_stmt);
+            List_print(f, prec+1,s->u.io_stmt.io_list);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case STMT_COMP:
@@ -470,26 +499,22 @@ void AST_class_body_print(FILE *f, int prec, AST_class_body c){
     }
     fprintf(f, "Type: AST_class_body(\n");
     Identifier_print(f, prec+1, c->parent);
-    AST_members_method_list_print(f, prec+1, c->members_methods);
+    //AST_members_method_list_print(f, prec+1, c->members_methods);
+    List_print(f, prec+1, c->members_methods);
     indent(f, prec); fprintf(f, ")\n");
 }
 
-
-//check this
-// void AST_member_or_method_print(FILE *f, int prec, AST_member_or_method m){
-//     indent(f, prec);
-//     if(m == NULL){
-//         fprintf(f, "<<NULL>>\n");
-//         return;
-//     }
-//     switch(m->kind){
-//         case MOM_MEMBER:
-//             fprintf(f, "AST_mebmer_or_method: mom member");
-            
-//             indent(f, prec); fprintf(f, ")\n");
-//             break;
-//     }
-// }
+void AST_members_method_print(FILE *f, int prec, AST_members_method m){
+    indent(f, prec);
+    if(m == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    fprint(f, "Type: AST_members_method(\n");
+    Access_print(f, prec+1, m->access);
+    AST_member_or_method_print(f, prec+1, m->mom);
+    indent(f, prec); fprintf(f, ")\n");
+}
 
 void AST_member_or_method_print(FILE *f, int prec, AST_member_or_method m){
     indent(f, prec);
@@ -532,7 +557,8 @@ void AST_short_func_dcl_print(FILE *f, int prec, AST_short_func_dcl s){
         case SHORT_FUNC_WITH_PARAMS:
             fprintf(f, "short_func_dcl: short func with params(\n");
             AST_func_header_start_print(f, prec+1, s->func_header_start);
-            AST_parameter_list(f, prec+1, s->parameters);
+            //AST_parameter_list(f, prec+1, s->parameters);
+            List_print(f, prec+1, s->parameters);
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:
@@ -543,7 +569,8 @@ void AST_short_func_dcl_print(FILE *f, int prec, AST_short_func_dcl s){
 void AST_union_dcl_print(FILE *f, int prec, AST_union_dcl u){
     fprintf(f, "Type: AST_union_dcl(\n");
     Identifier_print(f, prec+1, u->id);
-    AST_var_declaration_list_print(f, prec+1, u->union_fields);
+    //AST_var_declaration_list_print(f, prec+1, u->union_fields);
+    List_print(f, prec+1, u->union_fields);
     indent(f, prec); fprintf(f, ")\n");    
 }
 
@@ -557,13 +584,15 @@ void AST_member_print(FILE *f, int prec, AST_member m){
         case MEMBER_VARIABLE:
             fprintf(f, "AST_member: member variable(\n");
             AST_var_declaration_print(f, prec+1, m->u.var_declaration);
-            AST_var_declaration_list_print(f, prec+1, m->u.union_fields);
+            //AST_var_declaration_list_print(f, prec+1, m->u.union_fields);
+            List_print(f, prec+1, m->u.union_fields);
             indent(f, prec); fprintf(f, ")\n");
             break;  
         case MEMBER_ANON_UNION:
             fprintf(f, "AST_member: member anon union(\n");
             AST_var_declaration_print(f, prec+1, m->u.var_declaration);
-            AST_var_declaration_list_print(f, prec+1, m->u.union_fields);
+            //AST_var_declaration_list_print(f, prec+1, m->u.union_fields);
+            List_print(f, prec+1, m->u.union_fields);
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:
@@ -581,7 +610,8 @@ void AST_declaration_print(FILE *f, int prec, AST_declaration d){
     fprintf(f, "Type: AST_declaration(\n");
     Type_print(f, prec+1, d->typename);
     RepInt_print(f, prec+1, d->is_static);
-    AST_declaration_list_print(f, prec+1, d->list);
+    //AST_declaration_list_print(f, prec+1, d->list);
+    List_print(f, prec+1, d->list);
     indent(f, prec); fprintf(f, ")\n");
 }
 
@@ -594,7 +624,8 @@ void AST_var_declaration_print(FILE *f, int prec, AST_var_declaration v){
 
     fprintf(f, "Type: AST var declaration");
     Type_print(f, prec+1, v->typename);
-    AST_var_declaration_list_print(f, prec+1, v->list);
+    //AST_var_declaration_list_print(f, prec+1, v->list);
+    List_print(f, prec+1, v->list);
     indent(f, prec); fprintf(f, ")\n");
 }
 
@@ -726,13 +757,15 @@ void AST_full_par_func_header_print(FILE *f, int prec, AST_full_par_func_header 
         case FPF_NOCLASS:
             fprintf(f, "AST_full_par_func_header: fpf noclass(\n");
             AST_func_header_start_print(f, prec+1, h->u.fpf_noclass.header);
-            AST_parameter_list_print(f, prec+1, h->parameters);
+            //AST_parameter_list_print(f, prec+1, h->parameters);
+            List_print(f, prec+1, h->parameters);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case FPF_CLASS:
             fprintf(f, "AST_full_par_func_header: fpf class(\n");
             AST_class_func_header_start_print(f, prec+1, h->u.fpf_class.header);
-            AST_parameter_list_print(f, prec+1, h->parameters);
+            //AST_parameter_list_print(f, prec+1, h->parameters);
+            List_print(f, prec+1, h->parameters);
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:
@@ -779,18 +812,22 @@ void AST_dcl_stmt_print(FILE *f, int prec, AST_dcl_stmt s){
     switch(s->kind){
         case DCL_STMT_STMTS:
             fprintf(f, "AST_dcl_stmt: dcl stmt stmts(\n");
-            AST_stmt_list_print(f, prec+1, s->u.dcl_stmt_stmts.statements);
+            //AST_stmt_list_print(f, prec+1, s->u.dcl_stmt_stmts.statements);
+            List_print(f, prec+1, s->u.dcl_stmt_stmts.statements);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case DCL_STMT_DCLS:
             fprintf(f, "AST_dcl_stmt: dcl stmt dcls(\n");
-            AST_declaration_list_print(f, prec+1,s->u.dcl_stmt_dcls.declares);
+            //AST_declaration_list_print(f, prec+1,s->u.dcl_stmt_dcls.declares);
+            List_print(f, prec+1,s->u.dcl_stmt_dcls.declares);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case DCL_STMT_STMTS_DCLS:
             fprintf(f, "AST_dcl_stmt: dcl stmt stmts dcls(\n");
-            AST_stmt_list_print(f, prec+1, s->u.dcl_stmt_stmts_dcls.statements);
-            AST_declaration_list_print(f, prec+1, s->u.dcl_stmt_stmts_dcls.declares);
+            //AST_stmt_list_print(f, prec+1, s->u.dcl_stmt_stmts_dcls.statements);
+            List_print(f, prec+1, s->u.dcl_stmt_stmts_dcls.statements);
+            //AST_declaration_list_print(f, prec+1, s->u.dcl_stmt_stmts_dcls.declares);
+            List_print(f, prec+1, s->u.dcl_stmt_stmts_dcls.declares);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case DCL_STMT_EMPTY:
@@ -822,6 +859,18 @@ void AST_func_dcl_print(FILE *f, int prec, AST_func_dcl d){
     }
 }
 
+void List_print(FILE *f, int prec, List l){
+    indent(f, prec);
+    if(l == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    fprintf(f, "list(\n");
+    RepString_print(f, prec+1, l->data);  //void ?
+    List_print(f, prec+1, l->next);
+    indent(f, prec); fprintf(f, ")\n");
+}
+
 void AST_expr_list_print(FILE *f, int prec, AST_expr_list l){
    indent(f, prec);
     if(l == NULL){
@@ -833,16 +882,3 @@ void AST_expr_list_print(FILE *f, int prec, AST_expr_list l){
     AST_expr_list_print(f, prec+1, l->tail);
     indent(f, prec); fprintf(f, ")\n");
 }
-
-void List_print(FILE *f, int prec, List l){
-    indent(f, prec);
-    if(l == NULL){
-        fprintf(f, "<<NULL>>\n");
-        return;
-    }
-    fprintf(f, "list(\n");
-    RepString_print(f, prec+1, l->data);
-    List_print(f, prec+1, l->next);
-    indent(f, prec); fprintf(f, ")\n");
-}
-
