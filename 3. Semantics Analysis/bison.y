@@ -68,6 +68,9 @@ extern char *yytext;
     AST_global_var_declaration global_var_declaration;
     AST_assignment assignment;
     AST_variable variable;
+    AST_exprlist exprlist;
+    AST_global_decl global_decl;
+    AST_program program;
 }  
 
 %token <intval>     T_ICONST        "integer constant"
@@ -132,9 +135,8 @@ extern char *yytext;
 %token <strval>     T_LENGTH        "length"
 %token <strval>     T_EOF   0       "end of file"
     
-%type <strval> program global_declaration global_declarations
-%type <strval> expression_list listexpression
-%type <strval> in_item main_header
+    
+%type <strval> main_header
 
 %type <access> access
 %type <intval> decltype // As booleans
@@ -152,7 +154,7 @@ extern char *yytext;
 %type <list> init_variabledefs variabledefs parameter_list parameter_types
 %type <list> declarations fields union_body anonymous_union members_methods 
 %type <list> statements in_list out_list casestatements init_values id_list 
-%type <list> enum_body
+%type <list> enum_body global_declarations
 %type <var_declaration> var_declaration field
 %type <member> member
 %type <union_dcl> union_declaration
@@ -175,7 +177,10 @@ extern char *yytext;
 %type <init_variabledef> init_variabledef
 %type <global_var_declaration> global_var_declaration
 %type <assignment> assignment
-%type <variable> variable
+%type <variable> variable in_item
+%type <exprlist> expression_list listexpression
+%type <global_decl> global_declaration
+%type <program> program
 
 %left T_COMMA
 %right T_ASSIGN 
@@ -197,17 +202,23 @@ extern char *yytext;
 
 %%
 program:                                                                                    
-                          global_declarations main_function                                 {}
+                          global_declarations main_function                                 {$$ = ast_program($1, $2);}
                         ;
-global_declarations:      global_declarations global_declaration                            {}
-                        | %empty                                                            {}
+global_declarations:      global_declarations global_declaration                            {
+                                                                                                if($2 == NULL) printf("I am null\n");
+                                                                                                else{
+                                                                                                    $$ = list_add($1, $2);
+                                                                                                    printf("I am not null\n");
+                                                                                                } 
+                                                                                            }
+                        | %empty                                                            {$$ = NULL;}
                         ;
-global_declaration:       typedef_declaration                                               {} // Completed
-                        | enum_declaration                                                  {} // Completed
-                        | class_declaration                                                 {} // Completed
-                        | union_declaration                                                 {} // Completed
-                        | global_var_declaration                                            {} // Completed
-                        | func_declaration                                                  {} // Completed
+global_declaration:       typedef_declaration                                               {$$ = ast_gdcl_typedef($1);}
+                        | enum_declaration                                                  {$$ = ast_gdcl_enum($1);} 
+                        | class_declaration                                                 {$$ = ast_gdcl_class($1);} 
+                        | union_declaration                                                 {$$ = ast_gdcl_union($1);}
+                        | global_var_declaration                                            {$$ = ast_gdcl_gvar($1);} 
+                        | func_declaration                                                  {$$ = ast_gdcl_func($1);} 
                         ;
 typedef_declaration:      T_TYPEDEF typename listspec T_ID dims T_SEMI                      {$$ = ast_typedef(id_make($4), $2, $3, $5);}
                         ;
@@ -242,25 +253,25 @@ initializer:              T_ASSIGN init_value                                   
 init_value:               expression                                                        {$$ = ast_init_value_single($1);}
                         | T_LBRACE init_values T_RBRACE                                     {$$ = ast_init_value_multi($2);}
                         ;
-expression:               expression T_OROP expression                                      {$$ = ast_new_binop_OR_expr($1 ,$3);}
-                        | expression T_ANDOP expression                                     {$$ = ast_new_binop_AND_expr($1 ,$3);}
-                        | expression T_EQUOP expression                                     {$$ = ast_new_binop_EQ_expr($1 ,$3);}
-                        | expression T_RELOP expression                                     {$$ = ast_new_binop_REL_expr($1 ,$2 ,$3);}
-                        | expression T_ADDOP expression                                     {$$ = ast_new_binop_ADD_expr($1 ,$2 ,$3);}
-                        | expression T_MULOP expression                                     {$$ = ast_new_binop_MUL_expr($1 ,$2 ,$3);}
-                        | T_NOTOP expression                                                {$$ = ast_unop_expr($1 ,$2);}
-                        | T_ADDOP expression %prec UMINUS                                   {$$ = ast_unop_expr($1 ,$2);}
-                        | T_SIZEOP expression                                               {$$ = ast_unop_expr($1 ,$2);}  
-                        | T_INCDEC variable                                                 {$$ = ast_unop_expr($1 ,NULL);  } 
-                        | variable T_INCDEC                                                 {$$ = ast_unop_expr($2 ,NULL);} 
-                        | variable                                                          {$$ = $1;} 
-                        | variable T_LPAREN expression_list T_RPAREN                        {$$ = ast_func_expr($1 ,$3);} 
-                        | T_LENGTH T_LPAREN general_expression T_RPAREN                     {$$ = ast_length_expr($3);} 
-                        | T_NEW T_LPAREN general_expression T_RPAREN                        {$$ = ast_variable_list(NULL,$3);}
-                        | constant                                                          {$$ = $1;}                                                          
-                        | T_LPAREN general_expression T_RPAREN                              {$$ = $2;}
-                        | T_LPAREN standard_type T_RPAREN                                   {$$ = $2;} 
-                        | listexpression                                                    {$$ = $1;}
+expression:               expression T_OROP expression                                      {$$ = ast_expr_new_binop_OR($1, $3);}
+                        | expression T_ANDOP expression                                     {$$ = ast_expr_new_binop_AND($1, $3);}
+                        | expression T_EQUOP expression                                     {$$ = ast_expr_new_binop_EQ($1, $3);}
+                        | expression T_RELOP expression                                     {$$ = ast_expr_new_binop_REL($1, $2, $3);}
+                        | expression T_ADDOP expression                                     {$$ = ast_expr_new_binop_ADD($1, $2, $3);}
+                        | expression T_MULOP expression                                     {$$ = ast_expr_new_binop_MUL($1, $2, $3);}
+                        | T_NOTOP expression                                                {$$ = ast_expr_unop($1, $2);}
+                        | T_ADDOP expression %prec UMINUS                                   {$$ = ast_expr_unop($1, $2);}
+                        | T_SIZEOP expression                                               {$$ = ast_expr_unop($1, $2);}  
+                        | T_INCDEC variable                                                 {$$ = ast_expr_incdec($1, $2);} 
+                        | variable T_INCDEC                                                 {$$ = ast_expr_incdec($2, $1);} 
+                        | variable                                                          {$$ = ast_expr_variable($1);} 
+                        | variable T_LPAREN expression_list T_RPAREN                        {$$ = ast_expr_func($1, $3);} // Possibly required to change?
+                        | T_LENGTH T_LPAREN general_expression T_RPAREN                     {$$ = ast_expr_length($3);} 
+                        | T_NEW T_LPAREN general_expression T_RPAREN                        {$$ = ast_expr_new($3);}
+                        | constant                                                          {$$ = ast_expr_constant($1);}                                                          
+                        | T_LPAREN general_expression T_RPAREN                              {$$ = ast_expr_general_expr($2);}
+                        | T_LPAREN standard_type T_RPAREN                                   {$$ = ast_expr_standardtype($2);} 
+                        | listexpression                                                    {$$ = ast_expr_listexpr($1);}
                         ;
 variable:                 variable T_LBRACK general_expression T_RBRACK                     {$$ = ast_variable_list($1, $3);} 
                         | variable T_DOT T_ID                                               {$$ = ast_variable_nested($1, id_make($3));}                 
@@ -275,8 +286,8 @@ general_expression:       general_expression T_COMMA general_expression         
 assignment:               variable T_ASSIGN assignment                                      {$$ = ast_assignment_var($1, $3);}
                         | expression                                                        {$$ = ast_assignment_expr($1);}
                         ;
-expression_list:          general_expression                                                {$$ = $1;} // Abstract
-                        | %empty                                                            {$$ = NULL;}
+expression_list:          general_expression                                                {$$ = ast_exprlist_general($1);}
+                        | %empty                                                            {$$ = ast_exprlist_general(NULL);}
                         ;
 constant:                 T_CCONST                                                          {$$ = ast_constant_cconst($1);}
                         | T_ICONST                                                          {$$ = ast_constant_iconst($1);}
@@ -416,7 +427,7 @@ for_statement:            T_FOR T_LPAREN
                             optexpr T_SEMI optexpr T_SEMI optexpr T_RPAREN statement        {$$ = ast_for_stmt($3, $5, $7, $9);}
                         ;
 optexpr:                  general_expression                                                {$$ = $1;}
-                        | %empty                                                            {$$ = NULL;} 
+                        | %empty                                                            {$$ = NULL;} // Careful ?
                         ;
 switch_statement:         T_SWITCH T_LPAREN                                                 
                             general_expression T_RPAREN switch_tail                         {$$ = ast_switch_stmt($3, $5);}
@@ -447,7 +458,7 @@ io_statement:             T_CIN T_INP in_list T_SEMI                            
 in_list:                  in_list T_INP in_item                                             {$$ = list_add($1, (void *) $3);}  
                         | in_item                                                           {$$ = list_add(NULL, (void *) $1);}
                         ;
-in_item:                  variable                                                          {}
+in_item:                  variable                                                          {$$ = $1;}
                         ;
 out_list:                 out_list T_OUT out_item                                           {$$ = list_add($1, (void *) $3);}  
                         | out_item                                                          {$$ = list_add(NULL, (void *) $1);}

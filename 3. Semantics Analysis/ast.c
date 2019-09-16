@@ -665,54 +665,52 @@ Type get_parameter_type(Type typename, Type pass_list_dims){
     }
 }
 
-
-
-
-
-AST_expr ast_new_binop_AND_expr(AST_expr exp1 ,AST_expr exp2)
-{   AST_expr result = new(sizeof(result));
+AST_expr ast_expr_new_binop_AND(AST_expr exp1, AST_expr exp2)
+{   
+    AST_expr result = new(sizeof(result));
 
     result->kind = EXPR_binop;
     result->u.e_binop.expr1 = exp1;
-    result->u.e_binop.expr2 =exp2;
+    result->u.e_binop.expr2 = exp2;
     result->u.e_binop.op = ast_binop_and;
     
     result->lineno = lineno;
     return result;
 }
 
-
-
-AST_expr ast_new_binop_OR_expr(AST_expr exp1 ,AST_expr exp2)
-{   AST_expr result = new(sizeof(result));
+AST_expr ast_expr_new_binop_OR(AST_expr exp1, AST_expr exp2)
+{   
+    AST_expr result = new(sizeof(result));
 
     result->kind = EXPR_binop;
     result->u.e_binop.expr1 = exp1;
-    result->u.e_binop.expr2 =exp2;
+    result->u.e_binop.expr2 = exp2;
     result->u.e_binop.op = ast_binop_or;
     
     result->lineno = lineno;
     return result;
 }
 
-AST_expr ast_new_binop_EQ_expr(AST_expr exp1 ,AST_expr exp2)
-{   AST_expr result = new(sizeof(result));
+AST_expr ast_expr_new_binop_EQ(AST_expr exp1, AST_expr exp2)
+{   
+    AST_expr result = new(sizeof(result));
 
     result->kind = EXPR_binop;
     result->u.e_binop.expr1 = exp1;
-    result->u.e_binop.expr2 =exp2;
+    result->u.e_binop.expr2 = exp2;
     result->u.e_binop.op = ast_binop_eq;
    
     result->lineno = lineno;
     return result;
 }
 
-AST_expr ast_new_binop_REL_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
-{   AST_expr result = new(sizeof(result));
+AST_expr ast_expr_new_binop_REL(AST_expr exp1, char *op, AST_expr exp2)
+{   
+    AST_expr result = new(sizeof(result));
 
     result->kind = EXPR_binop;
     result->u.e_binop.expr1 = exp1;
-    result->u.e_binop.expr2 =exp2;
+    result->u.e_binop.expr2 = exp2;
 
     if(strcmp("<",op))
         result->u.e_binop.op = ast_binop_lt;
@@ -728,12 +726,13 @@ AST_expr ast_new_binop_REL_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
 }
 
 
-AST_expr ast_new_binop_ADD_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
-{   AST_expr result = new(sizeof(result));
+AST_expr ast_expr_new_binop_ADD(AST_expr exp1, char *op, AST_expr exp2)
+{   
+    AST_expr result = new(sizeof(result));
 
     result->kind = EXPR_binop;
     result->u.e_binop.expr1 = exp1;
-    result->u.e_binop.expr2 =exp2;
+    result->u.e_binop.expr2 = exp2;
 
     if(strcmp("+",op))
         result->u.e_binop.op = ast_binop_plus;
@@ -744,8 +743,9 @@ AST_expr ast_new_binop_ADD_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
     return result;
 }
 
-AST_expr ast_new_binop_MUL_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
-{   AST_expr result = new(sizeof(result));
+AST_expr ast_expr_new_binop_MUL(AST_expr exp1, char *op, AST_expr exp2)
+{   
+    AST_expr result = new(sizeof(result));
 
     result->kind = EXPR_binop;
     result->u.e_binop.expr1 = exp1;
@@ -762,12 +762,12 @@ AST_expr ast_new_binop_MUL_expr(AST_expr exp1 ,char *op ,AST_expr exp2)
     return result;
 }
 
-AST_expr ast_unop_expr(char *op ,AST_expr expr)
+AST_expr ast_expr_unop(char *op, AST_expr expr)
 {
     AST_expr result = new(sizeof(result));
     
     result->kind = EXPR_unop;
-    result->u.e_unop.expr= expr;
+    result->u.e_unop.expr = expr;
 
 
     if(strcmp("!",op))
@@ -778,21 +778,46 @@ AST_expr ast_unop_expr(char *op ,AST_expr expr)
         result->u.e_unop.op = ast_unop_minus;
     else if(strcmp("sizeof",op))
         result->u.e_binop.op = ast_unop_sizeop;
-    else if (strcmp("++",op))
-        result->u.e_unop.op = ast_unop_inc;
-    else
-        result->u.e_unop.op = ast_unop_dec;
 
     result->lineno = lineno;
     return result;
     
 }
 
-AST_expr ast_func_expr(AST_variable variable ,AST_expr_list expression_list)
-{   AST_expr result = new(sizeof(result));
+
+AST_expr ast_expr_incdec(char *op, AST_variable variable)
+{
+    AST_expr result = new(sizeof(result));
+    
+    result->kind = EXPR_incdec;
+    result->u.e_incdec.variable = variable;
+
+    if (strcmp("++", op))
+        result->u.e_incdec.op = ast_unop_inc;
+    else
+        result->u.e_unop.op = ast_unop_dec;
+
+    result->lineno = lineno;
+    return result;
+}
+
+AST_expr ast_expr_variable(AST_variable variable)
+{
+    AST_expr result = new(sizeof(result));
+    
+    result->kind = EXPR_variable;
+    result->u.e_variable.variable = variable;
+
+    result->lineno = lineno;
+    return result;
+}
+
+AST_expr ast_expr_func(AST_variable variable, AST_exprlist expression_list)
+{   
+    AST_expr result = new(sizeof(result));
 
     result->kind = EXPR_call;
-    result->u.e_call.id = variable->u.definition.id;
+    result->u.e_call.variable = variable;
     result->u.e_call.list = expression_list;
     
     result->lineno = lineno;
@@ -800,20 +825,151 @@ AST_expr ast_func_expr(AST_variable variable ,AST_expr_list expression_list)
 }
 
 
-AST_expr ast_length_expr(AST_general_expr general_expression)
-{   AST_expr result = new(sizeof(result));
+AST_expr ast_expr_length(AST_general_expr general_expression)
+{   
+    AST_expr result = new(sizeof(result));
 
     result->kind = EXPR_call;
-    result->u.e_call_length.expr = general_expression;
+    result->u.e_call_length.general_expr = general_expression;
+    
+    result->lineno = lineno;
+    return result;  
+}
+
+AST_expr ast_expr_constant(AST_constant constant)
+{   
+    AST_expr result = new(sizeof(result));
+
+    result->kind = EXPR_constant;
+    result->u.e_constant.constant = constant;
+    
+    result->lineno = lineno;
+    return result;  
+}
+
+AST_expr ast_expr_standardtype(Type type)
+{   
+    AST_expr result = new(sizeof(result));
+
+    result->kind = EXPR_type;
+    result->u.e_type.type = type;
+
+    result->lineno = lineno;
+    return result;  
+}
+
+AST_expr ast_expr_new(AST_general_expr general_expr)
+{   
+    AST_expr result = new(sizeof(result));
+
+    result->kind = EXPR_new;
+    result->u.e_new.general_expr = general_expr;
+    
+    result->lineno = lineno;
+    return result;  
+}
+
+AST_expr ast_expr_general_expr(AST_general_expr general_expr){
+    AST_expr result = new(sizeof(result));
+
+    result->kind = EXPR_general_expr;
+    result->u.e_general_expr.general_expr = general_expr;
+    
+    result->lineno = lineno;
+    return result;  
+}
+
+AST_expr ast_expr_listexpr(AST_exprlist expr_list){
+    AST_expr result = new(sizeof(result));
+
+    result->kind = EXPR_list_expr;
+    result->u.e_listexpr.exprlist = expr_list;
     
     result->lineno = lineno;
     return result;  
 }
 
 
+AST_exprlist ast_exprlist_general(AST_general_expr general_expr){
+    AST_exprlist result = new(sizeof(result));
 
+    if(general_expr == NULL){
+        result->kind = EXPRLIST_empty;
+    }else{
+        result->kind = EXPRLIST_general;
+        result->u.e_general.general_expr = general_expr;
+    }
 
+    result->lineno = lineno;
+    return result;  
+}
 
+AST_global_decl ast_gdcl_typedef(AST_typedef typedef_dcl){
+    AST_global_decl result = new(sizeof(result));
 
+    result->kind = GDCL_TYPEDEF;
+    result->u.g_typedef.typedef_dcl = typedef_dcl;
 
+    result->lineno = lineno;
+    return result;
+}
 
+AST_global_decl ast_gdcl_enum(AST_enum_dcl enum_dcl){
+    AST_global_decl result = new(sizeof(result));
+
+    result->kind = GDCL_ENUM,
+    result->u.g_enum.enum_dcl = enum_dcl;
+
+    result->lineno = lineno;
+    return result;
+}
+
+AST_global_decl ast_gdcl_class(AST_class_dcl class_dcl){
+    AST_global_decl result = new(sizeof(result));
+
+    result->kind = GDCL_CLASS;
+    result->u.g_class.class_dcl = class_dcl;
+
+    result->lineno = lineno;
+    return result;
+}
+
+AST_global_decl ast_gdcl_union(AST_union_dcl union_dcl){
+    AST_global_decl result = new(sizeof(result));
+
+    result->kind = GDCL_UNION;
+    result->u.g_union.union_dcl = union_dcl;
+
+    result->lineno = lineno;
+    return result;
+}
+
+AST_global_decl ast_gdcl_gvar(AST_global_var_declaration gvar){
+    AST_global_decl result = new(sizeof(result));
+
+    result->kind = GDCL_GLOBAL_VAR;
+    result->u.g_global_var.global_var_dcl = gvar;
+
+    result->lineno = lineno;
+    return result;
+}
+
+AST_global_decl ast_gdcl_func(AST_func_dcl func_dcl){
+    AST_global_decl result = new(sizeof(result));
+
+    result->kind = GDCL_FUNC;
+    result->u.g_func.func_dcl = func_dcl;
+
+    result->lineno = lineno;
+    return result;
+}
+
+AST_program ast_program(List gdcl_list, AST_dcl_stmt dcl_stmt){
+    AST_program result = new(sizeof(result));
+
+    result->gdcl_list = gdcl_list; // Can be NULL! 
+    result->dcl_stmts = dcl_stmt;
+
+    result->lineno = lineno;
+    return result;
+}

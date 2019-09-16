@@ -18,6 +18,8 @@
    --------------------------------------------------------------------- */
 
 /* Δηλώσεις */
+typedef struct AST_program_tag                  * AST_program;
+typedef struct AST_global_decl_tag              * AST_global_decl;
 typedef struct AST_variable_tag                 * AST_variable;
 typedef struct AST_assignment_tag               * AST_assignment;
 typedef struct AST_global_var_declaration_tag   * AST_global_var_declaration;
@@ -51,7 +53,7 @@ typedef struct AST_full_par_func_header_tag     * AST_full_par_func_header;
 typedef struct AST_full_func_dcl_tag            * AST_full_func_dcl;
 typedef struct AST_dcl_stmt_tag                 * AST_dcl_stmt;
 typedef struct AST_func_dcl_tag                 * AST_func_dcl; 
-typedef struct AST_expr_list_tag                * AST_expr_list;
+typedef struct AST_exprlist_tag                 * AST_exprlist;
 
 typedef struct List_tag                 * List;  // TODO: Extract to library?
 
@@ -88,43 +90,109 @@ typedef enum {
     ast_binop_ge,
     ast_binop_and,
     ast_binop_or,
-    
 } AST_binop;
 
 struct AST_expr_tag {
-    enum {
+    enum{
         EXPR_unop,
         EXPR_binop,
-       // EXPR_id,
-       // EXPR_Id,  
-        EXPR_call,     
+        EXPR_call,  
+        EXPR_incdec,
+        EXPR_variable,
+        EXPR_constant,
+        EXPR_type,
+        EXPR_new,
+        EXPR_general_expr,
+        EXPR_list_expr,
     } kind;
     union {
-        struct {
+        struct{
             AST_unop op;
             AST_expr expr;
         } e_unop;
-        struct {
+        struct{
             AST_expr expr1;
             AST_binop op;
             AST_expr expr2;
         } e_binop;
-        struct {
-            Identifier id;
-        } e_id;
-        struct {
-            Identifier id;
-        } e_Id;
-        struct {
-            Identifier id;
-            AST_expr_list list;
+        struct{
+            AST_variable variable;
+            AST_exprlist list;
         } e_call;
- struct {
-            AST_general_expr expr;
+        struct{
+            AST_general_expr general_expr;
         } e_call_length;
+        struct{
+            AST_variable variable;
+            AST_unop op;
+        } e_incdec;
+        struct{
+            AST_variable variable;
+        } e_variable;
+        struct{
+            AST_constant constant;
+        } e_constant;
+        struct{
+            Type type;
+        } e_type;
+        struct{
+            AST_general_expr general_expr;
+        } e_new;
+        struct{
+            AST_general_expr general_expr;
+        } e_general_expr;
+        struct{
+            AST_exprlist exprlist;
+        } e_listexpr;
     } u;
     int lineno;
 }; 
+
+struct AST_exprlist_tag{
+    enum{
+        EXPRLIST_general,
+        EXPRLIST_empty
+    } kind;
+    union {
+        struct{
+            AST_general_expr general_expr;
+        } e_general;
+    } u;
+    int lineno;
+};
+
+struct AST_global_decl_tag{
+    enum{
+        GDCL_TYPEDEF,
+        GDCL_ENUM,
+        GDCL_CLASS,
+        GDCL_UNION,
+        GDCL_GLOBAL_VAR,
+        GDCL_FUNC,
+    } kind;
+    union{
+        struct{
+            AST_typedef typedef_dcl;
+        } g_typedef;
+        struct{
+            AST_enum_dcl enum_dcl;
+        } g_enum;
+        struct{
+            AST_class_dcl class_dcl;
+        } g_class;
+        struct{
+            AST_union_dcl union_dcl;
+        } g_union;
+        struct{
+            AST_global_var_declaration global_var_dcl;
+        } g_global_var;
+        struct{
+            AST_func_dcl func_dcl;
+        } g_func;
+    } u;
+
+    int lineno;
+};
 
 
 /* Απαριθμήσεις τελεστών */
@@ -149,7 +217,7 @@ struct AST_variable_tag{
         struct{
             AST_general_expr general_expr;
         } listfunc;
-        struct {
+        struct{
             int is_static;
             Identifier id;
         } definition;
@@ -560,16 +628,22 @@ struct AST_func_dcl_tag{
     int lineno;
 };
 
+struct AST_program_tag{
+    List gdcl_list;
+    AST_dcl_stmt dcl_stmts;
+    int lineno;
+};
+
 struct List_tag{
     void *data;
     List next;
 };
 
-struct AST_expr_list_tag {
-    AST_expr head;
-    AST_expr_list tail;
-    int lineno;
-};
+// struct AST_expr_list_tag {
+//     AST_expr head;
+//     AST_expr_list tail;
+//     int lineno;
+// };
 
 
 AST_general_expr ast_gexpr_gexpr(AST_general_expr general_expr1, AST_general_expr general_expr2);
@@ -640,15 +714,30 @@ AST_dcl_stmt ast_dcl_stmt_stmts(List s);
 AST_dcl_stmt ast_dcl_stmt_empty();
 AST_func_dcl ast_func_dcl_short(AST_short_func_dcl s);
 AST_func_dcl ast_func_dcl_full(AST_full_func_dcl f);
-AST_expr ast_new_binop_AND_expr(AST_expr exp1 ,AST_expr exp2);
-AST_expr ast_new_binop_OR_expr(AST_expr exp1 ,AST_expr exp2);
-AST_expr ast_new_binop_EQ_expr(AST_expr exp1 ,AST_expr exp2);
-AST_expr ast_new_binop_REL_expr(AST_expr exp1 ,char *op ,AST_expr exp2);
-AST_expr ast_new_binop_ADD_expr(AST_expr exp1 ,char *op ,AST_expr exp2);
-AST_expr ast_new_binop_REL_expr(AST_expr exp1 ,char *op ,AST_expr exp2);
-AST_expr ast_unop_expr(char *op ,AST_expr expr);
-AST_expr ast_func_expr(AST_variable variable ,AST_expr_list expression_list);
-AST_expr ast_length_expr(AST_general_expr general_expression);
+AST_expr ast_expr_new_binop_AND(AST_expr exp1, AST_expr exp2);
+AST_expr ast_expr_new_binop_OR(AST_expr exp1, AST_expr exp2);
+AST_expr ast_expr_new_binop_EQ(AST_expr exp1, AST_expr exp2);
+AST_expr ast_expr_new_binop_REL(AST_expr exp1, char *op, AST_expr exp2);
+AST_expr ast_expr_new_binop_ADD(AST_expr exp1, char *op, AST_expr exp2);
+AST_expr ast_expr_new_binop_MUL(AST_expr exp1, char *op, AST_expr exp2);
+AST_expr ast_expr_unop(char *op, AST_expr expr);
+AST_expr ast_expr_incdec(char *op, AST_variable variable);
+AST_expr ast_expr_variable(AST_variable variable);
+AST_expr ast_expr_func(AST_variable variable, AST_exprlist expression_list);
+AST_expr ast_expr_length(AST_general_expr general_expression);
+AST_expr ast_expr_constant(AST_constant constant);
+AST_expr ast_expr_standardtype(Type type);
+AST_expr ast_expr_new(AST_general_expr general_expr);
+AST_expr ast_expr_general_expr(AST_general_expr general_expr);
+AST_expr ast_expr_listexpr(AST_exprlist expr_list);
+AST_exprlist ast_exprlist_general(AST_general_expr general_expr);
+AST_global_decl ast_gdcl_typedef(AST_typedef typedef_dcl);
+AST_global_decl ast_gdcl_enum(AST_enum_dcl enum_dcl);
+AST_global_decl ast_gdcl_class(AST_class_dcl class_dcl);
+AST_global_decl ast_gdcl_union(AST_union_dcl union_dcl);
+AST_global_decl ast_gdcl_gvar(AST_global_var_declaration gvar);
+AST_global_decl ast_gdcl_func(AST_func_dcl func_dcl);
+AST_program ast_program(List gdcl_list, AST_dcl_stmt dcl_stmt);
 
 List list_add(List list, void *data);
 void list_reverse(List *head);
