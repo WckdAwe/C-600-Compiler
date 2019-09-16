@@ -1,3 +1,7 @@
+#ifndef __PRETTY_H__
+#define __PRETTY_H__
+ 
+
 #include <stdio.h>
 #include "ast.h"
 
@@ -50,3 +54,5 @@ void AST_func_dcl_print(FILE *, int, AST_func_dcl);
 
 void List_print(FILE *, int, List);
 void AST_expr_list_print(FILE *, int, AST_expr_list);
+
+#endif
