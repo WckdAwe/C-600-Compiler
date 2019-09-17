@@ -988,6 +988,18 @@ void AST_func_dcl_print(FILE *f, int prec, AST_func_dcl d){
     }
 }
 
+void AST_program_print(FILE *f, int prec, AST_program p){
+    indent(f, prec);
+    if(p == NULL){
+        fprintf(f, "<<NULL>>\n");
+        return;
+    }
+    fprintf(f, "Type: AST_program(\n");
+    List_print(f, prec+1, p->gdcl_list);
+    AST_dcl_stmt_print(f, prec+1, p->dcl_stmts);
+    indent(f, prec); fprint(f, ")\n");
+}
+
 void List_print(FILE *f, int prec, List l){
     indent(f, prec);
     if(l == NULL){
