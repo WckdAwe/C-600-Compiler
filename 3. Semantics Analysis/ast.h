@@ -636,6 +636,7 @@ struct AST_program_tag{
 struct List_tag{
     void *data;
     List next;
+    int lineno; 
 };
 
 // struct AST_expr_list_tag {

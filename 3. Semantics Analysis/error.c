@@ -39,7 +39,7 @@ bool flagWarnings = true;
 int  numWarnings = 0;
 int  maxWarnings = 200;
 
-
+extern int lineno;
 /* ---------------------------------------------------------------------
    --------- Υλοποίηση των συναρτήσεων του χειριστή σφαλμάτων ----------
    --------------------------------------------------------------------- */
@@ -81,12 +81,12 @@ void fatal (const char * fmt, ...)
 void error (const char * fmt, ...)
 {
     va_list ap;
-
+    
     va_start(ap, fmt);
     if (fmt[0] == '\r')
         fmt++;
     else
-        fprintf(stderr, "%s:%d: ", filename, lineno-1);
+        fprintf(stderr, "%s:%d: ", filename, lineno);
     fprintf(stderr, "Error, ");
     vfprintf(stderr, fmt, ap);
     fprintf(stderr, "\n");

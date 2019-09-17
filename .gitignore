@@ -107,3 +107,5 @@ bin-release/
 3\. Semantics Analysis/tmp/
 
 *.code-workspace
+
+compiler-master/

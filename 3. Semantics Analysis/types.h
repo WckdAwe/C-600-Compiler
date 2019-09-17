@@ -80,8 +80,8 @@ Type type_func  (Type t1, Type t2);
 Type type_ref   (Type t);
 Type type_array (int dim, Type t);
 Type type_list  (Type t);
-Type type_enum (); // TODO: Verify if needed later. Currently using basic
-Type type_union (); // TODO: Verify if needed later. Currently using basic
+// Type type_enum (); // TODO: Verify if needed later. Currently using basic
+// Type type_union (); // TODO: Verify if needed later. Currently using basic
 Type type_id    (Identifier id);
 
 TypeList   type_list_add(TypeList list, Type type);

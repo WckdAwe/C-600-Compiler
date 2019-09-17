@@ -177,4 +177,6 @@ void        scope_print   (Scope scope, int go_deeper);
 
 EntryList   entry_list_add(EntryList list, SymbolEntry entry);
 void        entry_list_reverse(EntryList *list);
+
+char* _print_array_type(Type array);
 #endif

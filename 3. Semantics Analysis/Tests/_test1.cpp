@@ -47,7 +47,8 @@ void all(int i, int j) {
 int b = 1;
 int main() {
 int z,j;
-ar y,w;
+//ar y,w;
+ar w;
 string y[100];
 mystery_class mm;
 y[z] = !x && !g[10][y[j]] || (z == k*3);

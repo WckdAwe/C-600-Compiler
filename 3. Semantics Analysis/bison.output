@@ -1,0 +1,5054 @@
+Grammar
+
+    0 $accept: program "end of file"
+
+    1 program: global_declarations main_function
+
+    2 global_declarations: global_declarations global_declaration
+    3                    | %empty
+
+    4 global_declaration: typedef_declaration
+    5                   | enum_declaration
+    6                   | class_declaration
+    7                   | union_declaration
+    8                   | global_var_declaration
+    9                   | func_declaration
+
+   10 typedef_declaration: "typedef" typename listspec "id" dims ";"
+
+   11 typename: standard_type
+   12         | "id"
+
+   13 standard_type: "char"
+   14              | "int"
+   15              | "float"
+   16              | "string"
+   17              | "void"
+
+   18 listspec: "list"
+   19         | %empty
+
+   20 dims: dims dim
+   21     | %empty
+
+   22 dim: "[" "integer constant" "]"
+   23    | "[" "]"
+
+   24 enum_declaration: "enum" "id" enum_body ";"
+
+   25 enum_body: "{" id_list "}"
+
+   26 id_list: id_list "," "id" initializer
+   27        | "id" initializer
+
+   28 initializer: "=" init_value
+   29            | %empty
+
+   30 init_value: expression
+   31           | "{" init_values "}"
+
+   32 expression: expression "||" expression
+   33           | expression "&&" expression
+   34           | expression "== or !=" expression
+   35           | expression "> or >= or < or <=" expression
+   36           | expression "+ or -" expression
+   37           | expression "* or / or %" expression
+   38           | "!" expression
+   39           | "+ or -" expression
+   40           | "sizeof" expression
+   41           | "-- or ++" variable
+   42           | variable "-- or ++"
+   43           | variable
+   44           | variable "(" expression_list ")"
+   45           | "length" "(" general_expression ")"
+   46           | "new" "(" general_expression ")"
+   47           | constant
+   48           | "(" general_expression ")"
+   49           | "(" standard_type ")"
+   50           | listexpression
+
+   51 variable: variable "[" general_expression "]"
+   52         | variable "." "id"
+   53         | "listfunc" "(" general_expression ")"
+   54         | decltype "id"
+   55         | "this"
+
+   56 general_expression: general_expression "," general_expression
+   57                   | assignment
+
+   58 assignment: variable "=" assignment
+   59           | expression
+
+   60 expression_list: general_expression
+   61                | %empty
+
+   62 constant: "char const"
+   63         | "integer constant"
+   64         | "float constant"
+   65         | "string const"
+
+   66 listexpression: "[" expression_list "]"
+
+   67 init_values: init_values "," init_value
+   68            | init_value
+
+   69 class_declaration: "class" "id" class_body ";"
+
+   70 class_body: parent "{" members_methods "}"
+
+   71 parent: ":" "id"
+   72       | %empty
+
+   73 members_methods: members_methods access member_or_method
+   74                | access member_or_method
+
+   75 access: "private" ":"
+   76       | "protected" ":"
+   77       | "public" ":"
+   78       | %empty
+
+   79 member_or_method: member
+   80                 | method
+
+   81 member: var_declaration
+   82       | anonymous_union
+
+   83 var_declaration: typename variabledefs ";"
+
+   84 variabledefs: variabledefs "," variabledef
+   85             | variabledef
+
+   86 variabledef: listspec "id" dims
+
+   87 anonymous_union: "union" union_body ";"
+
+   88 union_body: "{" fields "}"
+
+   89 fields: fields field
+   90       | field
+
+   91 field: var_declaration
+
+   92 method: short_func_declaration
+
+   93 short_func_declaration: short_par_func_header ";"
+   94                       | nopar_func_header ";"
+
+   95 short_par_func_header: func_header_start "(" parameter_types ")"
+
+   96 func_header_start: typename listspec "id"
+
+   97 parameter_types: parameter_types "," typename pass_list_dims
+   98                | typename pass_list_dims
+
+   99 pass_list_dims: "&"
+  100               | listspec dims
+
+  101 nopar_func_header: func_header_start "(" ")"
+
+  102 union_declaration: "union" "id" union_body ";"
+
+  103 global_var_declaration: typename init_variabledefs ";"
+
+  104 init_variabledefs: init_variabledefs "," init_variabledef
+  105                  | init_variabledef
+
+  106 init_variabledef: variabledef initializer
+
+  107 func_declaration: short_func_declaration
+  108                 | full_func_declaration
+
+  109 full_func_declaration: full_par_func_header "{" decl_statements "}"
+  110                      | nopar_class_func_header "{" decl_statements "}"
+  111                      | nopar_func_header "{" decl_statements "}"
+
+  112 full_par_func_header: class_func_header_start "(" parameter_list ")"
+  113                     | func_header_start "(" parameter_list ")"
+
+  114 class_func_header_start: typename listspec func_class "id"
+
+  115 func_class: "id" "::"
+
+  116 parameter_list: parameter_list "," typename pass_variabledef
+  117               | typename pass_variabledef
+
+  118 pass_variabledef: variabledef
+  119                 | "&" "id"
+
+  120 nopar_class_func_header: class_func_header_start "(" ")"
+
+  121 decl_statements: declarations statements
+  122                | declarations
+  123                | statements
+  124                | %empty
+
+  125 declarations: declarations decltype typename variabledefs ";"
+  126             | decltype typename variabledefs ";"
+
+  127 decltype: "static"
+  128         | %empty
+
+  129 statements: statements statement
+  130           | statement
+
+  131 statement: expression_statement
+  132          | if_statement
+  133          | while_statement
+  134          | for_statement
+  135          | switch_statement
+  136          | return_statement
+  137          | io_statement
+  138          | comp_statement
+  139          | "continue" ";"
+  140          | "break" ";"
+  141          | ";"
+
+  142 expression_statement: general_expression ";"
+
+  143 if_statement: "if" "(" general_expression ")" statement if_tail
+
+  144 if_tail: "else" statement
+  145        | %empty
+
+  146 while_statement: "while" "(" general_expression ")" statement
+
+  147 for_statement: "for" "(" optexpr ";" optexpr ";" optexpr ")" statement
+
+  148 optexpr: general_expression
+  149        | %empty
+
+  150 switch_statement: "switch" "(" general_expression ")" switch_tail
+
+  151 switch_tail: "{" decl_cases "}"
+  152            | single_casestatement
+
+  153 decl_cases: declarations casestatements
+  154           | declarations
+  155           | casestatements
+  156           | %empty
+
+  157 casestatements: casestatements casestatement
+  158               | casestatement
+
+  159 casestatement: "case" constant ":" casestatement
+  160              | "case" constant ":" statements
+  161              | "default" ":" statements
+
+  162 single_casestatement: "case" constant ":" single_casestatement
+  163                     | "case" constant ":" statement
+
+  164 return_statement: "return" optexpr ";"
+
+  165 io_statement: "cin" "<<" in_list ";"
+  166             | "cout" ">>" out_list ";"
+
+  167 in_list: in_list "<<" in_item
+  168        | in_item
+
+  169 in_item: variable
+
+  170 out_list: out_list ">>" out_item
+  171         | out_item
+
+  172 out_item: general_expression
+
+  173 comp_statement: "{" decl_statements "}"
+
+  174 main_function: main_header "{" decl_statements "}"
+
+  175 main_header: "int" "main" "(" ")"
+
+
+Terminals, with rules where they appear
+
+"end of file" (0) 0
+error (256)
+"integer constant" (258) 22 63
+"float constant" (259) 64
+"typedef" (260) 10
+"char" (261) 13
+"string" (262) 16
+"string const" (263) 65
+"class" (264) 69
+"private" (265) 75
+"protected" (266) 76
+"public" (267) 77
+"static" (268) 127
+"union" (269) 87 102
+"list" (270) 18
+"continue" (271) 139
+"break" (272) 140
+"if" (273) 143
+"else" (274) 144
+"while" (275) 146
+"for" (276) 147
+"switch" (277) 150
+"default" (278) 161
+"return" (279) 164
+"new" (280) 46
+"cin" (281) 165
+"cout" (282) 166
+"main" (283) 175
+"this" (284) 55
+"id" (285) 10 12 24 26 27 52 54 69 71 86 96 102 114 115 119
+"||" (286) 32
+"&&" (287) 33
+"== or !=" (288) 34
+"+ or -" (289) 36 39
+"* or / or %" (290) 37
+"-- or ++" (291) 41 42
+"sizeof" (292) 40
+"listfunc" (293) 53
+"(" (294) 44 45 46 48 49 53 95 101 112 113 120 143 146 147 150 175
+")" (295) 44 45 46 48 49 53 95 101 112 113 120 143 146 147 150 175
+";" (296) 10 24 69 83 87 93 94 102 103 125 126 139 140 141 142 147
+    164 165 166
+"." (297) 52
+"," (298) 26 56 67 84 97 104 116
+":" (299) 71 75 76 77 159 160 161 162 163
+"[" (300) 22 23 51 66
+"]" (301) 22 23 51 66
+"&" (302) 99 119
+"{" (303) 25 31 70 88 109 110 111 151 173 174
+"}" (304) 25 31 70 88 109 110 111 151 173 174
+"::" (305) 115
+"<<" (306) 165 167
+">>" (307) 166 170
+"=" (308) 28 58
+"case" (309) 159 160 162 163
+"char const" (310) 62
+"float" (311) 15
+"!" (312) 38
+"> or >= or < or <=" (313) 35
+"void" (314) 17
+"enum" (315) 24
+"int" (316) 14 175
+"length" (317) 45
+UMINUS (318)
+LOWER_THAN_ELSE (319)
+
+
+Nonterminals, with rules where they appear
+
+$accept (65)
+    on left: 0
+program (66)
+    on left: 1, on right: 0
+global_declarations (67)
+    on left: 2 3, on right: 1 2
+global_declaration (68)
+    on left: 4 5 6 7 8 9, on right: 2
+typedef_declaration (69)
+    on left: 10, on right: 4
+typename (70)
+    on left: 11 12, on right: 10 83 96 97 98 103 114 116 117 125 126
+standard_type (71)
+    on left: 13 14 15 16 17, on right: 11 49
+listspec (72)
+    on left: 18 19, on right: 10 86 96 100 114
+dims (73)
+    on left: 20 21, on right: 10 20 86 100
+dim (74)
+    on left: 22 23, on right: 20
+enum_declaration (75)
+    on left: 24, on right: 5
+enum_body (76)
+    on left: 25, on right: 24
+id_list (77)
+    on left: 26 27, on right: 25 26
+initializer (78)
+    on left: 28 29, on right: 26 27 106
+init_value (79)
+    on left: 30 31, on right: 28 67 68
+expression (80)
+    on left: 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49
+    50, on right: 30 32 33 34 35 36 37 38 39 40 59
+variable (81)
+    on left: 51 52 53 54 55, on right: 41 42 43 44 51 52 58 169
+general_expression (82)
+    on left: 56 57, on right: 45 46 48 51 53 56 60 142 143 146 148
+    150 172
+assignment (83)
+    on left: 58 59, on right: 57 58
+expression_list (84)
+    on left: 60 61, on right: 44 66
+constant (85)
+    on left: 62 63 64 65, on right: 47 159 160 162 163
+listexpression (86)
+    on left: 66, on right: 50
+init_values (87)
+    on left: 67 68, on right: 31 67
+class_declaration (88)
+    on left: 69, on right: 6
+class_body (89)
+    on left: 70, on right: 69
+parent (90)
+    on left: 71 72, on right: 70
+members_methods (91)
+    on left: 73 74, on right: 70 73
+access (92)
+    on left: 75 76 77 78, on right: 73 74
+member_or_method (93)
+    on left: 79 80, on right: 73 74
+member (94)
+    on left: 81 82, on right: 79
+var_declaration (95)
+    on left: 83, on right: 81 91
+variabledefs (96)
+    on left: 84 85, on right: 83 84 125 126
+variabledef (97)
+    on left: 86, on right: 84 85 106 118
+anonymous_union (98)
+    on left: 87, on right: 82
+union_body (99)
+    on left: 88, on right: 87 102
+fields (100)
+    on left: 89 90, on right: 88 89
+field (101)
+    on left: 91, on right: 89 90
+method (102)
+    on left: 92, on right: 80
+short_func_declaration (103)
+    on left: 93 94, on right: 92 107
+short_par_func_header (104)
+    on left: 95, on right: 93
+func_header_start (105)
+    on left: 96, on right: 95 101 113
+parameter_types (106)
+    on left: 97 98, on right: 95 97
+pass_list_dims (107)
+    on left: 99 100, on right: 97 98
+nopar_func_header (108)
+    on left: 101, on right: 94 111
+union_declaration (109)
+    on left: 102, on right: 7
+global_var_declaration (110)
+    on left: 103, on right: 8
+init_variabledefs (111)
+    on left: 104 105, on right: 103 104
+init_variabledef (112)
+    on left: 106, on right: 104 105
+func_declaration (113)
+    on left: 107 108, on right: 9
+full_func_declaration (114)
+    on left: 109 110 111, on right: 108
+full_par_func_header (115)
+    on left: 112 113, on right: 109
+class_func_header_start (116)
+    on left: 114, on right: 112 120
+func_class (117)
+    on left: 115, on right: 114
+parameter_list (118)
+    on left: 116 117, on right: 112 113 116
+pass_variabledef (119)
+    on left: 118 119, on right: 116 117
+nopar_class_func_header (120)
+    on left: 120, on right: 110
+decl_statements (121)
+    on left: 121 122 123 124, on right: 109 110 111 173 174
+declarations (122)
+    on left: 125 126, on right: 121 122 125 153 154
+decltype (123)
+    on left: 127 128, on right: 54 125 126
+statements (124)
+    on left: 129 130, on right: 121 123 129 160 161
+statement (125)
+    on left: 131 132 133 134 135 136 137 138 139 140 141, on right:
+    129 130 143 144 146 147 163
+expression_statement (126)
+    on left: 142, on right: 131
+if_statement (127)
+    on left: 143, on right: 132
+if_tail (128)
+    on left: 144 145, on right: 143
+while_statement (129)
+    on left: 146, on right: 133
+for_statement (130)
+    on left: 147, on right: 134
+optexpr (131)
+    on left: 148 149, on right: 147 164
+switch_statement (132)
+    on left: 150, on right: 135
+switch_tail (133)
+    on left: 151 152, on right: 150
+decl_cases (134)
+    on left: 153 154 155 156, on right: 151
+casestatements (135)
+    on left: 157 158, on right: 153 155 157
+casestatement (136)
+    on left: 159 160 161, on right: 157 158 159
+single_casestatement (137)
+    on left: 162 163, on right: 152 162
+return_statement (138)
+    on left: 164, on right: 136
+io_statement (139)
+    on left: 165 166, on right: 137
+in_list (140)
+    on left: 167 168, on right: 165 167
+in_item (141)
+    on left: 169, on right: 167 168
+out_list (142)
+    on left: 170 171, on right: 166 170
+out_item (143)
+    on left: 172, on right: 170 171
+comp_statement (144)
+    on left: 173, on right: 138
+main_function (145)
+    on left: 174, on right: 1
+main_header (146)
+    on left: 175, on right: 174
+
+
+State 0
+
+    0 $accept: . program "end of file"
+
+    $default  reduce using rule 3 (global_declarations)
+
+    program              go to state 1
+    global_declarations  go to state 2
+
+
+State 1
+
+    0 $accept: program . "end of file"
+
+    "end of file"  shift, and go to state 3
+
+
+State 2
+
+    1 program: global_declarations . main_function
+    2 global_declarations: global_declarations . global_declaration
+
+    "typedef"  shift, and go to state 4
+    "char"     shift, and go to state 5
+    "string"   shift, and go to state 6
+    "class"    shift, and go to state 7
+    "union"    shift, and go to state 8
+    "id"       shift, and go to state 9
+    "float"    shift, and go to state 10
+    "void"     shift, and go to state 11
+    "enum"     shift, and go to state 12
+    "int"      shift, and go to state 13
+
+    global_declaration       go to state 14
+    typedef_declaration      go to state 15
+    typename                 go to state 16
+    standard_type            go to state 17
+    enum_declaration         go to state 18
+    class_declaration        go to state 19
+    short_func_declaration   go to state 20
+    short_par_func_header    go to state 21
+    func_header_start        go to state 22
+    nopar_func_header        go to state 23
+    union_declaration        go to state 24
+    global_var_declaration   go to state 25
+    func_declaration         go to state 26
+    full_func_declaration    go to state 27
+    full_par_func_header     go to state 28
+    class_func_header_start  go to state 29
+    nopar_class_func_header  go to state 30
+    main_function            go to state 31
+    main_header              go to state 32
+
+
+State 3
+
+    0 $accept: program "end of file" .
+
+    $default  accept
+
+
+State 4
+
+   10 typedef_declaration: "typedef" . typename listspec "id" dims ";"
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 9
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename       go to state 34
+    standard_type  go to state 17
+
+
+State 5
+
+   13 standard_type: "char" .
+
+    $default  reduce using rule 13 (standard_type)
+
+
+State 6
+
+   16 standard_type: "string" .
+
+    $default  reduce using rule 16 (standard_type)
+
+
+State 7
+
+   69 class_declaration: "class" . "id" class_body ";"
+
+    "id"  shift, and go to state 35
+
+
+State 8
+
+  102 union_declaration: "union" . "id" union_body ";"
+
+    "id"  shift, and go to state 36
+
+
+State 9
+
+   12 typename: "id" .
+
+    $default  reduce using rule 12 (typename)
+
+
+State 10
+
+   15 standard_type: "float" .
+
+    $default  reduce using rule 15 (standard_type)
+
+
+State 11
+
+   17 standard_type: "void" .
+
+    $default  reduce using rule 17 (standard_type)
+
+
+State 12
+
+   24 enum_declaration: "enum" . "id" enum_body ";"
+
+    "id"  shift, and go to state 37
+
+
+State 13
+
+   14 standard_type: "int" .
+  175 main_header: "int" . "main" "(" ")"
+
+    "main"  shift, and go to state 38
+
+    $default  reduce using rule 14 (standard_type)
+
+
+State 14
+
+    2 global_declarations: global_declarations global_declaration .
+
+    $default  reduce using rule 2 (global_declarations)
+
+
+State 15
+
+    4 global_declaration: typedef_declaration .
+
+    $default  reduce using rule 4 (global_declaration)
+
+
+State 16
+
+   96 func_header_start: typename . listspec "id"
+  103 global_var_declaration: typename . init_variabledefs ";"
+  114 class_func_header_start: typename . listspec func_class "id"
+
+    "list"  shift, and go to state 39
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec           go to state 40
+    variabledef        go to state 41
+    init_variabledefs  go to state 42
+    init_variabledef   go to state 43
+
+
+State 17
+
+   11 typename: standard_type .
+
+    $default  reduce using rule 11 (typename)
+
+
+State 18
+
+    5 global_declaration: enum_declaration .
+
+    $default  reduce using rule 5 (global_declaration)
+
+
+State 19
+
+    6 global_declaration: class_declaration .
+
+    $default  reduce using rule 6 (global_declaration)
+
+
+State 20
+
+  107 func_declaration: short_func_declaration .
+
+    $default  reduce using rule 107 (func_declaration)
+
+
+State 21
+
+   93 short_func_declaration: short_par_func_header . ";"
+
+    ";"  shift, and go to state 44
+
+
+State 22
+
+   95 short_par_func_header: func_header_start . "(" parameter_types ")"
+  101 nopar_func_header: func_header_start . "(" ")"
+  113 full_par_func_header: func_header_start . "(" parameter_list ")"
+
+    "("  shift, and go to state 45
+
+
+State 23
+
+   94 short_func_declaration: nopar_func_header . ";"
+  111 full_func_declaration: nopar_func_header . "{" decl_statements "}"
+
+    ";"  shift, and go to state 46
+    "{"  shift, and go to state 47
+
+
+State 24
+
+    7 global_declaration: union_declaration .
+
+    $default  reduce using rule 7 (global_declaration)
+
+
+State 25
+
+    8 global_declaration: global_var_declaration .
+
+    $default  reduce using rule 8 (global_declaration)
+
+
+State 26
+
+    9 global_declaration: func_declaration .
+
+    $default  reduce using rule 9 (global_declaration)
+
+
+State 27
+
+  108 func_declaration: full_func_declaration .
+
+    $default  reduce using rule 108 (func_declaration)
+
+
+State 28
+
+  109 full_func_declaration: full_par_func_header . "{" decl_statements "}"
+
+    "{"  shift, and go to state 48
+
+
+State 29
+
+  112 full_par_func_header: class_func_header_start . "(" parameter_list ")"
+  120 nopar_class_func_header: class_func_header_start . "(" ")"
+
+    "("  shift, and go to state 49
+
+
+State 30
+
+  110 full_func_declaration: nopar_class_func_header . "{" decl_statements "}"
+
+    "{"  shift, and go to state 50
+
+
+State 31
+
+    1 program: global_declarations main_function .
+
+    $default  reduce using rule 1 (program)
+
+
+State 32
+
+  174 main_function: main_header . "{" decl_statements "}"
+
+    "{"  shift, and go to state 51
+
+
+State 33
+
+   14 standard_type: "int" .
+
+    $default  reduce using rule 14 (standard_type)
+
+
+State 34
+
+   10 typedef_declaration: "typedef" typename . listspec "id" dims ";"
+
+    "list"  shift, and go to state 39
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec  go to state 52
+
+
+State 35
+
+   69 class_declaration: "class" "id" . class_body ";"
+
+    ":"  shift, and go to state 53
+
+    $default  reduce using rule 72 (parent)
+
+    class_body  go to state 54
+    parent      go to state 55
+
+
+State 36
+
+  102 union_declaration: "union" "id" . union_body ";"
+
+    "{"  shift, and go to state 56
+
+    union_body  go to state 57
+
+
+State 37
+
+   24 enum_declaration: "enum" "id" . enum_body ";"
+
+    "{"  shift, and go to state 58
+
+    enum_body  go to state 59
+
+
+State 38
+
+  175 main_header: "int" "main" . "(" ")"
+
+    "("  shift, and go to state 60
+
+
+State 39
+
+   18 listspec: "list" .
+
+    $default  reduce using rule 18 (listspec)
+
+
+State 40
+
+   86 variabledef: listspec . "id" dims
+   96 func_header_start: typename listspec . "id"
+  114 class_func_header_start: typename listspec . func_class "id"
+
+    "id"  shift, and go to state 61
+
+    func_class  go to state 62
+
+
+State 41
+
+  106 init_variabledef: variabledef . initializer
+
+    "="  shift, and go to state 63
+
+    $default  reduce using rule 29 (initializer)
+
+    initializer  go to state 64
+
+
+State 42
+
+  103 global_var_declaration: typename init_variabledefs . ";"
+  104 init_variabledefs: init_variabledefs . "," init_variabledef
+
+    ";"  shift, and go to state 65
+    ","  shift, and go to state 66
+
+
+State 43
+
+  105 init_variabledefs: init_variabledef .
+
+    $default  reduce using rule 105 (init_variabledefs)
+
+
+State 44
+
+   93 short_func_declaration: short_par_func_header ";" .
+
+    $default  reduce using rule 93 (short_func_declaration)
+
+
+State 45
+
+   95 short_par_func_header: func_header_start "(" . parameter_types ")"
+  101 nopar_func_header: func_header_start "(" . ")"
+  113 full_par_func_header: func_header_start "(" . parameter_list ")"
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 9
+    ")"       shift, and go to state 67
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename         go to state 68
+    standard_type    go to state 17
+    parameter_types  go to state 69
+    parameter_list   go to state 70
+
+
+State 46
+
+   94 short_func_declaration: nopar_func_header ";" .
+
+    $default  reduce using rule 94 (short_func_declaration)
+
+
+State 47
+
+  111 full_func_declaration: nopar_func_header "{" . decl_statements "}"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "}"       reduce using rule 124 (decl_statements)
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decl_statements       go to state 103
+    declarations          go to state 104
+    decltype              go to state 105
+    statements            go to state 106
+    statement             go to state 107
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 48
+
+  109 full_func_declaration: full_par_func_header "{" . decl_statements "}"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "}"       reduce using rule 124 (decl_statements)
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decl_statements       go to state 116
+    declarations          go to state 104
+    decltype              go to state 105
+    statements            go to state 106
+    statement             go to state 107
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 49
+
+  112 full_par_func_header: class_func_header_start "(" . parameter_list ")"
+  120 nopar_class_func_header: class_func_header_start "(" . ")"
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 9
+    ")"       shift, and go to state 117
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename        go to state 118
+    standard_type   go to state 17
+    parameter_list  go to state 119
+
+
+State 50
+
+  110 full_func_declaration: nopar_class_func_header "{" . decl_statements "}"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "}"       reduce using rule 124 (decl_statements)
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decl_statements       go to state 120
+    declarations          go to state 104
+    decltype              go to state 105
+    statements            go to state 106
+    statement             go to state 107
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 51
+
+  174 main_function: main_header "{" . decl_statements "}"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "}"       reduce using rule 124 (decl_statements)
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decl_statements       go to state 121
+    declarations          go to state 104
+    decltype              go to state 105
+    statements            go to state 106
+    statement             go to state 107
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 52
+
+   10 typedef_declaration: "typedef" typename listspec . "id" dims ";"
+
+    "id"  shift, and go to state 122
+
+
+State 53
+
+   71 parent: ":" . "id"
+
+    "id"  shift, and go to state 123
+
+
+State 54
+
+   69 class_declaration: "class" "id" class_body . ";"
+
+    ";"  shift, and go to state 124
+
+
+State 55
+
+   70 class_body: parent . "{" members_methods "}"
+
+    "{"  shift, and go to state 125
+
+
+State 56
+
+   88 union_body: "{" . fields "}"
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 9
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename         go to state 126
+    standard_type    go to state 17
+    var_declaration  go to state 127
+    fields           go to state 128
+    field            go to state 129
+
+
+State 57
+
+  102 union_declaration: "union" "id" union_body . ";"
+
+    ";"  shift, and go to state 130
+
+
+State 58
+
+   25 enum_body: "{" . id_list "}"
+
+    "id"  shift, and go to state 131
+
+    id_list  go to state 132
+
+
+State 59
+
+   24 enum_declaration: "enum" "id" enum_body . ";"
+
+    ";"  shift, and go to state 133
+
+
+State 60
+
+  175 main_header: "int" "main" "(" . ")"
+
+    ")"  shift, and go to state 134
+
+
+State 61
+
+   86 variabledef: listspec "id" . dims
+   96 func_header_start: typename listspec "id" .
+  115 func_class: "id" . "::"
+
+    "::"  shift, and go to state 135
+
+    "("       reduce using rule 96 (func_header_start)
+    $default  reduce using rule 21 (dims)
+
+    dims  go to state 136
+
+
+State 62
+
+  114 class_func_header_start: typename listspec func_class . "id"
+
+    "id"  shift, and go to state 137
+
+
+State 63
+
+   28 initializer: "=" . init_value
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 138
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    init_value      go to state 139
+    expression      go to state 140
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 64
+
+  106 init_variabledef: variabledef initializer .
+
+    $default  reduce using rule 106 (init_variabledef)
+
+
+State 65
+
+  103 global_var_declaration: typename init_variabledefs ";" .
+
+    $default  reduce using rule 103 (global_var_declaration)
+
+
+State 66
+
+  104 init_variabledefs: init_variabledefs "," . init_variabledef
+
+    "list"  shift, and go to state 39
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec          go to state 143
+    variabledef       go to state 41
+    init_variabledef  go to state 144
+
+
+State 67
+
+  101 nopar_func_header: func_header_start "(" ")" .
+
+    $default  reduce using rule 101 (nopar_func_header)
+
+
+State 68
+
+   98 parameter_types: typename . pass_list_dims
+  117 parameter_list: typename . pass_variabledef
+
+    "list"  shift, and go to state 39
+    "&"     shift, and go to state 145
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec          go to state 146
+    variabledef       go to state 147
+    pass_list_dims    go to state 148
+    pass_variabledef  go to state 149
+
+
+State 69
+
+   95 short_par_func_header: func_header_start "(" parameter_types . ")"
+   97 parameter_types: parameter_types . "," typename pass_list_dims
+
+    ")"  shift, and go to state 150
+    ","  shift, and go to state 151
+
+
+State 70
+
+  113 full_par_func_header: func_header_start "(" parameter_list . ")"
+  116 parameter_list: parameter_list . "," typename pass_variabledef
+
+    ")"  shift, and go to state 152
+    ","  shift, and go to state 153
+
+
+State 71
+
+   63 constant: "integer constant" .
+
+    $default  reduce using rule 63 (constant)
+
+
+State 72
+
+   64 constant: "float constant" .
+
+    $default  reduce using rule 64 (constant)
+
+
+State 73
+
+   65 constant: "string const" .
+
+    $default  reduce using rule 65 (constant)
+
+
+State 74
+
+  127 decltype: "static" .
+
+    $default  reduce using rule 127 (decltype)
+
+
+State 75
+
+  139 statement: "continue" . ";"
+
+    ";"  shift, and go to state 154
+
+
+State 76
+
+  140 statement: "break" . ";"
+
+    ";"  shift, and go to state 155
+
+
+State 77
+
+  143 if_statement: "if" . "(" general_expression ")" statement if_tail
+
+    "("  shift, and go to state 156
+
+
+State 78
+
+  146 while_statement: "while" . "(" general_expression ")" statement
+
+    "("  shift, and go to state 157
+
+
+State 79
+
+  147 for_statement: "for" . "(" optexpr ";" optexpr ";" optexpr ")" statement
+
+    "("  shift, and go to state 158
+
+
+State 80
+
+  150 switch_statement: "switch" . "(" general_expression ")" switch_tail
+
+    "("  shift, and go to state 159
+
+
+State 81
+
+  164 return_statement: "return" . optexpr ";"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    ";"       reduce using rule 149 (optexpr)
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 160
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+    optexpr             go to state 161
+
+
+State 82
+
+   46 expression: "new" . "(" general_expression ")"
+
+    "("  shift, and go to state 162
+
+
+State 83
+
+  165 io_statement: "cin" . "<<" in_list ";"
+
+    "<<"  shift, and go to state 163
+
+
+State 84
+
+  166 io_statement: "cout" . ">>" out_list ";"
+
+    ">>"  shift, and go to state 164
+
+
+State 85
+
+   55 variable: "this" .
+
+    $default  reduce using rule 55 (variable)
+
+
+State 86
+
+   39 expression: "+ or -" . expression
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression      go to state 165
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 87
+
+   41 expression: "-- or ++" . variable
+
+    "static"    shift, and go to state 74
+    "this"      shift, and go to state 85
+    "listfunc"  shift, and go to state 89
+
+    $default  reduce using rule 128 (decltype)
+
+    variable  go to state 166
+    decltype  go to state 142
+
+
+State 88
+
+   40 expression: "sizeof" . expression
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression      go to state 167
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 89
+
+   53 variable: "listfunc" . "(" general_expression ")"
+
+    "("  shift, and go to state 168
+
+
+State 90
+
+   48 expression: "(" . general_expression ")"
+   49           | "(" . standard_type ")"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "char"              shift, and go to state 5
+    "string"            shift, and go to state 6
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "float"             shift, and go to state 10
+    "!"                 shift, and go to state 95
+    "void"              shift, and go to state 11
+    "int"               shift, and go to state 33
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    standard_type       go to state 169
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 170
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+
+
+State 91
+
+  141 statement: ";" .
+
+    $default  reduce using rule 141 (statement)
+
+
+State 92
+
+   66 listexpression: "[" . expression_list "]"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "id"      reduce using rule 128 (decltype)
+    $default  reduce using rule 61 (expression_list)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 171
+    assignment          go to state 100
+    expression_list     go to state 172
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+
+
+State 93
+
+  173 comp_statement: "{" . decl_statements "}"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "}"       reduce using rule 124 (decl_statements)
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decl_statements       go to state 173
+    declarations          go to state 104
+    decltype              go to state 105
+    statements            go to state 106
+    statement             go to state 107
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 94
+
+   62 constant: "char const" .
+
+    $default  reduce using rule 62 (constant)
+
+
+State 95
+
+   38 expression: "!" . expression
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression      go to state 174
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 96
+
+   45 expression: "length" . "(" general_expression ")"
+
+    "("  shift, and go to state 175
+
+
+State 97
+
+   32 expression: expression . "||" expression
+   33           | expression . "&&" expression
+   34           | expression . "== or !=" expression
+   35           | expression . "> or >= or < or <=" expression
+   36           | expression . "+ or -" expression
+   37           | expression . "* or / or %" expression
+   59 assignment: expression .
+
+    "||"                  shift, and go to state 176
+    "&&"                  shift, and go to state 177
+    "== or !="            shift, and go to state 178
+    "+ or -"              shift, and go to state 179
+    "* or / or %"         shift, and go to state 180
+    "> or >= or < or <="  shift, and go to state 181
+
+    $default  reduce using rule 59 (assignment)
+
+
+State 98
+
+   42 expression: variable . "-- or ++"
+   43           | variable .
+   44           | variable . "(" expression_list ")"
+   51 variable: variable . "[" general_expression "]"
+   52         | variable . "." "id"
+   58 assignment: variable . "=" assignment
+
+    "-- or ++"  shift, and go to state 182
+    "("         shift, and go to state 183
+    "."         shift, and go to state 184
+    "["         shift, and go to state 185
+    "="         shift, and go to state 186
+
+    $default  reduce using rule 43 (expression)
+
+
+State 99
+
+   56 general_expression: general_expression . "," general_expression
+  142 expression_statement: general_expression . ";"
+
+    ";"  shift, and go to state 187
+    ","  shift, and go to state 188
+
+
+State 100
+
+   57 general_expression: assignment .
+
+    $default  reduce using rule 57 (general_expression)
+
+
+State 101
+
+   47 expression: constant .
+
+    $default  reduce using rule 47 (expression)
+
+
+State 102
+
+   50 expression: listexpression .
+
+    $default  reduce using rule 50 (expression)
+
+
+State 103
+
+  111 full_func_declaration: nopar_func_header "{" decl_statements . "}"
+
+    "}"  shift, and go to state 189
+
+
+State 104
+
+  121 decl_statements: declarations . statements
+  122                | declarations .
+  125 declarations: declarations . decltype typename variabledefs ";"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "}"       reduce using rule 122 (decl_statements)
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 190
+    statements            go to state 191
+    statement             go to state 107
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 105
+
+   54 variable: decltype . "id"
+  126 declarations: decltype . typename variabledefs ";"
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 192
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename       go to state 193
+    standard_type  go to state 17
+
+
+State 106
+
+  123 decl_statements: statements .
+  129 statements: statements . statement
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "id"      reduce using rule 128 (decltype)
+    $default  reduce using rule 123 (decl_statements)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 142
+    statement             go to state 194
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 107
+
+  130 statements: statement .
+
+    $default  reduce using rule 130 (statements)
+
+
+State 108
+
+  131 statement: expression_statement .
+
+    $default  reduce using rule 131 (statement)
+
+
+State 109
+
+  132 statement: if_statement .
+
+    $default  reduce using rule 132 (statement)
+
+
+State 110
+
+  133 statement: while_statement .
+
+    $default  reduce using rule 133 (statement)
+
+
+State 111
+
+  134 statement: for_statement .
+
+    $default  reduce using rule 134 (statement)
+
+
+State 112
+
+  135 statement: switch_statement .
+
+    $default  reduce using rule 135 (statement)
+
+
+State 113
+
+  136 statement: return_statement .
+
+    $default  reduce using rule 136 (statement)
+
+
+State 114
+
+  137 statement: io_statement .
+
+    $default  reduce using rule 137 (statement)
+
+
+State 115
+
+  138 statement: comp_statement .
+
+    $default  reduce using rule 138 (statement)
+
+
+State 116
+
+  109 full_func_declaration: full_par_func_header "{" decl_statements . "}"
+
+    "}"  shift, and go to state 195
+
+
+State 117
+
+  120 nopar_class_func_header: class_func_header_start "(" ")" .
+
+    $default  reduce using rule 120 (nopar_class_func_header)
+
+
+State 118
+
+  117 parameter_list: typename . pass_variabledef
+
+    "list"  shift, and go to state 39
+    "&"     shift, and go to state 196
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec          go to state 143
+    variabledef       go to state 147
+    pass_variabledef  go to state 149
+
+
+State 119
+
+  112 full_par_func_header: class_func_header_start "(" parameter_list . ")"
+  116 parameter_list: parameter_list . "," typename pass_variabledef
+
+    ")"  shift, and go to state 197
+    ","  shift, and go to state 153
+
+
+State 120
+
+  110 full_func_declaration: nopar_class_func_header "{" decl_statements . "}"
+
+    "}"  shift, and go to state 198
+
+
+State 121
+
+  174 main_function: main_header "{" decl_statements . "}"
+
+    "}"  shift, and go to state 199
+
+
+State 122
+
+   10 typedef_declaration: "typedef" typename listspec "id" . dims ";"
+
+    $default  reduce using rule 21 (dims)
+
+    dims  go to state 200
+
+
+State 123
+
+   71 parent: ":" "id" .
+
+    $default  reduce using rule 71 (parent)
+
+
+State 124
+
+   69 class_declaration: "class" "id" class_body ";" .
+
+    $default  reduce using rule 69 (class_declaration)
+
+
+State 125
+
+   70 class_body: parent "{" . members_methods "}"
+
+    "private"    shift, and go to state 201
+    "protected"  shift, and go to state 202
+    "public"     shift, and go to state 203
+
+    $default  reduce using rule 78 (access)
+
+    members_methods  go to state 204
+    access           go to state 205
+
+
+State 126
+
+   83 var_declaration: typename . variabledefs ";"
+
+    "list"  shift, and go to state 39
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec      go to state 143
+    variabledefs  go to state 206
+    variabledef   go to state 207
+
+
+State 127
+
+   91 field: var_declaration .
+
+    $default  reduce using rule 91 (field)
+
+
+State 128
+
+   88 union_body: "{" fields . "}"
+   89 fields: fields . field
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 9
+    "}"       shift, and go to state 208
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename         go to state 126
+    standard_type    go to state 17
+    var_declaration  go to state 127
+    field            go to state 209
+
+
+State 129
+
+   90 fields: field .
+
+    $default  reduce using rule 90 (fields)
+
+
+State 130
+
+  102 union_declaration: "union" "id" union_body ";" .
+
+    $default  reduce using rule 102 (union_declaration)
+
+
+State 131
+
+   27 id_list: "id" . initializer
+
+    "="  shift, and go to state 63
+
+    $default  reduce using rule 29 (initializer)
+
+    initializer  go to state 210
+
+
+State 132
+
+   25 enum_body: "{" id_list . "}"
+   26 id_list: id_list . "," "id" initializer
+
+    ","  shift, and go to state 211
+    "}"  shift, and go to state 212
+
+
+State 133
+
+   24 enum_declaration: "enum" "id" enum_body ";" .
+
+    $default  reduce using rule 24 (enum_declaration)
+
+
+State 134
+
+  175 main_header: "int" "main" "(" ")" .
+
+    $default  reduce using rule 175 (main_header)
+
+
+State 135
+
+  115 func_class: "id" "::" .
+
+    $default  reduce using rule 115 (func_class)
+
+
+State 136
+
+   20 dims: dims . dim
+   86 variabledef: listspec "id" dims .
+
+    "["  shift, and go to state 213
+
+    $default  reduce using rule 86 (variabledef)
+
+    dim  go to state 214
+
+
+State 137
+
+  114 class_func_header_start: typename listspec func_class "id" .
+
+    $default  reduce using rule 114 (class_func_header_start)
+
+
+State 138
+
+   31 init_value: "{" . init_values "}"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 138
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    init_value      go to state 215
+    expression      go to state 140
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    init_values     go to state 216
+    decltype        go to state 142
+
+
+State 139
+
+   28 initializer: "=" init_value .
+
+    $default  reduce using rule 28 (initializer)
+
+
+State 140
+
+   30 init_value: expression .
+   32 expression: expression . "||" expression
+   33           | expression . "&&" expression
+   34           | expression . "== or !=" expression
+   35           | expression . "> or >= or < or <=" expression
+   36           | expression . "+ or -" expression
+   37           | expression . "* or / or %" expression
+
+    "||"                  shift, and go to state 176
+    "&&"                  shift, and go to state 177
+    "== or !="            shift, and go to state 178
+    "+ or -"              shift, and go to state 179
+    "* or / or %"         shift, and go to state 180
+    "> or >= or < or <="  shift, and go to state 181
+
+    $default  reduce using rule 30 (init_value)
+
+
+State 141
+
+   42 expression: variable . "-- or ++"
+   43           | variable .
+   44           | variable . "(" expression_list ")"
+   51 variable: variable . "[" general_expression "]"
+   52         | variable . "." "id"
+
+    "-- or ++"  shift, and go to state 182
+    "("         shift, and go to state 183
+    "."         shift, and go to state 184
+    "["         shift, and go to state 185
+
+    $default  reduce using rule 43 (expression)
+
+
+State 142
+
+   54 variable: decltype . "id"
+
+    "id"  shift, and go to state 217
+
+
+State 143
+
+   86 variabledef: listspec . "id" dims
+
+    "id"  shift, and go to state 218
+
+
+State 144
+
+  104 init_variabledefs: init_variabledefs "," init_variabledef .
+
+    $default  reduce using rule 104 (init_variabledefs)
+
+
+State 145
+
+   99 pass_list_dims: "&" .
+  119 pass_variabledef: "&" . "id"
+
+    "id"  shift, and go to state 219
+
+    $default  reduce using rule 99 (pass_list_dims)
+
+
+State 146
+
+   86 variabledef: listspec . "id" dims
+  100 pass_list_dims: listspec . dims
+
+    "id"  shift, and go to state 218
+
+    $default  reduce using rule 21 (dims)
+
+    dims  go to state 220
+
+
+State 147
+
+  118 pass_variabledef: variabledef .
+
+    $default  reduce using rule 118 (pass_variabledef)
+
+
+State 148
+
+   98 parameter_types: typename pass_list_dims .
+
+    $default  reduce using rule 98 (parameter_types)
+
+
+State 149
+
+  117 parameter_list: typename pass_variabledef .
+
+    $default  reduce using rule 117 (parameter_list)
+
+
+State 150
+
+   95 short_par_func_header: func_header_start "(" parameter_types ")" .
+
+    $default  reduce using rule 95 (short_par_func_header)
+
+
+State 151
+
+   97 parameter_types: parameter_types "," . typename pass_list_dims
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 9
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename       go to state 221
+    standard_type  go to state 17
+
+
+State 152
+
+  113 full_par_func_header: func_header_start "(" parameter_list ")" .
+
+    $default  reduce using rule 113 (full_par_func_header)
+
+
+State 153
+
+  116 parameter_list: parameter_list "," . typename pass_variabledef
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 9
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename       go to state 222
+    standard_type  go to state 17
+
+
+State 154
+
+  139 statement: "continue" ";" .
+
+    $default  reduce using rule 139 (statement)
+
+
+State 155
+
+  140 statement: "break" ";" .
+
+    $default  reduce using rule 140 (statement)
+
+
+State 156
+
+  143 if_statement: "if" "(" . general_expression ")" statement if_tail
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 223
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+
+
+State 157
+
+  146 while_statement: "while" "(" . general_expression ")" statement
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 224
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+
+
+State 158
+
+  147 for_statement: "for" "(" . optexpr ";" optexpr ";" optexpr ")" statement
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    ";"       reduce using rule 149 (optexpr)
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 160
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+    optexpr             go to state 225
+
+
+State 159
+
+  150 switch_statement: "switch" "(" . general_expression ")" switch_tail
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 226
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+
+
+State 160
+
+   56 general_expression: general_expression . "," general_expression
+  148 optexpr: general_expression .
+
+    ","  shift, and go to state 188
+
+    $default  reduce using rule 148 (optexpr)
+
+
+State 161
+
+  164 return_statement: "return" optexpr . ";"
+
+    ";"  shift, and go to state 227
+
+
+State 162
+
+   46 expression: "new" "(" . general_expression ")"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 228
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+
+
+State 163
+
+  165 io_statement: "cin" "<<" . in_list ";"
+
+    "static"    shift, and go to state 74
+    "this"      shift, and go to state 85
+    "listfunc"  shift, and go to state 89
+
+    $default  reduce using rule 128 (decltype)
+
+    variable  go to state 229
+    decltype  go to state 142
+    in_list   go to state 230
+    in_item   go to state 231
+
+
+State 164
+
+  166 io_statement: "cout" ">>" . out_list ";"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 232
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+    out_list            go to state 233
+    out_item            go to state 234
+
+
+State 165
+
+   32 expression: expression . "||" expression
+   33           | expression . "&&" expression
+   34           | expression . "== or !=" expression
+   35           | expression . "> or >= or < or <=" expression
+   36           | expression . "+ or -" expression
+   37           | expression . "* or / or %" expression
+   39           | "+ or -" expression .
+
+    $default  reduce using rule 39 (expression)
+
+
+State 166
+
+   41 expression: "-- or ++" variable .
+   51 variable: variable . "[" general_expression "]"
+   52         | variable . "." "id"
+
+    "."  shift, and go to state 184
+    "["  shift, and go to state 185
+
+    $default  reduce using rule 41 (expression)
+
+
+State 167
+
+   32 expression: expression . "||" expression
+   33           | expression . "&&" expression
+   34           | expression . "== or !=" expression
+   35           | expression . "> or >= or < or <=" expression
+   36           | expression . "+ or -" expression
+   37           | expression . "* or / or %" expression
+   40           | "sizeof" expression .
+
+    $default  reduce using rule 40 (expression)
+
+
+State 168
+
+   53 variable: "listfunc" "(" . general_expression ")"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 235
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+
+
+State 169
+
+   49 expression: "(" standard_type . ")"
+
+    ")"  shift, and go to state 236
+
+
+State 170
+
+   48 expression: "(" general_expression . ")"
+   56 general_expression: general_expression . "," general_expression
+
+    ")"  shift, and go to state 237
+    ","  shift, and go to state 188
+
+
+State 171
+
+   56 general_expression: general_expression . "," general_expression
+   60 expression_list: general_expression .
+
+    ","  shift, and go to state 188
+
+    $default  reduce using rule 60 (expression_list)
+
+
+State 172
+
+   66 listexpression: "[" expression_list . "]"
+
+    "]"  shift, and go to state 238
+
+
+State 173
+
+  173 comp_statement: "{" decl_statements . "}"
+
+    "}"  shift, and go to state 239
+
+
+State 174
+
+   32 expression: expression . "||" expression
+   33           | expression . "&&" expression
+   34           | expression . "== or !=" expression
+   35           | expression . "> or >= or < or <=" expression
+   36           | expression . "+ or -" expression
+   37           | expression . "* or / or %" expression
+   38           | "!" expression .
+
+    $default  reduce using rule 38 (expression)
+
+
+State 175
+
+   45 expression: "length" "(" . general_expression ")"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 240
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+
+
+State 176
+
+   32 expression: expression "||" . expression
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression      go to state 241
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 177
+
+   33 expression: expression "&&" . expression
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression      go to state 242
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 178
+
+   34 expression: expression "== or !=" . expression
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression      go to state 243
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 179
+
+   36 expression: expression "+ or -" . expression
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression      go to state 244
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 180
+
+   37 expression: expression "* or / or %" . expression
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression      go to state 245
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 181
+
+   35 expression: expression "> or >= or < or <=" . expression
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression      go to state 246
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 182
+
+   42 expression: variable "-- or ++" .
+
+    $default  reduce using rule 42 (expression)
+
+
+State 183
+
+   44 expression: variable "(" . expression_list ")"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "id"      reduce using rule 128 (decltype)
+    $default  reduce using rule 61 (expression_list)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 171
+    assignment          go to state 100
+    expression_list     go to state 247
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+
+
+State 184
+
+   52 variable: variable "." . "id"
+
+    "id"  shift, and go to state 248
+
+
+State 185
+
+   51 variable: variable "[" . general_expression "]"
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 249
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+
+
+State 186
+
+   58 assignment: variable "=" . assignment
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression      go to state 97
+    variable        go to state 98
+    assignment      go to state 250
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 187
+
+  142 expression_statement: general_expression ";" .
+
+    $default  reduce using rule 142 (expression_statement)
+
+
+State 188
+
+   56 general_expression: general_expression "," . general_expression
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 251
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+
+
+State 189
+
+  111 full_func_declaration: nopar_func_header "{" decl_statements "}" .
+
+    $default  reduce using rule 111 (full_func_declaration)
+
+
+State 190
+
+   54 variable: decltype . "id"
+  125 declarations: declarations decltype . typename variabledefs ";"
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 192
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename       go to state 252
+    standard_type  go to state 17
+
+
+State 191
+
+  121 decl_statements: declarations statements .
+  129 statements: statements . statement
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "id"      reduce using rule 128 (decltype)
+    $default  reduce using rule 121 (decl_statements)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 142
+    statement             go to state 194
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 192
+
+   12 typename: "id" .
+   54 variable: decltype "id" .
+
+    "list"    reduce using rule 12 (typename)
+    "id"      reduce using rule 12 (typename)
+    $default  reduce using rule 54 (variable)
+
+
+State 193
+
+  126 declarations: decltype typename . variabledefs ";"
+
+    "list"  shift, and go to state 39
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec      go to state 143
+    variabledefs  go to state 253
+    variabledef   go to state 207
+
+
+State 194
+
+  129 statements: statements statement .
+
+    $default  reduce using rule 129 (statements)
+
+
+State 195
+
+  109 full_func_declaration: full_par_func_header "{" decl_statements "}" .
+
+    $default  reduce using rule 109 (full_func_declaration)
+
+
+State 196
+
+  119 pass_variabledef: "&" . "id"
+
+    "id"  shift, and go to state 219
+
+
+State 197
+
+  112 full_par_func_header: class_func_header_start "(" parameter_list ")" .
+
+    $default  reduce using rule 112 (full_par_func_header)
+
+
+State 198
+
+  110 full_func_declaration: nopar_class_func_header "{" decl_statements "}" .
+
+    $default  reduce using rule 110 (full_func_declaration)
+
+
+State 199
+
+  174 main_function: main_header "{" decl_statements "}" .
+
+    $default  reduce using rule 174 (main_function)
+
+
+State 200
+
+   10 typedef_declaration: "typedef" typename listspec "id" dims . ";"
+   20 dims: dims . dim
+
+    ";"  shift, and go to state 254
+    "["  shift, and go to state 213
+
+    dim  go to state 214
+
+
+State 201
+
+   75 access: "private" . ":"
+
+    ":"  shift, and go to state 255
+
+
+State 202
+
+   76 access: "protected" . ":"
+
+    ":"  shift, and go to state 256
+
+
+State 203
+
+   77 access: "public" . ":"
+
+    ":"  shift, and go to state 257
+
+
+State 204
+
+   70 class_body: parent "{" members_methods . "}"
+   73 members_methods: members_methods . access member_or_method
+
+    "private"    shift, and go to state 201
+    "protected"  shift, and go to state 202
+    "public"     shift, and go to state 203
+    "}"          shift, and go to state 258
+
+    $default  reduce using rule 78 (access)
+
+    access  go to state 259
+
+
+State 205
+
+   74 members_methods: access . member_or_method
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "union"   shift, and go to state 260
+    "id"      shift, and go to state 9
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename                go to state 261
+    standard_type           go to state 17
+    member_or_method        go to state 262
+    member                  go to state 263
+    var_declaration         go to state 264
+    anonymous_union         go to state 265
+    method                  go to state 266
+    short_func_declaration  go to state 267
+    short_par_func_header   go to state 21
+    func_header_start       go to state 268
+    nopar_func_header       go to state 269
+
+
+State 206
+
+   83 var_declaration: typename variabledefs . ";"
+   84 variabledefs: variabledefs . "," variabledef
+
+    ";"  shift, and go to state 270
+    ","  shift, and go to state 271
+
+
+State 207
+
+   85 variabledefs: variabledef .
+
+    $default  reduce using rule 85 (variabledefs)
+
+
+State 208
+
+   88 union_body: "{" fields "}" .
+
+    $default  reduce using rule 88 (union_body)
+
+
+State 209
+
+   89 fields: fields field .
+
+    $default  reduce using rule 89 (fields)
+
+
+State 210
+
+   27 id_list: "id" initializer .
+
+    $default  reduce using rule 27 (id_list)
+
+
+State 211
+
+   26 id_list: id_list "," . "id" initializer
+
+    "id"  shift, and go to state 272
+
+
+State 212
+
+   25 enum_body: "{" id_list "}" .
+
+    $default  reduce using rule 25 (enum_body)
+
+
+State 213
+
+   22 dim: "[" . "integer constant" "]"
+   23    | "[" . "]"
+
+    "integer constant"  shift, and go to state 273
+    "]"                 shift, and go to state 274
+
+
+State 214
+
+   20 dims: dims dim .
+
+    $default  reduce using rule 20 (dims)
+
+
+State 215
+
+   68 init_values: init_value .
+
+    $default  reduce using rule 68 (init_values)
+
+
+State 216
+
+   31 init_value: "{" init_values . "}"
+   67 init_values: init_values . "," init_value
+
+    ","  shift, and go to state 275
+    "}"  shift, and go to state 276
+
+
+State 217
+
+   54 variable: decltype "id" .
+
+    $default  reduce using rule 54 (variable)
+
+
+State 218
+
+   86 variabledef: listspec "id" . dims
+
+    $default  reduce using rule 21 (dims)
+
+    dims  go to state 136
+
+
+State 219
+
+  119 pass_variabledef: "&" "id" .
+
+    $default  reduce using rule 119 (pass_variabledef)
+
+
+State 220
+
+   20 dims: dims . dim
+  100 pass_list_dims: listspec dims .
+
+    "["  shift, and go to state 213
+
+    $default  reduce using rule 100 (pass_list_dims)
+
+    dim  go to state 214
+
+
+State 221
+
+   97 parameter_types: parameter_types "," typename . pass_list_dims
+
+    "list"  shift, and go to state 39
+    "&"     shift, and go to state 277
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec        go to state 278
+    pass_list_dims  go to state 279
+
+
+State 222
+
+  116 parameter_list: parameter_list "," typename . pass_variabledef
+
+    "list"  shift, and go to state 39
+    "&"     shift, and go to state 196
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec          go to state 143
+    variabledef       go to state 147
+    pass_variabledef  go to state 280
+
+
+State 223
+
+   56 general_expression: general_expression . "," general_expression
+  143 if_statement: "if" "(" general_expression . ")" statement if_tail
+
+    ")"  shift, and go to state 281
+    ","  shift, and go to state 188
+
+
+State 224
+
+   56 general_expression: general_expression . "," general_expression
+  146 while_statement: "while" "(" general_expression . ")" statement
+
+    ")"  shift, and go to state 282
+    ","  shift, and go to state 188
+
+
+State 225
+
+  147 for_statement: "for" "(" optexpr . ";" optexpr ";" optexpr ")" statement
+
+    ";"  shift, and go to state 283
+
+
+State 226
+
+   56 general_expression: general_expression . "," general_expression
+  150 switch_statement: "switch" "(" general_expression . ")" switch_tail
+
+    ")"  shift, and go to state 284
+    ","  shift, and go to state 188
+
+
+State 227
+
+  164 return_statement: "return" optexpr ";" .
+
+    $default  reduce using rule 164 (return_statement)
+
+
+State 228
+
+   46 expression: "new" "(" general_expression . ")"
+   56 general_expression: general_expression . "," general_expression
+
+    ")"  shift, and go to state 285
+    ","  shift, and go to state 188
+
+
+State 229
+
+   51 variable: variable . "[" general_expression "]"
+   52         | variable . "." "id"
+  169 in_item: variable .
+
+    "."  shift, and go to state 184
+    "["  shift, and go to state 185
+
+    $default  reduce using rule 169 (in_item)
+
+
+State 230
+
+  165 io_statement: "cin" "<<" in_list . ";"
+  167 in_list: in_list . "<<" in_item
+
+    ";"   shift, and go to state 286
+    "<<"  shift, and go to state 287
+
+
+State 231
+
+  168 in_list: in_item .
+
+    $default  reduce using rule 168 (in_list)
+
+
+State 232
+
+   56 general_expression: general_expression . "," general_expression
+  172 out_item: general_expression .
+
+    ","  shift, and go to state 188
+
+    $default  reduce using rule 172 (out_item)
+
+
+State 233
+
+  166 io_statement: "cout" ">>" out_list . ";"
+  170 out_list: out_list . ">>" out_item
+
+    ";"   shift, and go to state 288
+    ">>"  shift, and go to state 289
+
+
+State 234
+
+  171 out_list: out_item .
+
+    $default  reduce using rule 171 (out_list)
+
+
+State 235
+
+   53 variable: "listfunc" "(" general_expression . ")"
+   56 general_expression: general_expression . "," general_expression
+
+    ")"  shift, and go to state 290
+    ","  shift, and go to state 188
+
+
+State 236
+
+   49 expression: "(" standard_type ")" .
+
+    $default  reduce using rule 49 (expression)
+
+
+State 237
+
+   48 expression: "(" general_expression ")" .
+
+    $default  reduce using rule 48 (expression)
+
+
+State 238
+
+   66 listexpression: "[" expression_list "]" .
+
+    $default  reduce using rule 66 (listexpression)
+
+
+State 239
+
+  173 comp_statement: "{" decl_statements "}" .
+
+    $default  reduce using rule 173 (comp_statement)
+
+
+State 240
+
+   45 expression: "length" "(" general_expression . ")"
+   56 general_expression: general_expression . "," general_expression
+
+    ")"  shift, and go to state 291
+    ","  shift, and go to state 188
+
+
+State 241
+
+   32 expression: expression . "||" expression
+   32           | expression "||" expression .
+   33           | expression . "&&" expression
+   34           | expression . "== or !=" expression
+   35           | expression . "> or >= or < or <=" expression
+   36           | expression . "+ or -" expression
+   37           | expression . "* or / or %" expression
+
+    "&&"                  shift, and go to state 177
+    "== or !="            shift, and go to state 178
+    "+ or -"              shift, and go to state 179
+    "* or / or %"         shift, and go to state 180
+    "> or >= or < or <="  shift, and go to state 181
+
+    $default  reduce using rule 32 (expression)
+
+
+State 242
+
+   32 expression: expression . "||" expression
+   33           | expression . "&&" expression
+   33           | expression "&&" expression .
+   34           | expression . "== or !=" expression
+   35           | expression . "> or >= or < or <=" expression
+   36           | expression . "+ or -" expression
+   37           | expression . "* or / or %" expression
+
+    "== or !="            shift, and go to state 178
+    "+ or -"              shift, and go to state 179
+    "* or / or %"         shift, and go to state 180
+    "> or >= or < or <="  shift, and go to state 181
+
+    $default  reduce using rule 33 (expression)
+
+
+State 243
+
+   32 expression: expression . "||" expression
+   33           | expression . "&&" expression
+   34           | expression . "== or !=" expression
+   34           | expression "== or !=" expression .
+   35           | expression . "> or >= or < or <=" expression
+   36           | expression . "+ or -" expression
+   37           | expression . "* or / or %" expression
+
+    "+ or -"              shift, and go to state 179
+    "* or / or %"         shift, and go to state 180
+    "> or >= or < or <="  shift, and go to state 181
+
+    $default  reduce using rule 34 (expression)
+
+
+State 244
+
+   32 expression: expression . "||" expression
+   33           | expression . "&&" expression
+   34           | expression . "== or !=" expression
+   35           | expression . "> or >= or < or <=" expression
+   36           | expression . "+ or -" expression
+   36           | expression "+ or -" expression .
+   37           | expression . "* or / or %" expression
+
+    "* or / or %"  shift, and go to state 180
+
+    $default  reduce using rule 36 (expression)
+
+
+State 245
+
+   32 expression: expression . "||" expression
+   33           | expression . "&&" expression
+   34           | expression . "== or !=" expression
+   35           | expression . "> or >= or < or <=" expression
+   36           | expression . "+ or -" expression
+   37           | expression . "* or / or %" expression
+   37           | expression "* or / or %" expression .
+
+    $default  reduce using rule 37 (expression)
+
+
+State 246
+
+   32 expression: expression . "||" expression
+   33           | expression . "&&" expression
+   34           | expression . "== or !=" expression
+   35           | expression . "> or >= or < or <=" expression
+   35           | expression "> or >= or < or <=" expression .
+   36           | expression . "+ or -" expression
+   37           | expression . "* or / or %" expression
+
+    "+ or -"       shift, and go to state 179
+    "* or / or %"  shift, and go to state 180
+
+    $default  reduce using rule 35 (expression)
+
+
+State 247
+
+   44 expression: variable "(" expression_list . ")"
+
+    ")"  shift, and go to state 292
+
+
+State 248
+
+   52 variable: variable "." "id" .
+
+    $default  reduce using rule 52 (variable)
+
+
+State 249
+
+   51 variable: variable "[" general_expression . "]"
+   56 general_expression: general_expression . "," general_expression
+
+    ","  shift, and go to state 188
+    "]"  shift, and go to state 293
+
+
+State 250
+
+   58 assignment: variable "=" assignment .
+
+    $default  reduce using rule 58 (assignment)
+
+
+State 251
+
+   56 general_expression: general_expression . "," general_expression
+   56                   | general_expression "," general_expression .
+
+    $default  reduce using rule 56 (general_expression)
+
+
+State 252
+
+  125 declarations: declarations decltype typename . variabledefs ";"
+
+    "list"  shift, and go to state 39
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec      go to state 143
+    variabledefs  go to state 294
+    variabledef   go to state 207
+
+
+State 253
+
+   84 variabledefs: variabledefs . "," variabledef
+  126 declarations: decltype typename variabledefs . ";"
+
+    ";"  shift, and go to state 295
+    ","  shift, and go to state 271
+
+
+State 254
+
+   10 typedef_declaration: "typedef" typename listspec "id" dims ";" .
+
+    $default  reduce using rule 10 (typedef_declaration)
+
+
+State 255
+
+   75 access: "private" ":" .
+
+    $default  reduce using rule 75 (access)
+
+
+State 256
+
+   76 access: "protected" ":" .
+
+    $default  reduce using rule 76 (access)
+
+
+State 257
+
+   77 access: "public" ":" .
+
+    $default  reduce using rule 77 (access)
+
+
+State 258
+
+   70 class_body: parent "{" members_methods "}" .
+
+    $default  reduce using rule 70 (class_body)
+
+
+State 259
+
+   73 members_methods: members_methods access . member_or_method
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "union"   shift, and go to state 260
+    "id"      shift, and go to state 9
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename                go to state 261
+    standard_type           go to state 17
+    member_or_method        go to state 296
+    member                  go to state 263
+    var_declaration         go to state 264
+    anonymous_union         go to state 265
+    method                  go to state 266
+    short_func_declaration  go to state 267
+    short_par_func_header   go to state 21
+    func_header_start       go to state 268
+    nopar_func_header       go to state 269
+
+
+State 260
+
+   87 anonymous_union: "union" . union_body ";"
+
+    "{"  shift, and go to state 56
+
+    union_body  go to state 297
+
+
+State 261
+
+   83 var_declaration: typename . variabledefs ";"
+   96 func_header_start: typename . listspec "id"
+
+    "list"  shift, and go to state 39
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec      go to state 298
+    variabledefs  go to state 206
+    variabledef   go to state 207
+
+
+State 262
+
+   74 members_methods: access member_or_method .
+
+    $default  reduce using rule 74 (members_methods)
+
+
+State 263
+
+   79 member_or_method: member .
+
+    $default  reduce using rule 79 (member_or_method)
+
+
+State 264
+
+   81 member: var_declaration .
+
+    $default  reduce using rule 81 (member)
+
+
+State 265
+
+   82 member: anonymous_union .
+
+    $default  reduce using rule 82 (member)
+
+
+State 266
+
+   80 member_or_method: method .
+
+    $default  reduce using rule 80 (member_or_method)
+
+
+State 267
+
+   92 method: short_func_declaration .
+
+    $default  reduce using rule 92 (method)
+
+
+State 268
+
+   95 short_par_func_header: func_header_start . "(" parameter_types ")"
+  101 nopar_func_header: func_header_start . "(" ")"
+
+    "("  shift, and go to state 299
+
+
+State 269
+
+   94 short_func_declaration: nopar_func_header . ";"
+
+    ";"  shift, and go to state 46
+
+
+State 270
+
+   83 var_declaration: typename variabledefs ";" .
+
+    $default  reduce using rule 83 (var_declaration)
+
+
+State 271
+
+   84 variabledefs: variabledefs "," . variabledef
+
+    "list"  shift, and go to state 39
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec     go to state 143
+    variabledef  go to state 300
+
+
+State 272
+
+   26 id_list: id_list "," "id" . initializer
+
+    "="  shift, and go to state 63
+
+    $default  reduce using rule 29 (initializer)
+
+    initializer  go to state 301
+
+
+State 273
+
+   22 dim: "[" "integer constant" . "]"
+
+    "]"  shift, and go to state 302
+
+
+State 274
+
+   23 dim: "[" "]" .
+
+    $default  reduce using rule 23 (dim)
+
+
+State 275
+
+   67 init_values: init_values "," . init_value
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 138
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    init_value      go to state 303
+    expression      go to state 140
+    variable        go to state 141
+    constant        go to state 101
+    listexpression  go to state 102
+    decltype        go to state 142
+
+
+State 276
+
+   31 init_value: "{" init_values "}" .
+
+    $default  reduce using rule 31 (init_value)
+
+
+State 277
+
+   99 pass_list_dims: "&" .
+
+    $default  reduce using rule 99 (pass_list_dims)
+
+
+State 278
+
+  100 pass_list_dims: listspec . dims
+
+    $default  reduce using rule 21 (dims)
+
+    dims  go to state 220
+
+
+State 279
+
+   97 parameter_types: parameter_types "," typename pass_list_dims .
+
+    $default  reduce using rule 97 (parameter_types)
+
+
+State 280
+
+  116 parameter_list: parameter_list "," typename pass_variabledef .
+
+    $default  reduce using rule 116 (parameter_list)
+
+
+State 281
+
+  143 if_statement: "if" "(" general_expression ")" . statement if_tail
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 142
+    statement             go to state 304
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 282
+
+  146 while_statement: "while" "(" general_expression ")" . statement
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 142
+    statement             go to state 305
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 283
+
+  147 for_statement: "for" "(" optexpr ";" . optexpr ";" optexpr ")" statement
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    ";"       reduce using rule 149 (optexpr)
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 160
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+    optexpr             go to state 306
+
+
+State 284
+
+  150 switch_statement: "switch" "(" general_expression ")" . switch_tail
+
+    "{"     shift, and go to state 307
+    "case"  shift, and go to state 308
+
+    switch_tail           go to state 309
+    single_casestatement  go to state 310
+
+
+State 285
+
+   46 expression: "new" "(" general_expression ")" .
+
+    $default  reduce using rule 46 (expression)
+
+
+State 286
+
+  165 io_statement: "cin" "<<" in_list ";" .
+
+    $default  reduce using rule 165 (io_statement)
+
+
+State 287
+
+  167 in_list: in_list "<<" . in_item
+
+    "static"    shift, and go to state 74
+    "this"      shift, and go to state 85
+    "listfunc"  shift, and go to state 89
+
+    $default  reduce using rule 128 (decltype)
+
+    variable  go to state 229
+    decltype  go to state 142
+    in_item   go to state 311
+
+
+State 288
+
+  166 io_statement: "cout" ">>" out_list ";" .
+
+    $default  reduce using rule 166 (io_statement)
+
+
+State 289
+
+  170 out_list: out_list ">>" . out_item
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 232
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+    out_item            go to state 312
+
+
+State 290
+
+   53 variable: "listfunc" "(" general_expression ")" .
+
+    $default  reduce using rule 53 (variable)
+
+
+State 291
+
+   45 expression: "length" "(" general_expression ")" .
+
+    $default  reduce using rule 45 (expression)
+
+
+State 292
+
+   44 expression: variable "(" expression_list ")" .
+
+    $default  reduce using rule 44 (expression)
+
+
+State 293
+
+   51 variable: variable "[" general_expression "]" .
+
+    $default  reduce using rule 51 (variable)
+
+
+State 294
+
+   84 variabledefs: variabledefs . "," variabledef
+  125 declarations: declarations decltype typename variabledefs . ";"
+
+    ";"  shift, and go to state 313
+    ","  shift, and go to state 271
+
+
+State 295
+
+  126 declarations: decltype typename variabledefs ";" .
+
+    $default  reduce using rule 126 (declarations)
+
+
+State 296
+
+   73 members_methods: members_methods access member_or_method .
+
+    $default  reduce using rule 73 (members_methods)
+
+
+State 297
+
+   87 anonymous_union: "union" union_body . ";"
+
+    ";"  shift, and go to state 314
+
+
+State 298
+
+   86 variabledef: listspec . "id" dims
+   96 func_header_start: typename listspec . "id"
+
+    "id"  shift, and go to state 315
+
+
+State 299
+
+   95 short_par_func_header: func_header_start "(" . parameter_types ")"
+  101 nopar_func_header: func_header_start "(" . ")"
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 9
+    ")"       shift, and go to state 67
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename         go to state 316
+    standard_type    go to state 17
+    parameter_types  go to state 69
+
+
+State 300
+
+   84 variabledefs: variabledefs "," variabledef .
+
+    $default  reduce using rule 84 (variabledefs)
+
+
+State 301
+
+   26 id_list: id_list "," "id" initializer .
+
+    $default  reduce using rule 26 (id_list)
+
+
+State 302
+
+   22 dim: "[" "integer constant" "]" .
+
+    $default  reduce using rule 22 (dim)
+
+
+State 303
+
+   67 init_values: init_values "," init_value .
+
+    $default  reduce using rule 67 (init_values)
+
+
+State 304
+
+  143 if_statement: "if" "(" general_expression ")" statement . if_tail
+
+    "else"  shift, and go to state 317
+
+    $default  reduce using rule 145 (if_tail)
+
+    if_tail  go to state 318
+
+
+State 305
+
+  146 while_statement: "while" "(" general_expression ")" statement .
+
+    $default  reduce using rule 146 (while_statement)
+
+
+State 306
+
+  147 for_statement: "for" "(" optexpr ";" optexpr . ";" optexpr ")" statement
+
+    ";"  shift, and go to state 319
+
+
+State 307
+
+  151 switch_tail: "{" . decl_cases "}"
+
+    "static"   shift, and go to state 74
+    "default"  shift, and go to state 320
+    "case"     shift, and go to state 321
+
+    "}"       reduce using rule 156 (decl_cases)
+    $default  reduce using rule 128 (decltype)
+
+    declarations    go to state 322
+    decltype        go to state 323
+    decl_cases      go to state 324
+    casestatements  go to state 325
+    casestatement   go to state 326
+
+
+State 308
+
+  162 single_casestatement: "case" . constant ":" single_casestatement
+  163                     | "case" . constant ":" statement
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "char const"        shift, and go to state 94
+
+    constant  go to state 327
+
+
+State 309
+
+  150 switch_statement: "switch" "(" general_expression ")" switch_tail .
+
+    $default  reduce using rule 150 (switch_statement)
+
+
+State 310
+
+  152 switch_tail: single_casestatement .
+
+    $default  reduce using rule 152 (switch_tail)
+
+
+State 311
+
+  167 in_list: in_list "<<" in_item .
+
+    $default  reduce using rule 167 (in_list)
+
+
+State 312
+
+  170 out_list: out_list ">>" out_item .
+
+    $default  reduce using rule 170 (out_list)
+
+
+State 313
+
+  125 declarations: declarations decltype typename variabledefs ";" .
+
+    $default  reduce using rule 125 (declarations)
+
+
+State 314
+
+   87 anonymous_union: "union" union_body ";" .
+
+    $default  reduce using rule 87 (anonymous_union)
+
+
+State 315
+
+   86 variabledef: listspec "id" . dims
+   96 func_header_start: typename listspec "id" .
+
+    "("       reduce using rule 96 (func_header_start)
+    $default  reduce using rule 21 (dims)
+
+    dims  go to state 136
+
+
+State 316
+
+   98 parameter_types: typename . pass_list_dims
+
+    "list"  shift, and go to state 39
+    "&"     shift, and go to state 277
+
+    $default  reduce using rule 19 (listspec)
+
+    listspec        go to state 278
+    pass_list_dims  go to state 148
+
+
+State 317
+
+  144 if_tail: "else" . statement
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 142
+    statement             go to state 328
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 318
+
+  143 if_statement: "if" "(" general_expression ")" statement if_tail .
+
+    $default  reduce using rule 143 (if_statement)
+
+
+State 319
+
+  147 for_statement: "for" "(" optexpr ";" optexpr ";" . optexpr ")" statement
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "new"               shift, and go to state 82
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    "["                 shift, and go to state 92
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    ")"       reduce using rule 149 (optexpr)
+    $default  reduce using rule 128 (decltype)
+
+    expression          go to state 97
+    variable            go to state 98
+    general_expression  go to state 160
+    assignment          go to state 100
+    constant            go to state 101
+    listexpression      go to state 102
+    decltype            go to state 142
+    optexpr             go to state 329
+
+
+State 320
+
+  161 casestatement: "default" . ":" statements
+
+    ":"  shift, and go to state 330
+
+
+State 321
+
+  159 casestatement: "case" . constant ":" casestatement
+  160              | "case" . constant ":" statements
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "char const"        shift, and go to state 94
+
+    constant  go to state 331
+
+
+State 322
+
+  125 declarations: declarations . decltype typename variabledefs ";"
+  153 decl_cases: declarations . casestatements
+  154           | declarations .
+
+    "static"   shift, and go to state 74
+    "default"  shift, and go to state 320
+    "case"     shift, and go to state 321
+
+    "}"       reduce using rule 154 (decl_cases)
+    $default  reduce using rule 128 (decltype)
+
+    decltype        go to state 332
+    casestatements  go to state 333
+    casestatement   go to state 326
+
+
+State 323
+
+  126 declarations: decltype . typename variabledefs ";"
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 9
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename       go to state 193
+    standard_type  go to state 17
+
+
+State 324
+
+  151 switch_tail: "{" decl_cases . "}"
+
+    "}"  shift, and go to state 334
+
+
+State 325
+
+  155 decl_cases: casestatements .
+  157 casestatements: casestatements . casestatement
+
+    "default"  shift, and go to state 320
+    "case"     shift, and go to state 321
+
+    $default  reduce using rule 155 (decl_cases)
+
+    casestatement  go to state 335
+
+
+State 326
+
+  158 casestatements: casestatement .
+
+    $default  reduce using rule 158 (casestatements)
+
+
+State 327
+
+  162 single_casestatement: "case" constant . ":" single_casestatement
+  163                     | "case" constant . ":" statement
+
+    ":"  shift, and go to state 336
+
+
+State 328
+
+  144 if_tail: "else" statement .
+
+    $default  reduce using rule 144 (if_tail)
+
+
+State 329
+
+  147 for_statement: "for" "(" optexpr ";" optexpr ";" optexpr . ")" statement
+
+    ")"  shift, and go to state 337
+
+
+State 330
+
+  161 casestatement: "default" ":" . statements
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 142
+    statements            go to state 338
+    statement             go to state 107
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 331
+
+  159 casestatement: "case" constant . ":" casestatement
+  160              | "case" constant . ":" statements
+
+    ":"  shift, and go to state 339
+
+
+State 332
+
+  125 declarations: declarations decltype . typename variabledefs ";"
+
+    "char"    shift, and go to state 5
+    "string"  shift, and go to state 6
+    "id"      shift, and go to state 9
+    "float"   shift, and go to state 10
+    "void"    shift, and go to state 11
+    "int"     shift, and go to state 33
+
+    typename       go to state 252
+    standard_type  go to state 17
+
+
+State 333
+
+  153 decl_cases: declarations casestatements .
+  157 casestatements: casestatements . casestatement
+
+    "default"  shift, and go to state 320
+    "case"     shift, and go to state 321
+
+    $default  reduce using rule 153 (decl_cases)
+
+    casestatement  go to state 335
+
+
+State 334
+
+  151 switch_tail: "{" decl_cases "}" .
+
+    $default  reduce using rule 151 (switch_tail)
+
+
+State 335
+
+  157 casestatements: casestatements casestatement .
+
+    $default  reduce using rule 157 (casestatements)
+
+
+State 336
+
+  162 single_casestatement: "case" constant ":" . single_casestatement
+  163                     | "case" constant ":" . statement
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "case"              shift, and go to state 308
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 142
+    statement             go to state 340
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    single_casestatement  go to state 341
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 337
+
+  147 for_statement: "for" "(" optexpr ";" optexpr ";" optexpr ")" . statement
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 142
+    statement             go to state 342
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 338
+
+  129 statements: statements . statement
+  161 casestatement: "default" ":" statements .
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "id"      reduce using rule 128 (decltype)
+    $default  reduce using rule 161 (casestatement)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 142
+    statement             go to state 194
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 339
+
+  159 casestatement: "case" constant ":" . casestatement
+  160              | "case" constant ":" . statements
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "default"           shift, and go to state 320
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "case"              shift, and go to state 321
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    $default  reduce using rule 128 (decltype)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 142
+    statements            go to state 343
+    statement             go to state 107
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    casestatement         go to state 344
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 340
+
+  163 single_casestatement: "case" constant ":" statement .
+
+    $default  reduce using rule 163 (single_casestatement)
+
+
+State 341
+
+  162 single_casestatement: "case" constant ":" single_casestatement .
+
+    $default  reduce using rule 162 (single_casestatement)
+
+
+State 342
+
+  147 for_statement: "for" "(" optexpr ";" optexpr ";" optexpr ")" statement .
+
+    $default  reduce using rule 147 (for_statement)
+
+
+State 343
+
+  129 statements: statements . statement
+  160 casestatement: "case" constant ":" statements .
+
+    "integer constant"  shift, and go to state 71
+    "float constant"    shift, and go to state 72
+    "string const"      shift, and go to state 73
+    "static"            shift, and go to state 74
+    "continue"          shift, and go to state 75
+    "break"             shift, and go to state 76
+    "if"                shift, and go to state 77
+    "while"             shift, and go to state 78
+    "for"               shift, and go to state 79
+    "switch"            shift, and go to state 80
+    "return"            shift, and go to state 81
+    "new"               shift, and go to state 82
+    "cin"               shift, and go to state 83
+    "cout"              shift, and go to state 84
+    "this"              shift, and go to state 85
+    "+ or -"            shift, and go to state 86
+    "-- or ++"          shift, and go to state 87
+    "sizeof"            shift, and go to state 88
+    "listfunc"          shift, and go to state 89
+    "("                 shift, and go to state 90
+    ";"                 shift, and go to state 91
+    "["                 shift, and go to state 92
+    "{"                 shift, and go to state 93
+    "char const"        shift, and go to state 94
+    "!"                 shift, and go to state 95
+    "length"            shift, and go to state 96
+
+    "id"      reduce using rule 128 (decltype)
+    $default  reduce using rule 160 (casestatement)
+
+    expression            go to state 97
+    variable              go to state 98
+    general_expression    go to state 99
+    assignment            go to state 100
+    constant              go to state 101
+    listexpression        go to state 102
+    decltype              go to state 142
+    statement             go to state 194
+    expression_statement  go to state 108
+    if_statement          go to state 109
+    while_statement       go to state 110
+    for_statement         go to state 111
+    switch_statement      go to state 112
+    return_statement      go to state 113
+    io_statement          go to state 114
+    comp_statement        go to state 115
+
+
+State 344
+
+  159 casestatement: "case" constant ":" casestatement .
+
+    $default  reduce using rule 159 (casestatement)

@@ -26,7 +26,10 @@ extern char *yytext;
 /* ---------------------------------------------------------------------
    --------------- Local variables & functions for bison.y -------------
    --------------------------------------------------------------------- */
+
 AST_program ast;
+
+
 %}
 
 
@@ -210,10 +213,10 @@ program:
                           global_declarations main_function                                 {ast = $$ = ast_program($1, $2);}
                         ;
 global_declarations:      global_declarations global_declaration                            {
-                                                                                                if($2 == NULL) printf("I am null\n");
+                                                                                                if($2 == NULL) printf("I am null - Test & Remove\n");
                                                                                                 else{
-                                                                                                    $$ = list_add($1, $2);
-                                                                                                    printf("I am not null\n");
+                                                                                                    $$ = list_add($1, (void *) $2);
+                                                                                                    printf("I am not null - Test & Remove\n");
                                                                                                 } 
                                                                                             }
                         | %empty                                                            {$$ = NULL;}

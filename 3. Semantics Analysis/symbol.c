@@ -76,8 +76,8 @@ Scope scope_open (SymbolTable table)
 
 Scope scope_close (SymbolTable table)
 {
-    scope_print(table->currentScope, 0); // DEBUG ONLY;
-    printf("---End Scope---\n");
+    // scope_print(table->currentScope, 0); // DEBUG ONLY;
+    // printf("---End Scope---\n");
     Scope result = table->currentScope;
     SymbolEntry e;
 

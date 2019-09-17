@@ -10,7 +10,8 @@
 #include <errno.h>
 
 #include "c600.h"
-#include "pretty.h"
+// #include "pretty.h"
+#include "semantic.h"
 
 /* ---------------------------------------------------------------------
    ------------- External variables & functions from lexer.l -----------
@@ -90,13 +91,15 @@ int main(int argc, char *argv[])
         printf("Syntax Analysis completed successfully.\n");
     }
 
-    // Print AST on file
-    FILE *ast_file = fopen("outputs/ast.txt", "w+");
-    if(!ast_file){
-        printf("Can't save AST (Permission Denied)\n");
-        exit(-1);
-    }
-    AST_program_print(ast_file, 0, ast);
-    fclose(ast_file);
+    // // Print AST on file
+    // FILE *ast_file = fopen("outputs/ast.txt", "w+");
+    // if(!ast_file){
+    //     printf("Can't save AST (Permission Denied)\n");
+    //     exit(-1);
+    // }
+    // AST_program_print(ast_file, 0, ast);
+    // fclose(ast_file);
+
+    AST_program_traverse(ast);
     return 0;
 }
