@@ -109,3 +109,11 @@ bin-release/
 *.code-workspace
 
 compiler-master/
+
+3. Semantics Analysis/bison.c
+
+3. Semantics Analysis/bison.h
+
+3. Semantics Analysis/bison.output
+
+3. Semantics Analysis/lexer.c
