@@ -298,32 +298,32 @@ void AST_global_decl_print(FILE *f, int prec, AST_global_decl g){
     }
     switch(g->kind){
         case GDCL_TYPEDEF:
-            fprint(f, " (\n");
+            fprintf(f, " (\n");
             AST_typedef_print(f, prec+1, g->u.g_typedef.typedef_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case GDCL_ENUM:
-            fprint(f, " (\n");
+            fprintf(f, " (\n");
             AST_enum_dcl_print(f, prec+1, g->u.g_enum.enum_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case GDCL_CLASS:
-            fprint(f, " (\n");
+            fprintf(f, " (\n");
             AST_class_dcl_print(f, prec+1, g->u.g_class.class_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case GDCL_UNION:
-            fprint(f, " (\n");
+            fprintf(f, " (\n");
             AST_union_dcl_print(f, prec+1, g->u.g_union.union_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case GDCL_GLOBAL_VAR:
-            fprint(f, " (\n");
+            fprintf(f, " (\n");
             AST_global_var_declaration_print(f, prec+1, g->u.g_global_var.global_var_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case GDCL_FUNC:
-            fprint(f, " (\n");
+            fprintf(f, " (\n");
             AST_func_dcl_print(f, prec+1, g->u.g_func.func_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
