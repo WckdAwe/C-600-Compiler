@@ -21,6 +21,7 @@ void AST_unop_print(FILE *, int, AST_unop);
 
 void AST_expr_print(FILE *, int, AST_expr);
 void AST_exprlist_print(FILE *, int, AST_exprlist);
+void AST_global_decl_print(FILE *, int, AST_global_decl);
 void AST_variable_print(FILE *, int, AST_variable);
 void AST_assingment_print(FILE *, int, AST_assignment);
 void AST_global_var_declaration_print(FILE *, int, AST_global_var_declaration);
