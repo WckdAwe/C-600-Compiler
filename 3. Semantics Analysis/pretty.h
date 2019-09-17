@@ -23,7 +23,7 @@ void AST_expr_print(FILE *, int, AST_expr);
 void AST_exprlist_print(FILE *, int, AST_exprlist);
 void AST_global_decl_print(FILE *, int, AST_global_decl);
 void AST_variable_print(FILE *, int, AST_variable);
-void AST_assingment_print(FILE *, int, AST_assignment);
+void AST_assignment_print(FILE *, int, AST_assignment);
 void AST_global_var_declaration_print(FILE *, int, AST_global_var_declaration);
 void AST_init_variabledef_print(FILE *, int , AST_init_variabledef);
 void AST_enum_dcl_print(FILE *, int, AST_enum_dcl);

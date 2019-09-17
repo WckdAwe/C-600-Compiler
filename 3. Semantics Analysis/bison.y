@@ -22,6 +22,11 @@ extern void yyerror(const char *message);
 extern int yylex();
 extern int lineno;
 extern char *yytext;
+
+/* ---------------------------------------------------------------------
+   --------------- Local variables & functions for bison.y -------------
+   --------------------------------------------------------------------- */
+AST_program ast;
 %}
 
 
@@ -202,7 +207,7 @@ extern char *yytext;
 
 %%
 program:                                                                                    
-                          global_declarations main_function                                 {$$ = ast_program($1, $2);}
+                          global_declarations main_function                                 {ast = $$ = ast_program($1, $2);}
                         ;
 global_declarations:      global_declarations global_declaration                            {
                                                                                                 if($2 == NULL) printf("I am null\n");

@@ -10,7 +10,7 @@
 #include <errno.h>
 
 #include "c600.h"
-
+#include "pretty.h"
 
 /* ---------------------------------------------------------------------
    ------------- External variables & functions from lexer.l -----------
@@ -24,6 +24,14 @@ extern char *str_buf_ptr;
 
 extern char *yytext;
 extern FILE *yyin;
+
+
+/* ---------------------------------------------------------------------
+   ------------- External variables & functions from bison.y -----------
+   --------------------------------------------------------------------- */
+
+extern AST_program ast;
+
 
 /* ---------------------------------------------------------------------
    --------------------- Local variables & functions  ------------------
@@ -75,10 +83,20 @@ int main(int argc, char *argv[])
     if (error_count > 0)
     {
         printf("Syntax Analysis failed due to %d errors\n", error_count);
+        exit(-1);
     }
     else
     {
         printf("Syntax Analysis completed successfully.\n");
     }
+
+    // Print AST on file
+    FILE *ast_file = fopen("outputs/ast.txt", "w+");
+    if(!ast_file){
+        printf("Can't save AST (Permission Denied)\n");
+        exit(-1);
+    }
+    AST_program_print(ast_file, 0, ast);
+    fclose(ast_file);
     return 0;
 }

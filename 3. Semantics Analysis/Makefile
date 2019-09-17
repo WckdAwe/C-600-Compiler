@@ -27,8 +27,8 @@ ifndef YFLAGS
 endif
 
 # files
-CFILES   = error.c general.c symbol.c ast.c sizes.c types.c
-HFILES   = error.c general.h symbol.h ast.h sizes.h types.h
+CFILES   = error.c general.c symbol.c ast.c sizes.c types.c pretty.c
+HFILES   = error.c general.h symbol.h ast.h sizes.h types.h pretty.h
 OBJFILES = $(patsubst %.c,%.o,$(CFILES)) bison.o lexer.o main.o
 TMPFILES = bison.h bison.c bison.output lexer.c c600
 EXEFILES = c600$(EXE)
@@ -63,7 +63,7 @@ bison.o      : symbol.h types.h bison.c bison.h c600.h
 general.o    : general.c general.h
 error.o      : error.c general.h error.h
 symbol.o     : symbol.c symbol.h general.h error.h types.h
-# hashtbl.o    : hashtbl.c general.h
+pretty.o 	 : pretty.c pretty.h error.h ast.h
 sizes.o		 : sizes.c general.h
 ast.o		 : ast.h types.h symbol.h general.h
 types.o		 : types.c general.h
