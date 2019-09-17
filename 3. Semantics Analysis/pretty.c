@@ -2,6 +2,8 @@
 #include "error.h"
 #include "pretty.h"
 
+extern AST_program ast_p;
+
 
 static void indent(FILE *f, int n){
     int i;
@@ -1011,4 +1013,8 @@ void List_print(FILE *f, int prec, List l){
     Type_print(f, prec+1, l->data);         //TODO: check this !
     List_print(f, prec+1, l->next);
     indent(f, prec); fprintf(f, ")\n");
+}
+
+void start_program(FILE *f, int prec){
+    AST_program_print(f, prec+1, ast_p);
 }
