@@ -73,7 +73,6 @@ typedef enum {
     ast_unop_sizeop,
     ast_unop_inc,
     ast_unop_dec,
-    
 } AST_unop;
 
 typedef enum {

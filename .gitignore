@@ -105,3 +105,5 @@ bin-release/
 \.vscode/
 
 3\. Semantics Analysis/tmp/
+
+*.code-workspace
