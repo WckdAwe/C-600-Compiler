@@ -57,7 +57,7 @@ void AST_dcl_stmt_print(FILE *, int, AST_dcl_stmt);
 void AST_func_dcl_print(FILE *, int, AST_func_dcl);
 
 void AST_program_print(FILE *, int, AST_program);
-void List_print(FILE *, int, List);
+void List_print(FILE *, int, List, char*);
 
 void start_program(FILE *, int);
 
