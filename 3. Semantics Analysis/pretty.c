@@ -702,12 +702,12 @@ void AST_member_or_method_print(FILE *f, int prec, AST_member_or_method m){
     switch(m->kind){
         case MOM_MEMBER:
             fprintf(f, "AST_member_or_method: mom mebmer(\n");
-            AST_member_print(f, prec+1, m->u.member);
+            AST_member_print(f, prec+1, m->u.member.member);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case MOM_METHOD:
             fprintf(f, "AST_member_or_method: mom method(\n");
-            AST_short_func_dcl_print(f, prec+1, m->u.method);
+            AST_short_func_dcl_print(f, prec+1, m->u.method.short_func_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:
