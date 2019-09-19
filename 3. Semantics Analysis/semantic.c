@@ -53,7 +53,6 @@ bool type_eq(Type a, Type b) {
     }
 }
 
-
 void AST_program_traverse(AST_program p) {
     if (p == NULL) {
         return;
@@ -82,6 +81,8 @@ void AST_gdcl_traverse(List gdcl_list){
                 AST_enum_traverse(gdcl->u.g_enum.enum_dcl);
                 break;
             case GDCL_CLASS: // TODO
+                AST_class_traverse(gdcl->u.g_class.class_dcl);
+                break;
             case GDCL_UNION: // TODO
             case GDCL_GLOBAL_VAR: // TODO
             case GDCL_FUNC: // TODO
@@ -101,16 +102,7 @@ void AST_typedef_traverse(AST_typedef typedef_dcl){
     SymbolEntry entry = symbol_enter(symbol_table, typedef_dcl->id, true);
     entry->entry_type = ENTRY_VARIABLE;
     entry->e.variable.type = typedef_dcl->typename;
-    char buffer[256];
-    switch(entry->e.variable.type->kind){
-        case TYPE_array: 
-            printf("Typedef %s of %s \n", entry->id->name, _print_array_type(entry->e.variable.type));
-            break;
-        default:
-            printf("Typedef %s of %s \n", entry->id->name, reverse_type_kind[entry->e.variable.type->kind]);
-    }
 }
-
 
 void AST_enum_traverse(AST_enum_dcl enum_dcl){
     if(!enum_dcl) return;
@@ -131,6 +123,8 @@ void AST_enum_traverse(AST_enum_dcl enum_dcl){
         AST_id_traverse(id, initial_value);
         item = item->next;
     }
+
+    scope_close(symbol_table);
     free(initial_value);
 }
 
@@ -174,4 +168,137 @@ void AST_id_traverse(AST_id id, int *max){ // Used for IDs inside Enum
         *max = entry->e.constant.value.v_int + 1;
     }
     return;
+}
+
+void AST_class_traverse(AST_class_dcl class_dcl){
+    if(!class_dcl) return;
+    ASSERT(class_dcl->id != NULL);
+    ASSERT(class_dcl->class_body != NULL);
+
+    SymbolEntry entry = symbol_enter(symbol_table, class_dcl->id, true);
+    entry->entry_type = ENTRY_TYPE;
+    entry->e.type.scope = scope_open(symbol_table); 
+    entry->e.type.type = type_basic(TYPE_class);
+
+    AST_class_body_traverse(class_dcl->class_body);
+
+    scope_close(symbol_table);
+}
+
+void AST_class_body_traverse(AST_class_body class_body){
+    if(!class_body) return;
+    ASSERT(class_body->members_methods != NULL);
+    // ASSERT(class_body->parent != NULL); || PARENT CAN BE NULL
+
+    SymbolEntry parent = NULL;
+    if(class_body->parent){
+        parent = symbol_lookup(symbol_table, class_body->parent, LOOKUP_ALL_SCOPES, true); // Check if parent exists!
+        if(parent->entry_type != ENTRY_TYPE){ // TODO: Verify if this is really needed (I think it should.)
+            SEMANTIC_ERROR(class_body, "Parent | Parent must be of another already-defined class.");
+        }
+    }
+    // TODO: Implement parent inheritance methods?!
+    // Possibly by just adding the from parent-class using the list.
+
+    List item = class_body->members_methods;
+    AST_members_method mm;
+
+    while(item){
+        mm = (AST_members_method) item->data;
+        AST_members_methods_traverse(mm);
+
+        item = item->next;
+    }
+}
+
+void AST_members_methods_traverse(AST_members_method members_method){
+    if(!members_method) return;
+    // ASSERT(members_method->access != NULL); // Maybe hardcode NULL => DEFAULT?
+    ASSERT(members_method->mom != NULL);
+
+    // TODO: If statement depending on ACCESS?
+
+    AST_member_or_method_traverse(members_method->mom);
+}
+
+void AST_member_or_method_traverse(AST_member_or_method mom){
+    if(!mom) return;
+    
+    switch(mom->kind){
+        case MOM_MEMBER: // TODO
+            AST_member_traverse(mom->u.member);
+            break;
+        case MOM_METHOD: // TODO
+            printf("MOM\n");
+            break;
+        default:
+            SEMANTIC_ERROR(mom, "MOM | Member or Method kind undefined.");
+    }
+}
+
+void AST_member_traverse(AST_member member){
+    if(!member) return;
+    
+    switch(member->kind){
+        case MEMBER_VARIABLE: 
+            AST_var_declaration_traverse(member->u.var_declaration);
+            break;
+        case MEMBER_ANON_UNION: // TODO - Implement Anonymous Unions logic || Scope?
+            AST_union_fields_traverse(member->u.union_fields);
+            break;
+        default:
+            SEMANTIC_ERROR(member, "Member | Member kind undefined.");
+    }
+}
+
+void AST_var_declaration_traverse(AST_var_declaration var_declaration){
+    if(!var_declaration) return;
+    ASSERT(var_declaration->typename != NULL);
+    ASSERT(var_declaration->list != NULL);
+
+    // Assign typename to all variables inside the list
+    List item = var_declaration->list;
+    AST_variabledef variabledef;
+
+    while(item){
+        variabledef = (AST_variabledef) item->data;
+        ASSERT(variabledef->id != NULL);
+        SymbolEntry entry = symbol_enter(symbol_table, variabledef->id, true);
+        entry->entry_type = ENTRY_VARIABLE;
+
+        // TODO: Possibly export this? Most likely will be required by other funcs here & outside of this file.
+        if(variabledef->type == NULL){ // Simple variable, neither List nor Array.
+            entry->e.variable.type = var_declaration->typename;
+        }else{
+            switch(variabledef->type->kind){
+                case TYPE_list:  // TODO: Verify that this works
+                    variabledef->type->u.t_list.type = var_declaration->typename;
+                    entry->e.variable.type = variabledef->type;
+                    break;
+                case TYPE_array: // TODO: Verify that this works
+                    set_array_type(variabledef->type, var_declaration->typename);
+                    entry->e.variable.type = variabledef->type;
+                    break;
+                default:
+                    SEMANTIC_ERROR(variabledef, "Variabledef | Unexpected variable inner type (NULL, List or Array expected but got %d)", variabledef->type->kind);
+            }
+        }
+
+        item = item->next;
+    }
+}
+
+void AST_union_fields_traverse(List union_fields){
+    if(!union_fields) return;
+
+    List item = union_fields;
+    AST_var_declaration var_declaration;
+
+    while(item){
+        var_declaration = (AST_var_declaration) item->data;
+
+        AST_var_declaration_traverse(var_declaration);
+
+        item = item->next;
+    }
 }

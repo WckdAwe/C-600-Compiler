@@ -445,10 +445,10 @@ AST_variabledef ast_variabledef(Identifier id, Type list, Type array){
     result->lineno = lineno;
     return result;
 }
-                  
-Type ast_dims(Type outer_array, Type inner_array){ //  Good for semantic... Maybe need different for ast?
+
+Type ast_dims(Type outer_array, Type inner_array){
     if(outer_array){
-        outer_array->u.t_array.type = inner_array;
+        set_array_type(outer_array, inner_array);
         return outer_array;
     }else{
         return inner_array;
@@ -579,92 +579,6 @@ AST_func_dcl ast_func_dcl_full(AST_full_func_dcl f){
     return result;
 }
 
-List list_add(List list, void *data){
-    List node = new(sizeof(struct List_tag));
-    node->data = data;
-    node->next = NULL;
-    node->lineno = lineno;
-
-    if(list == NULL)
-        return node;
-    
-    List tmp = list;
-	while(tmp->next != NULL){
-		tmp = tmp->next;
-	}
-    tmp->next = node;
-	
-	return list;
-}
-
-void list_reverse(List *head){
-    List prev = NULL;
-    List current = *head;
-    List next = NULL;
-
-    while(current != NULL){
-        next = current->next;
-        current->next = prev;
-        prev = current;
-        current = next;
-    }
-    *head = prev;
-}
-
-Type set_list_or_typename(Type list, Type typename){
-    if(list){
-        ASSERT(list->kind == TYPE_list);
-        list->u.t_list.type = typename;
-        return list;
-    }else{
-        return typename;
-    }
-}
-
-Type set_list_or_array_or_typename(Type list, Type array, Type typename){
-    ASSERT(!(list && array)); // Can't be both a list and array!
-    if(list){
-        ASSERT(list->kind == TYPE_list);
-        list->u.t_list.type = typename;
-        return list;
-    }else if(array){
-        set_array_type(array, typename);
-        return array;
-    }else{
-        return typename;
-    }
-}
-
-void set_array_type(Type array, Type type){
-    ASSERT(array && type);
-    ASSERT(array->kind == TYPE_array);
-    Type tmp = array;
-    while(tmp->u.t_array.type->kind == TYPE_array)
-        tmp = tmp->u.t_array.type;
-    tmp->u.t_array.type = type;
-}
-
-Type get_parameter_type(Type typename, Type pass_list_dims){
-    if(!pass_list_dims){ // If not ref or list/array
-        return typename;
-    }else{
-        switch(pass_list_dims->kind){
-            case TYPE_ref:
-                pass_list_dims->u.t_ref.type = typename;
-                break;
-            case TYPE_list:
-                pass_list_dims->u.t_list.type = typename;
-                break;
-            case TYPE_array:
-                set_array_type(pass_list_dims, typename);
-                break;
-            default:
-                fatal("Unexpected input on get_parameter_type()\n");
-                break;
-        }
-        return pass_list_dims;
-    }
-}
 
 AST_expr ast_expr_new_binop_AND(AST_expr exp1, AST_expr exp2)
 {   
@@ -844,7 +758,6 @@ AST_expr ast_expr_constant(AST_constant constant)
     result->kind = EXPR_constant;
     result->u.e_constant.constant = constant;
     
-    printf("Hello const %d\n", lineno);
     result->lineno = lineno;
     return result;  
 }
@@ -974,4 +887,94 @@ AST_program ast_program(List gdcl_list, AST_dcl_stmt dcl_stmt){
 
     result->lineno = lineno;
     return result;
+}
+
+
+
+
+List list_add(List list, void *data){
+    List node = new(sizeof(struct List_tag));
+    node->data = data;
+    node->next = NULL;
+    node->lineno = lineno;
+
+    if(list == NULL)
+        return node;
+    
+    List tmp = list;
+	while(tmp->next != NULL){
+		tmp = tmp->next;
+	}
+    tmp->next = node;
+	
+	return list;
+}
+
+void list_reverse(List *head){
+    List prev = NULL;
+    List current = *head;
+    List next = NULL;
+
+    while(current != NULL){
+        next = current->next;
+        current->next = prev;
+        prev = current;
+        current = next;
+    }
+    *head = prev;
+}
+
+Type set_list_or_typename(Type list, Type typename){
+    if(list){
+        ASSERT(list->kind == TYPE_list);
+        list->u.t_list.type = typename;
+        return list;
+    }else{
+        return typename;
+    }
+}
+
+Type set_list_or_array_or_typename(Type list, Type array, Type typename){
+    ASSERT(!(list && array)); // Can't be both a list and array!
+    if(list){
+        ASSERT(list->kind == TYPE_list);
+        list->u.t_list.type = typename;
+        return list;
+    }else if(array){
+        set_array_type(array, typename);
+        return array;
+    }else{
+        return typename;
+    }
+}
+
+void set_array_type(Type array, Type type){
+    ASSERT(array && type);
+    ASSERT(array->kind == TYPE_array);
+    Type tmp = array;
+    while(tmp->u.t_array.type->kind == TYPE_array)
+        tmp = tmp->u.t_array.type;
+    tmp->u.t_array.type = type;
+}
+
+Type get_parameter_type(Type typename, Type pass_list_dims){
+    if(!pass_list_dims){ // If not ref or list/array
+        return typename;
+    }else{
+        switch(pass_list_dims->kind){
+            case TYPE_ref:
+                pass_list_dims->u.t_ref.type = typename;
+                break;
+            case TYPE_list:
+                pass_list_dims->u.t_list.type = typename;
+                break;
+            case TYPE_array:
+                set_array_type(pass_list_dims, typename);
+                break;
+            default:
+                fatal("Unexpected input on get_parameter_type()\n");
+                break;
+        }
+        return pass_list_dims;
+    }
 }

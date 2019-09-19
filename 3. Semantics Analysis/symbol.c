@@ -228,7 +228,11 @@ char* _print_array_type(Type array){
         tmp = tmp->u.t_array.type;
         ASSERT(tmp != NULL);
     }
-    sprintf(out_bfr, "%s%s", reverse_type_kind[tmp->kind], bfr);
+    if(tmp->kind == TYPE_id){
+        sprintf(out_bfr, "%s%s", tmp->u.t_id.id->name, bfr);
+    }else{
+        sprintf(out_bfr, "%s%s", reverse_type_kind[tmp->kind], bfr);
+    }
     return out_bfr;
     // TODO: Implement cleanup? MemLeaks otherwise...
 }
@@ -333,7 +337,11 @@ void scope_print (Scope scope, int go_deeper)
                         printf("reference to: %s \n", reverse_type_kind[type->u.t_ref.type->kind]);
                         break;
                     default:
-                        printf("%s\n", reverse_type_kind[type->kind]);
+                        if(type->kind == TYPE_id){
+                            printf("%s\n", type->u.t_id.id->name);
+                        }else{
+                            printf("%s\n", reverse_type_kind[type->kind]);
+                        }
                         break;
                 }
                 break;

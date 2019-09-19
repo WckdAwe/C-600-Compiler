@@ -212,13 +212,7 @@ AST_program ast;
 program:                                                                                    
                           global_declarations main_function                                 {ast = $$ = ast_program($1, $2);}
                         ;
-global_declarations:      global_declarations global_declaration                            {
-                                                                                                if($2 == NULL) printf("I am null - Test & Remove\n");
-                                                                                                else{
-                                                                                                    $$ = list_add($1, (void *) $2);
-                                                                                                    printf("I am not null - Test & Remove\n");
-                                                                                                } 
-                                                                                            }
+global_declarations:      global_declarations global_declaration                            {if($2 != NULL) $$ = list_add($1, (void *) $2);}
                         | %empty                                                            {$$ = NULL;}
                         ;
 global_declaration:       typedef_declaration                                               {$$ = ast_gdcl_typedef($1);}
