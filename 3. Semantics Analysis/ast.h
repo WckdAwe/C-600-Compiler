@@ -437,8 +437,12 @@ struct AST_member_or_method_tag{
         MOM_METHOD,
     } kind;
     union{
-        AST_short_func_dcl method;          // CHECH THIS!!!!!!!! probably needs structs
-        AST_member member;
+        struct{
+            AST_short_func_dcl short_func_dcl;
+        } method;
+        struct{
+            AST_member member;
+        } member;
     } u;
     int lineno;
 };
