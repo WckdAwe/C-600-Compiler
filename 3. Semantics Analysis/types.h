@@ -19,11 +19,11 @@
 
 typedef struct Type_tag * Type;
 
-typedef struct TypeList_tag * TypeList;
-struct TypeList_tag {
-    Type type;                     /* Type of List                   */
-    TypeList next;                 /* Pointer to next Type           */
-};
+// typedef struct TypeList_tag * TypeList;
+// struct TypeList_tag {
+//     Type type;                     /* Type of List                   */
+//     TypeList next;                 /* Pointer to next Type           */
+// };
 
 
 /* Ορισμός δομής */
@@ -84,6 +84,6 @@ Type type_list  (Type t);
 // Type type_union (); // TODO: Verify if needed later. Currently using basic
 Type type_id    (Identifier id);
 
-TypeList   type_list_add(TypeList list, Type type);
+// TypeList   type_list_add(TypeList list, Type type);
 
 #endif

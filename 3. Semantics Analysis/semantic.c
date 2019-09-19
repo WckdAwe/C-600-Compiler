@@ -80,14 +80,20 @@ void AST_gdcl_traverse(List gdcl_list){
             case GDCL_ENUM:
                 AST_enum_traverse(gdcl->u.g_enum.enum_dcl);
                 break;
-            case GDCL_CLASS: // TODO
+            case GDCL_CLASS:
                 AST_class_traverse(gdcl->u.g_class.class_dcl);
                 break;
-            case GDCL_UNION: // TODO
-            case GDCL_GLOBAL_VAR: // TODO
-            case GDCL_FUNC: // TODO
+            case GDCL_UNION:
+                AST_union_traverse(gdcl->u.g_union.union_dcl);
+                break;
+            case GDCL_GLOBAL_VAR:
+                AST_global_var_traverse(gdcl->u.g_global_var.global_var_dcl);
+                break;
+            case GDCL_FUNC:
+                AST_func_traverse(gdcl->u.g_func.func_dcl);
+                break;
             default:
-                SEMANTIC_ERROR(gdcl_list, "GDCL | Invalid kind");
+                SEMANTIC_ERROR(gdcl_list, "GDCL | Kind undefined.i");
                 exit(-1);
         }
         item = item->next;
@@ -225,14 +231,14 @@ void AST_member_or_method_traverse(AST_member_or_method mom){
     if(!mom) return;
     
     switch(mom->kind){
-        case MOM_MEMBER: // TODO
-            AST_member_traverse(mom->u.member);
+        case MOM_MEMBER:
+            AST_member_traverse(mom->u.member.member);
             break;
-        case MOM_METHOD: // TODO
-            printf("MOM\n");
+        case MOM_METHOD:
+            AST_short_func_dcl_traverse(mom->u.method.short_func_dcl);
             break;
         default:
-            SEMANTIC_ERROR(mom, "MOM | Member or Method kind undefined.");
+            SEMANTIC_ERROR(mom, "MOM | Kind undefined.");
     }
 }
 
@@ -247,7 +253,7 @@ void AST_member_traverse(AST_member member){
             AST_union_fields_traverse(member->u.union_fields);
             break;
         default:
-            SEMANTIC_ERROR(member, "Member | Member kind undefined.");
+            SEMANTIC_ERROR(member, "Member | Kind undefined.");
     }
 }
 
@@ -260,29 +266,10 @@ void AST_var_declaration_traverse(AST_var_declaration var_declaration){
     List item = var_declaration->list;
     AST_variabledef variabledef;
 
-    while(item){
+    while(item){ // TODO: MERGE with init_variabledef
         variabledef = (AST_variabledef) item->data;
         ASSERT(variabledef->id != NULL);
-        SymbolEntry entry = symbol_enter(symbol_table, variabledef->id, true);
-        entry->entry_type = ENTRY_VARIABLE;
-
-        // TODO: Possibly export this? Most likely will be required by other funcs here & outside of this file.
-        if(variabledef->type == NULL){ // Simple variable, neither List nor Array.
-            entry->e.variable.type = var_declaration->typename;
-        }else{
-            switch(variabledef->type->kind){
-                case TYPE_list:  // TODO: Verify that this works
-                    variabledef->type->u.t_list.type = var_declaration->typename;
-                    entry->e.variable.type = variabledef->type;
-                    break;
-                case TYPE_array: // TODO: Verify that this works
-                    set_array_type(variabledef->type, var_declaration->typename);
-                    entry->e.variable.type = variabledef->type;
-                    break;
-                default:
-                    SEMANTIC_ERROR(variabledef, "Variabledef | Unexpected variable inner type (NULL, List or Array expected but got %d)", variabledef->type->kind);
-            }
-        }
+        AST_variabledef_traverse(variabledef, var_declaration->typename);
 
         item = item->next;
     }
@@ -301,4 +288,121 @@ void AST_union_fields_traverse(List union_fields){
 
         item = item->next;
     }
+}
+
+void AST_short_func_dcl_traverse(AST_short_func_dcl short_func_dcl){
+    if(!short_func_dcl) return;
+    ASSERT(short_func_dcl->func_header_start != NULL);
+    ASSERT(short_func_dcl->kind == SHORT_FUNC_NO_PARAMS || 
+           short_func_dcl->kind == SHORT_FUNC_WITH_PARAMS);
+    SymbolEntry entry = symbol_enter(symbol_table, short_func_dcl->func_header_start->id, true);
+    entry->entry_type = ENTRY_FUNCTION_DECLARATION;
+    entry->e.function_declaration.result_type = short_func_dcl->func_header_start->typename;
+    
+    // Add parameters to function if they are defined || TODO: Verify that there are no check that need to happen!
+    if(short_func_dcl->kind == SHORT_FUNC_WITH_PARAMS) entry->e.function_declaration.parameters = short_func_dcl->parameters;
+}
+
+void AST_union_traverse(AST_union_dcl union_dcl){
+    if(!union_dcl) return;
+    ASSERT(union_dcl->id != NULL);
+    ASSERT(union_dcl->union_fields != NULL);
+    
+    SymbolEntry entry = symbol_enter(symbol_table, union_dcl->id, true);
+    entry->entry_type = ENTRY_TYPE; // TODO: Might require custom entry to do Union functions?
+    entry->e.type.scope = scope_open(symbol_table); // TODO: Possibly doesn't need to be like that
+    entry->e.type.type = type_basic(TYPE_union);
+
+    AST_union_fields_traverse(union_dcl->union_fields);
+    
+    scope_close(symbol_table);
+}
+
+void AST_global_var_traverse(AST_global_var_declaration global_var_dcl){
+    if(!global_var_dcl) return;
+    ASSERT(global_var_dcl->typename != NULL);
+    ASSERT(global_var_dcl->init_variabledefs != NULL); // TODO: Can this be null ? Can there be no Vars?
+
+    List item = global_var_dcl->init_variabledefs;
+    AST_init_variabledef init_variabledef;
+
+    while(item){
+        // TODO: Set correct type to each init variabledef.
+        init_variabledef = item->data;
+     
+        AST_init_variabledef_traverse(init_variabledef, global_var_dcl->typename);
+
+        item = item->next;
+    }     
+}
+
+void AST_init_variabledef_traverse(AST_init_variabledef init_variabledef, Type typename){ // TODO: Good luck with this
+    if(!init_variabledef) return;
+    ASSERT(init_variabledef->variabledef != NULL);
+    ASSERT(init_variabledef->init_value != NULL); // Can it be null?>
+
+    AST_variabledef_traverse(init_variabledef->variabledef, typename);
+
+    // TODO: Parse init_value!!
+    // IMPORTANT!!
+}
+
+// TODO: Merge this wherever needed
+void AST_variabledef_traverse(AST_variabledef variabledef, Type typename){
+    SymbolEntry entry = symbol_enter(symbol_table, variabledef->id, true);
+    entry->entry_type = ENTRY_VARIABLE;
+
+    // TODO: Possibly export this? Most likely will be required by other funcs here & outside of this file.
+    if(variabledef->type == NULL){ // Simple variable, neither List nor Array.
+        entry->e.variable.type = typename;
+    }else{
+        switch(variabledef->type->kind){
+            case TYPE_list:  // TODO: Verify that this works
+                variabledef->type->u.t_list.type = typename;
+                entry->e.variable.type = variabledef->type;
+                break;
+            case TYPE_array: // TODO: Verify that this works
+                set_array_type(variabledef->type, typename);
+                entry->e.variable.type = variabledef->type;
+                break;
+            default:
+                SEMANTIC_ERROR(variabledef, "Variabledef | Unexpected variable inner type (NULL, List or Array expected but got %d)", variabledef->type->kind);
+        }
+    }
+}
+
+void AST_func_traverse(AST_func_dcl func_dcl){
+    if(!func_dcl) return;
+    
+    switch(func_dcl->kind){
+        case FD_SHORT:
+            AST_short_func_dcl_traverse(func_dcl->u.fd_short.func);
+            break;
+        case FD_FULL: // TODO
+            AST_full_func_dcl_traverse(func_dcl->u.fd_full.func);
+            break;
+        default:
+            SEMANTIC_ERROR(func_dcl, "Function Declaration | Kind undefined.");
+    }
+}
+
+void AST_full_func_dcl_traverse(AST_full_func_dcl full_func){
+    if(!full_func) return;
+    
+    switch(full_func->kind){
+        case FFD_NOPAR: // TODO
+            AST_func_header_start_traverse(full_func->u.nopar.header);
+            break;
+        case FFD_NOPAR_CLASS: // TODO
+            // full_func->u.nopar_class.header
+        case FFD_FULL_PAR: // TODO
+        default:
+            SEMANTIC_ERROR(full_func, "Full Function Declaration | Kind undefined.");
+    }
+
+    // AST_dcl_stmt_traverse(full_func->statements); // TODO
+}
+
+void AST_func_header_start_traverse(AST_func_header_start func_header_start){
+    if(!func_header_start) return;
 }

@@ -86,19 +86,19 @@ Type type_func (Type type1, Type type2)
 }
 
 
-TypeList type_list_add(TypeList list, Type type){
-    TypeList node = new(sizeof(struct TypeList_tag));
-    node->type = type;
-    node->next = NULL;
+// TypeList type_list_add(TypeList list, Type type){
+//     TypeList node = new(sizeof(struct TypeList_tag));
+//     node->type = type;
+//     node->next = NULL;
 
-    if(list == NULL)
-        return node;
+//     if(list == NULL)
+//         return node;
     
-    TypeList tmp = list;
-	while(tmp->next != NULL){
-		tmp = tmp->next;
-	}
-    tmp->next = node;
+//     TypeList tmp = list;
+// 	while(tmp->next != NULL){
+// 		tmp = tmp->next;
+// 	}
+//     tmp->next = node;
 	
-	return list;
-}
+// 	return list;
+// }

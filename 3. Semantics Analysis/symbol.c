@@ -29,6 +29,7 @@
 #include "error.h"
 #include "symbol.h"
 #include "types.h"
+#include "ast.h"
 
 
 char* reverse_entry_type[] = {
@@ -307,14 +308,18 @@ void scope_print (Scope scope, int go_deeper)
             case ENTRY_FUNCTION_DECLARATION:
                 ASSERT(e->e.function_declaration.result_type != NULL);
                 memset(str_bfr,0,strlen(str_bfr));
-                TypeList parameters = e->e.function_declaration.parameters;
+                List parameters = e->e.function_declaration.parameters;
                 while(parameters != NULL){
-                    switch(parameters->type->kind){
+                    Type param_type = parameters->data;
+                    switch(param_type->kind){
                         case TYPE_array:
-                            sprintf(str_bfr, "%s, %s", str_bfr, _print_array_type(parameters->type));
+                            sprintf(str_bfr, "%s, %s", str_bfr, _print_array_type(param_type));
+                            break;
+                        case TYPE_id:
+                            sprintf(str_bfr, "%s, %s", str_bfr, param_type->u.t_id.id->name);
                             break;
                         default:
-                            sprintf(str_bfr, "%s, %s", str_bfr, reverse_type_kind[parameters->type->kind]);
+                            sprintf(str_bfr, "%s, %s", str_bfr, reverse_type_kind[param_type->kind]);
                             break;
                     }
                     parameters = parameters->next;

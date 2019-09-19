@@ -298,7 +298,7 @@ C(AD*|D+)R                                              {TPRINT(T_LISTFUNC); yyl
 {NEWLINE}                                               {lineno++;}
 
  /* Catch the rest */
-.                                                       {yyerror("Illegal character");/**yyless(1);**/}
+.                                                       {yyerror("Illegal character");}
  /* ====[END RULES BLOCK]==== */ 
 
 %%

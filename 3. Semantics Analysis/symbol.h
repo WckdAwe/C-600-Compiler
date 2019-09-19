@@ -27,6 +27,7 @@
 
 #include <stdbool.h>
 #include "types.h"
+#include "ast.h" // TODO: For List. Extract it later.
 
 
 /* ---------------------------------------------------------------------
@@ -78,7 +79,6 @@ struct SymbolTable_tag {
 extern char *reverse_entry_type[];
 
 struct SymbolEntry_tag {
-   /* Η διαχείριση αυτών των πεδίων γίνεται αυτόματα */
    Identifier   id;                 /* Ονομα αναγνωριστικού            */
    Scope        scope;              /* Εμβέλεια όπου βρίσκεται         */
    SymbolEntry  nextInHash;         /* Επόμενη εγγραφή στον Π.Κ.       */
@@ -92,7 +92,7 @@ struct SymbolEntry_tag {
        ENTRY_VARIABLE,
        ENTRY_TYPE,
        ENTRY_IDENTIFIER,
-       ENTRY_CLASS,
+    //    ENTRY_CLASS,
    } entry_type;
 
    union {
@@ -110,7 +110,7 @@ struct SymbolEntry_tag {
       } function;
 
       struct {
-          TypeList parameters;
+          List parameters;
           Type result_type;
       } function_declaration;
 
@@ -135,14 +135,14 @@ struct SymbolEntry_tag {
     //       Type type;
     //       Type argument_type;
     //   } constructor;
-      struct{
-        Type type;
-        SymbolEntry *first_member;
-        SymbolEntry *first_method;
-        SymbolEntry *last_member;
-        SymbolEntry *last_method;
-      } class;
-        int counter;
+    //   struct{
+    //     Type type;
+    //     SymbolEntry *first_member;
+    //     SymbolEntry *first_method;
+    //     SymbolEntry *last_member;
+    //     SymbolEntry *last_method;
+    // //   } class;
+    //     int counter;
    } e;
 };
 

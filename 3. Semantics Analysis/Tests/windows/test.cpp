@@ -4,8 +4,8 @@ typedef wckd wckdawe[300];
 typedef wckdawe vasil500[500];
 typedef char ar[100];
 typedef char multi_lvl[500][200][100][50];
-enum days { monday=1, tuesday, wednesday=5, thursday, friday=72 };
-
+enum days { monday=1, tuesday, wednesday, thursday, friday };
+enum enum_verify { monday=1, tuesday=7, wednesday, thursday=32, friday };
 class t {
 private:
    float a,b; // double a,b;
@@ -18,27 +18,19 @@ public:
       float f[2];
    };
 };
+union u {
+   int a;
+   char b[4];
+   days dd;
+};
+
+
+// int g[3];
+int g[3][2];
 
 int main(){
 
 }
-
-// typedef char ar[100];
-// enum days { monday=1, tuesday, wednesday, thursday, friday };
-// class t {
-// private:
-//    float a,b; // double a,b;
-//    int list al;
-//    days d;
-// public:
-//    float zz(int&,ar);
-//    union {
-//       int i[2];
-//       float f[2];
-//    };
-// };
-// int g[3];
-// int g[3][2];
 // float x = 5e-24;
 // int g[3][2] = {{0X1A00,0X30F0},0X18D0,0XA030};
 // union u {
