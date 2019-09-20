@@ -23,16 +23,16 @@ void Access_print(FILE *f, int prec, Access a){
     indent(f, prec);
     switch(a){
         case ACCESS_PRIVATE:
-            fprintf(f, "Access private");
+            fprintf(f, "Access private\n");
             break;
         case ACCESS_PROTECTED:
-            fprintf(f, "Access protected");
+            fprintf(f, "Access protected\n");
             break;
         case ACCESS_PUBLIC:
-            fprintf(f, "Access public");
+            fprintf(f, "Access public\n");
             break;
         case ACCESS_DEFAULT:
-            fprintf(f, "Access default");
+            fprintf(f, "Access default\n");
             break;
         default:
             internal("invalid AST");
@@ -64,11 +64,11 @@ void Type_print(FILE *f, int prec, Type type){
             fprintf(f, "Type: void\n");
             break;
         case TYPE_array:
-            fprintf(f, "Type: array(");
+            fprintf(f, "Type: array(\n");
             indent(f, prec+1);
             fprintf(f, "dim = %d\n", type->u.t_array.dim);
             Type_print(f, prec+1, type->u.t_array.type);
-            indent(f, prec); fprintf(f, ")");
+            indent(f, prec); fprintf(f, ")\n");
             break;
         case TYPE_enum:
             fprintf(f, "Type: enum\n");
@@ -404,11 +404,11 @@ void AST_global_var_declaration_print(FILE *f, int prec, AST_global_var_declarat
         fprintf(f, "<<NULL>>\n");
         return;
     }
-    fprintf(f, "Type: ast_global_var_declaration");
+    fprintf(f, "Type: ast_global_var_declaration\n");
     Type_print(f, prec+1, g->typename);
     //AST_init_variabledef_print_list(f, prec+1, g->init_variabledefs);
     List_print(f, prec+1, g->init_variabledefs, "AST_variabledef"); 
-    indent(f, prec); fprintf(f, ")\n");
+    indent(f, prec+1); fprintf(f, ")\n");
 }
 
 void AST_init_variabledef_print(FILE* f, int prec, AST_init_variabledef v){
@@ -630,6 +630,18 @@ void AST_stmt_print(FILE *f, int prec, AST_stmt s){
             indent(f, prec); fprintf(f, ")\n");
             break;
         //MORE CASES:
+        case STMT_BREAK:
+            fprintf(f, "AST_stmt: stmt break(\n");
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case STMT_CONTINUE:
+            fprintf(f, "AST_stmt: stmt Continue(\n");
+            indent(f, prec); fprintf(f, ")\n");
+            break;
+        case STMT_SEMI:
+            fprintf(f, "AST_stmt: stmt Semi(\n");
+            indent(f, prec); fprintf(f, ")\n");
+            break;
         default:
             internal("Invalid AST");
     }   
@@ -798,7 +810,7 @@ void AST_var_declaration_print(FILE *f, int prec, AST_var_declaration v){
         return;
     }
 
-    fprintf(f, "Type: AST var declaration");
+    fprintf(f, "Type: AST var declaration(\n");
     Type_print(f, prec+1, v->typename);
     //AST_var_declaration_list_print(f, prec+1, v->list);
     List_print(f, prec+1, v->list, "AST_variabledef");
@@ -887,7 +899,7 @@ void AST_variabledef_print(FILE *f, int prec, AST_variabledef v){
     fprintf(f, "Type: AST_variabledef(\n");
     Identifier_print(f, prec+1, v->id);
     Type_print(f, prec+1, v->type);
-    indent(f, prec); fprintf(f, ")\n");
+    indent(f, prec+1); fprintf(f, ")\n");
 }
 
 void AST_constant_print(FILE *f, int prec, AST_constant c){
@@ -995,7 +1007,7 @@ void AST_dcl_stmt_print(FILE *f, int prec, AST_dcl_stmt s){
         case DCL_STMT_DCLS:
             fprintf(f, "AST_dcl_stmt: dcl stmt dcls(\n");
             //AST_declaration_list_print(f, prec+1,s->u.dcl_stmt_dcls.declares);
-            List_print(f, prec+1,s->u.dcl_stmt_dcls.declares,  "AST_declaration");
+            List_print(f, prec+1, s->u.dcl_stmt_dcls.declares,  "AST_declaration");
             indent(f, prec); fprintf(f, ")\n");
             break;
         case DCL_STMT_STMTS_DCLS:
@@ -1007,6 +1019,7 @@ void AST_dcl_stmt_print(FILE *f, int prec, AST_dcl_stmt s){
             indent(f, prec); fprintf(f, ")\n");
             break;
         case DCL_STMT_EMPTY:
+            fprintf(f, "AST_dcl_stmt: empty\n");
             break;
         default: 
             internal("Invalid AST");
