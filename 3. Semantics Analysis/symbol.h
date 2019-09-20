@@ -51,9 +51,6 @@ typedef struct Constant_tag{
     } value;
 }Constant;
 
-/* Λίστα απο εγγραφές του πίνακα συμβόλων */
-
-typedef struct EntryList_tag * EntryList;
 
 /* Σύνολο εγγραφών που βρίσκονται στην ίδια εμβέλεια */
 
@@ -91,25 +88,20 @@ struct SymbolEntry_tag {
        ENTRY_PARAMETER,
        ENTRY_VARIABLE,
        ENTRY_TYPE,
-       ENTRY_IDENTIFIER,
-    //    ENTRY_CLASS,
+    //    ENTRY_IDENTIFIER,
    } entry_type;
 
    union {
       Constant constant;
 
       struct {
-        //   SymbolEntry *first_argument;
-        //   SymbolEntry *last_argument;
-        SymbolEntry parent;
-        EntryList arguments;
-        //   Type type;
-          Type result_type;
-        //   int counter; /* Μοναδικός για κάθε συνάρτηση, για να ξεχωρίζουμε
-                        //   αυτές που έχουν το ίδιο όνομα */
+        SymbolEntry class;
+        List parameters;
+        Type result_type;
+        Scope scope;
       } function;
 
-      struct {
+      struct { // Called inside a function to create the declaration
           List parameters;
           Type result_type;
       } function_declaration;
@@ -130,25 +122,7 @@ struct SymbolEntry_tag {
     //   struct {
     //       Type type;
     //   } identifier;
-
-    //   struct {
-    //       Type type;
-    //       Type argument_type;
-    //   } constructor;
-    //   struct{
-    //     Type type;
-    //     SymbolEntry *first_member;
-    //     SymbolEntry *first_method;
-    //     SymbolEntry *last_member;
-    //     SymbolEntry *last_method;
-    // //   } class;
-    //     int counter;
    } e;
-};
-
-struct EntryList_tag {
-    SymbolEntry entry;              /* Entry of List                   */
-    EntryList next;                 /* Pointer to next Entry           */
 };
 
 struct Scope_tag {
@@ -173,10 +147,9 @@ void        scope_insert  (SymbolTable table, Scope scope);
 SymbolEntry symbol_enter  (SymbolTable table, Identifier id, bool err);
 SymbolEntry symbol_lookup (SymbolTable table, Identifier id, LookupType type,
         bool err);
+SymbolEntry symbol_print_scope_tst (SymbolTable table, Scope scope); // TODO: Remove this
+SymbolEntry symbol_lookup_scope (SymbolTable table, Scope scope, Identifier id, bool err);
 void        scope_print   (Scope scope, int go_deeper);
-
-EntryList   entry_list_add(EntryList list, SymbolEntry entry);
-void        entry_list_reverse(EntryList *list);
 
 char* _print_array_type(Type array);
 #endif

@@ -169,9 +169,6 @@ SymbolEntry symbol_enter (SymbolTable table, Identifier id, bool err)
     return e;
 }
 
-// SymbolEntry symbol_enter_multiple (SymbolTable table, Identifier id, bool err){
-// }
-
 SymbolEntry symbol_lookup (SymbolTable table, Identifier id,
         LookupType type, bool err)
 {
@@ -203,6 +200,36 @@ SymbolEntry symbol_lookup (SymbolTable table, Identifier id,
                     return e;
             }
             break;
+    }
+
+    /* Σφάλμα, αν δε βρέθηκε */
+
+    if (err)
+        error("unknown identifier: %s", id_name(id));
+    return NULL;
+}
+
+SymbolEntry symbol_print_scope_tst (SymbolTable table, Scope scope) // TODO: Remove this
+{
+    SymbolEntry e;
+
+    ASSERT(table != NULL);
+    
+    for (e = scope->entries; e != NULL; e = e->nextInScope) {
+        printf("--- %s ---\n", e->id->name);
+    }
+    return NULL;
+}
+
+SymbolEntry symbol_lookup_scope (SymbolTable table, Scope scope, Identifier id, bool err)
+{
+    SymbolEntry e;
+
+    ASSERT(table != NULL);
+    
+    for (e = scope->entries; e != NULL; e = e->nextInScope) {
+        if (e->id == id)
+            return e;
     }
 
     /* Σφάλμα, αν δε βρέθηκε */
@@ -282,27 +309,28 @@ void scope_print (Scope scope, int go_deeper)
                 break;
             case ENTRY_FUNCTION:
                 ASSERT(e->e.function.result_type != NULL);
-                EntryList arguments = e->e.function.arguments;
+                List arguments = e->e.function.parameters;
                 memset(str_bfr,0, strlen(str_bfr));
-                while(arguments != NULL){
-                    ASSERT(arguments->entry->entry_type == ENTRY_PARAMETER);
-                    type = arguments->entry->e.parameter.type;
-                    switch(type->kind){
-                        case TYPE_array:
-                            sprintf(str_bfr, "%s, %s", str_bfr, _print_array_type(type));
-                            break;
-                        default:
-                            sprintf(str_bfr, "%s, %s", str_bfr, reverse_type_kind[type->kind]);
-                            break;
-                    }
-                    arguments = arguments->next;
-                }
+                // while(arguments != NULL){
+                //     SymbolEntry argument = arguments->data;
+                //     ASSERT(argument->entry_type == ENTRY_PARAMETER);
+                //     type = argument->e.parameter.type;
+                //     switch(type->kind){
+                //         case TYPE_array:
+                //             sprintf(str_bfr, "%s, %s", str_bfr, _print_array_type(type));
+                //             break;
+                //         default:
+                //             sprintf(str_bfr, "%s, %s", str_bfr, reverse_type_kind[type->kind]);
+                //             break;
+                //     }
+                //     arguments = arguments->next;
+                // }
                 // ASSERT(e->e.function.parent != NULL);
                 // ASSERT(e->e.function.parent->id != NULL);
                 if(str_bfr != '\0'){
-                    printf(" [%s] of %s that returns %s\n", str_bfr+2, e->e.function.parent ? id_name(e->e.function.parent->id) : "N/A", reverse_type_kind[e->e.function.result_type->kind]);
+                    printf(" [%s] of %s that returns %s\n", str_bfr+2, e->e.function.class ? id_name(e->e.function.class->id) : "N/A", reverse_type_kind[e->e.function.result_type->kind]);
                 }else{
-                    printf(" [%s] of %s that returns %s\n", str_bfr, e->e.function.parent ? id_name(e->e.function.parent->id) : "N/A", reverse_type_kind[e->e.function.result_type->kind]);
+                    printf(" [%s] of %s that returns %s\n", str_bfr, e->e.function.class ? id_name(e->e.function.class->id) : "N/A", reverse_type_kind[e->e.function.result_type->kind]);
                 }
                 break;
             case ENTRY_FUNCTION_DECLARATION:
@@ -311,6 +339,7 @@ void scope_print (Scope scope, int go_deeper)
                 List parameters = e->e.function_declaration.parameters;
                 while(parameters != NULL){
                     Type param_type = parameters->data;
+                    ASSERT(param_type != NULL);
                     switch(param_type->kind){
                         case TYPE_array:
                             sprintf(str_bfr, "%s, %s", str_bfr, _print_array_type(param_type));
@@ -356,33 +385,33 @@ void scope_print (Scope scope, int go_deeper)
     }
 }
 
-EntryList entry_list_add(EntryList list, SymbolEntry entry){
-    EntryList node = new(sizeof(struct EntryList_tag));
-    node->entry = entry;
-    node->next = NULL;
+// EntryList entry_list_add(EntryList list, SymbolEntry entry){
+//     EntryList node = new(sizeof(struct EntryList_tag));
+//     node->entry = entry;
+//     node->next = NULL;
 
-    if(list == NULL)
-        return node;
+//     if(list == NULL)
+//         return node;
     
-    EntryList tmp = list;
-	while(tmp->next != NULL){
-		tmp = tmp->next;
-	}
-    tmp->next = node;
+//     EntryList tmp = list;
+// 	while(tmp->next != NULL){
+// 		tmp = tmp->next;
+// 	}
+//     tmp->next = node;
 	
-	return list;
-}
+// 	return list;
+// }
 
-void entry_list_reverse(EntryList *head){
-    EntryList prev = NULL;
-    EntryList current = *head;
-    EntryList next = NULL;
+// void entry_list_reverse(EntryList *head){
+//     EntryList prev = NULL;
+//     EntryList current = *head;
+//     EntryList next = NULL;
 
-    while(current != NULL){
-        next = current->next;
-        current->next = prev;
-        prev = current;
-        current = next;
-    }
-    *head = prev;
-}
+//     while(current != NULL){
+//         next = current->next;
+//         current->next = prev;
+//         prev = current;
+//         current = next;
+//     }
+//     *head = prev;
+// }

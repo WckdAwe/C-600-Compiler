@@ -18,11 +18,23 @@ public:
       float f[2];
    };
 };
+class t2 {
+public:
+   float za(int&,ar);
+   float z2(int&,ar);
+};
 union u {
    int a;
    char b[4];
    days dd;
 };
+
+
+void zz(){}
+void __try_it(int& n, days list d){}
+float t2::za(int & a, ar test){}
+void t2::z2(){}
+void test();
 
 
 // int g[3];
@@ -31,6 +43,23 @@ int g[3][2];
 int main(){
 
 }
+
+// typedef char ar[100];
+// enum days { monday=1, tuesday, wednesday, thursday, friday };
+// class t {
+// private:
+//    float a,b; // double a,b;
+//    int list al;
+//    days d;
+// public:
+//    float zz(int&,ar);
+//    union {
+//       int i[2];
+//       float f[2];
+//    };
+// };
+// int g[3];
+// int g[3][2];
 // float x = 5e-24;
 // int g[3][2] = {{0X1A00,0X30F0},0X18D0,0XA030};
 // union u {

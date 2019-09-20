@@ -375,7 +375,7 @@ void AST_func_traverse(AST_func_dcl func_dcl){
     if(!func_dcl) return;
     
     switch(func_dcl->kind){
-        case FD_SHORT:
+        case FD_SHORT: // TODO
             AST_short_func_dcl_traverse(func_dcl->u.fd_short.func);
             break;
         case FD_FULL: // TODO
@@ -386,23 +386,96 @@ void AST_func_traverse(AST_func_dcl func_dcl){
     }
 }
 
+// TODO: Solve the following
+// 1: Do we require a declaration?
+// 2: Should Declarations point to functions?
+// 3: Should Declarations & functions be unified (pointing dec to func)
 void AST_full_func_dcl_traverse(AST_full_func_dcl full_func){
     if(!full_func) return;
     
+    SymbolEntry entry = NULL;
     switch(full_func->kind){
         case FFD_NOPAR: // TODO
-            AST_func_header_start_traverse(full_func->u.nopar.header);
+            entry = AST_func_header_start_traverse(full_func->u.nopar.header);
             break;
-        case FFD_NOPAR_CLASS: // TODO
-            // full_func->u.nopar_class.header
+        case FFD_NOPAR_CLASS:
+            entry = AST_class_func_header_start_traverse(full_func->u.nopar_class.header);
+            break;
         case FFD_FULL_PAR: // TODO
+            entry = AST_full_par_func_header_traverse(full_func->u.full_par.header);
+            break;
         default:
             SEMANTIC_ERROR(full_func, "Full Function Declaration | Kind undefined.");
     }
-
+    ASSERT(entry != NULL);
+    scope_close(symbol_table); // TODO: Make sure scope_open is called on each full_func (before parameters);
     // AST_dcl_stmt_traverse(full_func->statements); // TODO
 }
 
-void AST_func_header_start_traverse(AST_func_header_start func_header_start){
-    if(!func_header_start) return;
+SymbolEntry AST_func_header_start_traverse(AST_func_header_start func_header_start){ // TODO->ENTRY=> FUNCTION
+    if(!func_header_start) return NULL;
+
+    SymbolEntry entry = symbol_enter(symbol_table, func_header_start->id, true);
+    entry->entry_type = ENTRY_FUNCTION;
+    entry->e.function.result_type = func_header_start->typename;
+    entry->e.function.scope = scope_open(symbol_table);
+    entry->e.function.parameters = NULL;
+    entry->e.function.class = NULL;
+    
+    return entry;
+}
+
+SymbolEntry AST_class_func_header_start_traverse(AST_class_func_header_start class_func_header_start){ // TODO->ENTRY=> FUNCTION
+    if(!class_func_header_start) return NULL;
+    ASSERT(class_func_header_start->class != NULL);
+    ASSERT(class_func_header_start->typename != NULL);
+    ASSERT(class_func_header_start->id != NULL);
+    
+    SymbolEntry class;
+    SymbolEntry entry = symbol_enter(symbol_table, class_func_header_start->id, true);
+    entry->entry_type = ENTRY_FUNCTION;
+    entry->e.function.result_type = class_func_header_start->typename;
+    
+    class = symbol_lookup(symbol_table, class_func_header_start->class, LOOKUP_ALL_SCOPES, true);
+    if(class->entry_type != ENTRY_TYPE || 
+      (class->entry_type == ENTRY_TYPE && class->e.type.type->kind != TYPE_class)){
+        SEMANTIC_ERROR(class_func_header_start, 
+                      "Class Func Header Start | Function's \"%s\" class \"%s\" is not a class.", 
+                       class_func_header_start->id->name, class->id->name);
+    }
+    
+
+    if(!symbol_lookup_scope(symbol_table, class->e.type.scope, class_func_header_start->id, false)){ // Check if function is actually part of the class?
+        SEMANTIC_ERROR(class_func_header_start, 
+                      "Class Func Header Start | Class \"%s\" doesn't contain function \"%s\".", 
+                       class->id->name, class_func_header_start->id->name);
+    }
+
+    // TODO: Implement typecheck for each parameter ? || No params here
+
+    entry->e.function.class = class;
+    entry->e.function.scope = scope_open(symbol_table);
+    entry->e.function.parameters = NULL;
+    
+    return entry;
+}
+
+SymbolEntry AST_full_par_func_header_traverse(AST_full_par_func_header full_par_func_header){ // TODO->ENTRY=> FUNCTION
+    if(!full_par_func_header) return NULL;
+    
+    SymbolEntry entry;
+    switch(full_par_func_header->kind){
+        case FPF_NOCLASS: // TODO
+            entry = AST_func_header_start_traverse(full_par_func_header->u.fpf_noclass.header);
+            entry->e.function.parameters = full_par_func_header->parameters; // TODO: Verify parameters?
+            break;
+        case FPF_CLASS: // TODO
+            entry = AST_class_func_header_start_traverse(full_par_func_header->u.fpf_class.header); // TODO: Verify parameters
+            entry->e.function.parameters = full_par_func_header->parameters;
+            break;
+        default:
+            SEMANTIC_ERROR(full_par_func_header, "Full Par Func Header | Kind undefined. (%d)", full_par_func_header->kind);
+    }
+
+    return entry;
 }
