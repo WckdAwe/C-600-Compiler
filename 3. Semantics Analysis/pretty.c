@@ -82,26 +82,28 @@ void Type_print(FILE *f, int prec, Type type){
             indent(f, prec); fprintf(f, ")");
             break;
         case TYPE_class:
-            fprintf(f, "Type: class (\n");
+            fprintf(f, "Type: class(\n");
             Identifier_print(f, prec+1, type->u.t_class.parent);
             indent(f, prec); fprintf(f, ")");
             break;
         case TYPE_func:
-            fprintf(f, "Type: func (\n");
+            fprintf(f, "Type: func(\n");
             Type_print(f, prec+1, type->u.t_func.type1);
             Type_print(f, prec+1, type->u.t_func.type2);
             indent(f, prec); fprintf(f, ")");
             break;
         case TYPE_id:
-            fprintf(f, "Type: id (\n");
+            fprintf(f, "Type: id(\n");
             Identifier_print(f, prec+1, type->u.t_id.id);
             indent(f, prec); fprintf(f, ")\n");
+            break;
         case TYPE_ref:
-            fprintf(f, "Type: ref (\n");
+            fprintf(f, "Type: ref(\n");
             Type_print(f, prec+1, type->u.t_ref.type);
             indent(f, prec); fprintf(f, ")\n");
+            break;
         default:
-            printf("%d\n",type->kind);
+            printf("%d\n",type->kind); //Type_ref error !!!
             internal("Invalid AST");
     } 
 }
