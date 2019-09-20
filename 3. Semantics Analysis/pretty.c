@@ -71,13 +71,15 @@ void Type_print(FILE *f, int prec, Type type){
             indent(f, prec); fprintf(f, ")");
             break;
         case TYPE_enum:
-            fprintf(f, "Type: enum");
+            fprintf(f, "Type: enum(\n");
+            indent(f, prec); fprintf(f, ")");
             break;
         case TYPE_union:
-            fprintf(f, "Type: union");
+            fprintf(f, "Type: union(\n");
+            indent(f, prec); fprintf(f, ")");
             break;
         case TYPE_list:
-            fprintf(f, "Type: list (");
+            fprintf(f, "Type: list(\n");
             Type_print(f, prec+1, type->u.t_list.type);
             indent(f, prec); fprintf(f, ")");
             break;
