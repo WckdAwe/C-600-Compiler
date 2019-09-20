@@ -101,6 +101,7 @@ void Type_print(FILE *f, int prec, Type type){
             Type_print(f, prec+1, type->u.t_ref.type);
             indent(f, prec); fprintf(f, ")\n");
         default:
+            printf("%d\n",type->kind);
             internal("Invalid AST");
     } 
 }
@@ -299,32 +300,32 @@ void AST_global_decl_print(FILE *f, int prec, AST_global_decl g){
     }
     switch(g->kind){
         case GDCL_TYPEDEF:
-            fprintf(f, " (\n");
+            fprintf(f, "AST_global_decl: typedef(\n");
             AST_typedef_print(f, prec+1, g->u.g_typedef.typedef_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case GDCL_ENUM:
-            fprintf(f, " (\n");
+            fprintf(f, "AST_global_decl: enum(\n");
             AST_enum_dcl_print(f, prec+1, g->u.g_enum.enum_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case GDCL_CLASS:
-            fprintf(f, " (\n");
+            fprintf(f, "AST_global_decl: class(\n");
             AST_class_dcl_print(f, prec+1, g->u.g_class.class_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case GDCL_UNION:
-            fprintf(f, " (\n");
+            fprintf(f, " AST_global_decl: union(\n");
             AST_union_dcl_print(f, prec+1, g->u.g_union.union_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case GDCL_GLOBAL_VAR:
-            fprintf(f, " (\n");
+            fprintf(f, "AST_global_decl: global var(\n");
             AST_global_var_declaration_print(f, prec+1, g->u.g_global_var.global_var_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
         case GDCL_FUNC:
-            fprintf(f, " (\n");
+            fprintf(f, "AST_global_decl: func(\n");
             AST_func_dcl_print(f, prec+1, g->u.g_func.func_dcl);
             indent(f, prec); fprintf(f, ")\n");
             break;
@@ -1040,6 +1041,7 @@ void AST_program_print(FILE *f, int prec, AST_program p){
     }
     fprintf(f, "Type: AST_program(\n");
     List_print(f, prec+1, p->gdcl_list, "AST_global_decl");
+    printf("After list:");
     AST_dcl_stmt_print(f, prec+1, p->dcl_stmts);
     indent(f, prec); fprintf(f, ")\n");
 }
@@ -1067,7 +1069,7 @@ void List_print(FILE *f, int prec, List l, char *listType){
     else if(strcmp("AST_casestmt", listType) == 0){
         AST_casestmt_print(f, prec+1, (AST_casestmt)l->data);
     }
-    else if(strcmp("AST_stmt", listType)){
+    else if(strcmp("AST_stmt", listType) == 0){
         AST_stmt_print(f, prec+1, (AST_stmt)l->data);
     }
     else if(strcmp("AST_output", listType) == 0){
