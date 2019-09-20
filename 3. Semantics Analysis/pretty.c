@@ -103,7 +103,7 @@ void Type_print(FILE *f, int prec, Type type){
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:
-            printf("%d\n",type->kind); //Type_ref error !!!
+            printf("%d\n",type->kind);
             internal("Invalid AST");
     } 
 }
