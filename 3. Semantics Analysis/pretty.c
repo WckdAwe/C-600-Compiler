@@ -64,7 +64,7 @@ void Type_print(FILE *f, int prec, Type type){
             fprintf(f, "Type: void\n");
             break;
         case TYPE_array:
-            fprintf(f, "Type: array(\n");
+            fprintf(f, "Type: array(");
             indent(f, prec+1);
             fprintf(f, "dim = %d\n", type->u.t_array.dim);
             Type_print(f, prec+1, type->u.t_array.type);
