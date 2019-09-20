@@ -46,35 +46,35 @@ void Type_print(FILE *f, int prec, Type type){
     }
     switch(type->kind){
         case TYPE_unknown:
-            fprintf(f, "Type: unknown");
+            fprintf(f, "Type: unknown\n");
             break;
         case TYPE_int:
-            fprintf(f, "Type: int");
+            fprintf(f, "Type: int\n");
             break;
         case TYPE_float:
-            fprintf(f, "Type: float");
+            fprintf(f, "Type: float\n");
             break;
         case TYPE_char:
-            fprintf(f, "Type: char");
+            fprintf(f, "Type: char\n");
             break;
         case TYPE_str:
-            fprintf(f, "Type: str");
+            fprintf(f, "Type: str\n");
             break;
         case TYPE_void:
-            fprintf(f, "Type: void");
+            fprintf(f, "Type: void\n");
             break;
         case TYPE_array:
-            fprintf(f, "Type: array (");
+            fprintf(f, "Type: array(\n");
             indent(f, prec+1);
             fprintf(f, "dim = %d\n", type->u.t_array.dim);
             Type_print(f, prec+1, type->u.t_array.type);
             indent(f, prec); fprintf(f, ")");
             break;
         case TYPE_enum:
-            fprintf(f, "Type: enum");
+            fprintf(f, "Type: enum\n");
             break;
         case TYPE_union:
-            fprintf(f, "Type: union");
+            fprintf(f, "Type: union\n");
             break;
         case TYPE_list:
             fprintf(f, "Type: list(\n");
