@@ -466,7 +466,7 @@ void AST_init_value_print(FILE *f, int prec, AST_init_value i){
         case INIT_MULTI:
             fprintf(f, "ast_init_value: init multi(\n");
             //AST_expr_list_print(f, prec+1, i->u.multi.list_of_exprs);
-            List_print(f, prec+1, i->u.multi.list_of_exprs, "AST_expr");
+            List_print(f, prec+1, i->u.multi.list_of_exprs, "AST_init_value");
             indent(f, prec); fprintf(f, ")\n");
             break;
         case INIT_DEFAULT:
@@ -1111,6 +1111,12 @@ void List_print(FILE *f, int prec, List l, char *listType){
     }
     else if(strcmp("AST_global_decl", listType) == 0){
         AST_global_decl_print(f, prec+1, (AST_global_decl)l->data);
+    }
+    else if(strcmp("AST_init_variabledef", listType) == 0){
+        AST_init_variabledef_print(f, prec+1, (AST_init_variabledef)l->data);
+    }
+    else if(strcmp("AST_init_value", listType) == 0){
+        AST_init_value_print(f, prec+1, (AST_init_value)l->data);
     }
     List_print(f, prec+1, l->next, listType);
     indent(f, prec); fprintf(f, ")\n");

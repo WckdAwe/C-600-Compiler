@@ -93,7 +93,7 @@ AST_global_var_declaration ast_global_var_declaration(Type typename, List init_v
     AST_global_var_declaration result = new(sizeof(*result));
     result->typename = typename;
     result->init_variabledefs = init_variabledefs;
-    result->lineno;
+    result->lineno = lineno;
     return result;
 }
 
@@ -165,6 +165,7 @@ AST_switch_tail ast_switch_tail_decl(AST_decl_cases decl_case){
     AST_switch_tail result = new(sizeof(*result));
     result->kind = SWITCH_DECL_CASES;
     result->u.decl_cases.decl_cases = decl_case;
+    result->lineno = lineno;
     return result;
 }
 
@@ -172,6 +173,7 @@ AST_switch_tail ast_switch_tail_single(AST_casestmt casestmt){
     AST_switch_tail result = new(sizeof(*result));
     result->kind = SWITCH_SINGLE_CASE;
     result->u.single_case.casestmt = casestmt; 
+    result->lineno = lineno;
     return result;
 }
 
@@ -205,6 +207,7 @@ AST_casestmt ast_casestmt_multi(AST_constant constant, List stmts){
     result->kind = CASE_MULTI_STMT;
     result->u.c_multi_stmt.constant = constant;
     result->u.c_multi_stmt.stmts = stmts;
+    result->lineno = lineno;
     return result;
 }
 
@@ -263,7 +266,7 @@ AST_stmt ast_stmt_basic(int stmt_kind){
     ASSERT(stmt_kind == STMT_CONTINUE || stmt_kind == STMT_BREAK || stmt_kind == STMT_SEMI);
     AST_stmt result = new(sizeof(*result));
     result->kind = stmt_kind;
-    result->lineno;
+    result->lineno = lineno;
     return result;
 }
 
@@ -664,7 +667,7 @@ AST_expr ast_expr_new_binop_MUL(AST_expr exp1, char *op, AST_expr exp2)
 
     result->kind = EXPR_binop;
     result->u.e_binop.expr1 = exp1;
-    result->u.e_binop.expr2 =exp2;
+    result->u.e_binop.expr2 = exp2;
 
     if(strcmp("*",op))
         result->u.e_binop.op = ast_binop_times;
@@ -692,7 +695,7 @@ AST_expr ast_expr_unop(char *op, AST_expr expr)
     else if(strcmp("-",op))
         result->u.e_unop.op = ast_unop_minus;
     else if(strcmp("sizeof",op))
-        result->u.e_binop.op = ast_unop_sizeop;
+        result->u.e_unop.op = ast_unop_sizeop;
 
     result->lineno = lineno;
     return result;

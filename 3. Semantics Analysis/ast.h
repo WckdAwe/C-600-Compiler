@@ -297,6 +297,7 @@ struct AST_switch_tail_tag{
             AST_decl_cases decl_cases;
         } decl_cases;
     } u;
+    int lineno;
 };
 
 struct AST_decl_cases_tag{
