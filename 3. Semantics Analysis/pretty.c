@@ -16,7 +16,7 @@ void Identifier_print(FILE *f, int prec, Identifier id){
         fprintf(f, "<<NULL>>\n");
         return;
     }
-    fprintf(f, "Identifier: \%s\"\n", id_name(id));
+    fprintf(f, "Identifier: \"\%s\"\n", id_name(id));
 }
 
 void Access_print(FILE *f, int prec, Access a){
