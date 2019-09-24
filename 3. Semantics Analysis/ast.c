@@ -532,7 +532,7 @@ AST_full_func_dcl ast_full_func_dcl_nopar(AST_func_header_start h, AST_dcl_stmt 
     return result;
 }
 
-AST_dcl_stmt ast_dcl_stmt_dcls_stmts(List s, List d){
+AST_dcl_stmt ast_dcl_stmt_dcls_stmts(List d, List s){
     AST_dcl_stmt result = new(sizeof(*result));
     result->kind = DCL_STMT_STMTS_DCLS;
     result->u.dcl_stmt_stmts_dcls.statements = s;
