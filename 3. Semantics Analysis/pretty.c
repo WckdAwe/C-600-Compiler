@@ -103,7 +103,7 @@ void Type_print(FILE *f, int prec, Type type){
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:
-            printf("%d\n",type->kind);
+            printf("%d\n", type->kind);
             internal("Invalid AST");
     } 
 }
@@ -799,7 +799,7 @@ void AST_declaration_print(FILE *f, int prec, AST_declaration d){
     Type_print(f, prec+1, d->typename);
     RepInt_print(f, prec+1, d->is_static);
     //AST_declaration_list_print(f, prec+1, d->list);
-    List_print(f, prec+1, d->list, "AST_declaration");
+    List_print(f, prec+1, d->list, "AST_variabledef");
     indent(f, prec); fprintf(f, ")\n");
 }
 
@@ -1105,9 +1105,9 @@ void List_print(FILE *f, int prec, List l, char *listType){
     else if(strcmp("AST_global_decl", listType) == 0){
         AST_global_decl_print(f, prec+1, (AST_global_decl)l->data);
     }
-    else if(strcmp("AST_declaration", listType) == 0){
-        AST_declaration_print(f, prec+1, (AST_declaration)l->data);
-    }
+    // else if(strcmp("AST_declaration", listType) == 0){
+    //     AST_declaration_print(f, prec+1, (AST_declaration)l->data);
+    // }
     else if(strcmp("AST_variabledef", listType) == 0){
         AST_variabledef_print(f, prec+1, (AST_variabledef)l->data);
     }
