@@ -590,7 +590,7 @@ void AST_stmt_print(FILE *f, int prec, AST_stmt s){
         case STMT_WHILE:
             fprintf(f, "AST_stmt: stmt while(\n");
             AST_general_expr_print(f, prec+1, s->u.while_stmt.general_expr);
-            AST_stmt_print(f, prec+1, s->u.if_stmt.stmt);
+            AST_stmt_print(f, prec+1, s->u.while_stmt.stmt);
             indent(f, prec); fprintf(f, ")\n");
             break; 
         case STMT_FOR:
