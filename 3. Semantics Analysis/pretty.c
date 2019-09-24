@@ -235,6 +235,7 @@ void AST_expr_print(FILE *f, int prec, AST_expr e){
         // call length? 
         case EXPR_incdec:
             fprintf(f, "ast_expr: expr incdec(\n");
+            printf("...\n");
             AST_variable_print(f, prec+1, e->u.e_incdec.variable);
             AST_unop_print(f, prec+1, e->u.e_incdec.op);
             indent(f, prec); fprintf(f, ")\n");
@@ -367,7 +368,11 @@ void AST_variable_print(FILE *f, int prec, AST_variable v){
             indent(f, prec); fprintf(f, ")\n");
             break;
         //case VARIABLE_THIS
+        case VARIABLE_THIS:
+            fprintf(f, "ast_variable: variable this\n");
+            break;
         default:
+            printf("%d \n",v->kind);
             internal("invalid AST");
     }
 
@@ -643,6 +648,7 @@ void AST_stmt_print(FILE *f, int prec, AST_stmt s){
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:
+            printf("%d \n", s->kind);
             internal("Invalid AST");
     }   
 }
