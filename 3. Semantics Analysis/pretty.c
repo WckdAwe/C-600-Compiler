@@ -410,7 +410,7 @@ void AST_global_var_declaration_print(FILE *f, int prec, AST_global_var_declarat
     fprintf(f, "Type: ast_global_var_declaration\n");
     Type_print(f, prec+1, g->typename);
     //AST_init_variabledef_print_list(f, prec+1, g->init_variabledefs);
-    List_print(f, prec+1, g->init_variabledefs, "AST_variabledef"); 
+    List_print(f, prec+1, g->init_variabledefs, "AST_init_variabledef"); 
     indent(f, prec+1); fprintf(f, ")\n");
 }
 
@@ -471,6 +471,7 @@ void AST_init_value_print(FILE *f, int prec, AST_init_value i){
             break;
         case INIT_DEFAULT:
             // ?
+            fprintf(f, "ast_init_value: init default\n");
             break;
         default:
             internal("invalid AST");
@@ -1074,6 +1075,9 @@ void List_print(FILE *f, int prec, List l, char *listType){
     if(strcmp("AST_variabledef", listType) == 0){
         AST_variabledef_print(f, prec+1, (AST_variabledef)l->data);
     }
+    else if(strcmp("AST_init_variabledef", listType) == 0){
+        AST_init_variabledef_print(f, prec+1, (AST_init_variabledef)l->data);
+    }
     else if(strcmp("AST_id", listType) == 0){
         AST_id_print(f, prec+1, (AST_id)l->data);
     }
@@ -1107,12 +1111,6 @@ void List_print(FILE *f, int prec, List l, char *listType){
     }
     else if(strcmp("AST_global_decl", listType) == 0){
         AST_global_decl_print(f, prec+1, (AST_global_decl)l->data);
-    }
-    // else if(strcmp("AST_declaration", listType) == 0){
-    //     AST_declaration_print(f, prec+1, (AST_declaration)l->data);
-    // }
-    else if(strcmp("AST_variabledef", listType) == 0){
-        AST_variabledef_print(f, prec+1, (AST_variabledef)l->data);
     }
     List_print(f, prec+1, l->next, listType);
     indent(f, prec); fprintf(f, ")\n");
