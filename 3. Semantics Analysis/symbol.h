@@ -88,7 +88,6 @@ struct SymbolEntry_tag {
        ENTRY_PARAMETER,
        ENTRY_VARIABLE,
        ENTRY_TYPE,
-    //    ENTRY_IDENTIFIER,
    } entry_type;
 
    union {
@@ -102,8 +101,9 @@ struct SymbolEntry_tag {
       } function;
 
       struct { // Called inside a function to create the declaration
-          List parameters;
+          List parameters_as_types;
           Type result_type;
+          SymbolEntry function;
       } function_declaration;
 
       struct {

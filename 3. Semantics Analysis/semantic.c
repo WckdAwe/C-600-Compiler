@@ -300,7 +300,7 @@ void AST_short_func_dcl_traverse(AST_short_func_dcl short_func_dcl){
     entry->e.function_declaration.result_type = short_func_dcl->func_header_start->typename;
     
     // Add parameters to function if they are defined || TODO: Verify that there are no check that need to happen!
-    if(short_func_dcl->kind == SHORT_FUNC_WITH_PARAMS) entry->e.function_declaration.parameters = short_func_dcl->parameters;
+    if(short_func_dcl->kind == SHORT_FUNC_WITH_PARAMS) entry->e.function_declaration.parameters_as_types = short_func_dcl->parameters;
 }
 
 void AST_union_traverse(AST_union_dcl union_dcl){
@@ -431,8 +431,11 @@ SymbolEntry AST_class_func_header_start_traverse(AST_class_func_header_start cla
     ASSERT(class_func_header_start->typename != NULL);
     ASSERT(class_func_header_start->id != NULL);
     
-    SymbolEntry class;
-    SymbolEntry entry = symbol_enter(symbol_table, class_func_header_start->id, true);
+    char func_name[256*2+2]; // TODO: Better
+    memset(func_name,0, strlen(func_name)); // TODO: Free?
+    sprintf(func_name, "%s::%s", class_func_header_start->class->name, class_func_header_start->id->name);
+    SymbolEntry class, func_dcl;
+    SymbolEntry entry = symbol_enter(symbol_table, id_make(func_name), true);
     entry->entry_type = ENTRY_FUNCTION;
     entry->e.function.result_type = class_func_header_start->typename;
     
@@ -445,14 +448,28 @@ SymbolEntry AST_class_func_header_start_traverse(AST_class_func_header_start cla
     }
     
 
-    if(!symbol_lookup_scope(symbol_table, class->e.type.scope, class_func_header_start->id, false)){ // Check if function is actually part of the class?
+    if(!(func_dcl = symbol_lookup_scope(symbol_table, class->e.type.scope, class_func_header_start->id, false))){ // Check if function is actually part of the class?
         SEMANTIC_ERROR(class_func_header_start, 
                       "Class Func Header Start | Class \"%s\" doesn't contain function \"%s\".", 
                        class->id->name, class_func_header_start->id->name);
     }
 
-    // TODO: Implement typecheck for each parameter ? || No params here
+    // Verify function name is actually a function declaration
+    if(func_dcl->entry_type != ENTRY_FUNCTION_DECLARATION){
+        SEMANTIC_ERROR(class_func_header_start, 
+                      "Class Func Header Start | Function name \"%s\" doesn't match any function in\"%s\".", 
+                       class_func_header_start->id->name, class->id->name);    
+    }
 
+    // Check if function has been redefined
+    if(func_dcl->e.function_declaration.function != NULL){
+        SEMANTIC_ERROR(class_func_header_start, 
+                      "Class Func Header Start | Function \"%s\" redefinition.", 
+                       class_func_header_start->id->name, class->id->name);    
+    }
+    func_dcl->e.function_declaration.function = entry;
+
+    // TODO: Implement typecheck for each parameter ? || No params here
     entry->e.function.class = class;
     entry->e.function.scope = scope_open(symbol_table);
     entry->e.function.parameters = NULL;

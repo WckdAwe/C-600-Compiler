@@ -269,6 +269,8 @@ void scope_print (Scope scope, int go_deeper)
 {
     SymbolEntry e;
     Type type;
+    List parameters;
+    AST_parameter param;
     char str_bfr[256];
     for (e = scope->entries; e != NULL; e = e->nextInScope) {
         // TODO: Anything better?
@@ -309,22 +311,22 @@ void scope_print (Scope scope, int go_deeper)
                 break;
             case ENTRY_FUNCTION:
                 ASSERT(e->e.function.result_type != NULL);
-                List arguments = e->e.function.parameters;
+                parameters = e->e.function.parameters;
                 memset(str_bfr,0, strlen(str_bfr));
-                // while(arguments != NULL){
-                //     SymbolEntry argument = arguments->data;
-                //     ASSERT(argument->entry_type == ENTRY_PARAMETER);
-                //     type = argument->e.parameter.type;
-                //     switch(type->kind){
-                //         case TYPE_array:
-                //             sprintf(str_bfr, "%s, %s", str_bfr, _print_array_type(type));
-                //             break;
-                //         default:
-                //             sprintf(str_bfr, "%s, %s", str_bfr, reverse_type_kind[type->kind]);
-                //             break;
-                //     }
-                //     arguments = arguments->next;
-                // }
+                while(parameters != NULL){
+                    AST_parameter param = parameters->data;
+                    // ASSERT(param->entry_type == ENTRY_PARAMETER);
+                    type = param->typename;
+                    switch(type->kind){
+                        case TYPE_array:
+                            sprintf(str_bfr, "%s, %s", str_bfr, _print_array_type(type));
+                            break;
+                        default:
+                            sprintf(str_bfr, "%s, %s", str_bfr, reverse_type_kind[type->kind]);
+                            break;
+                    }
+                    parameters = parameters->next;
+                }
                 // ASSERT(e->e.function.parent != NULL);
                 // ASSERT(e->e.function.parent->id != NULL);
                 if(str_bfr != '\0'){
@@ -336,7 +338,7 @@ void scope_print (Scope scope, int go_deeper)
             case ENTRY_FUNCTION_DECLARATION:
                 ASSERT(e->e.function_declaration.result_type != NULL);
                 memset(str_bfr,0,strlen(str_bfr));
-                List parameters = e->e.function_declaration.parameters;
+                parameters = e->e.function_declaration.parameters_as_types;
                 while(parameters != NULL){
                     Type param_type = parameters->data;
                     ASSERT(param_type != NULL);

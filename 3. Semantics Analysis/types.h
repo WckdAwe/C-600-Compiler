@@ -83,7 +83,6 @@ Type type_list  (Type t);
 // Type type_enum (); // TODO: Verify if needed later. Currently using basic
 // Type type_union (); // TODO: Verify if needed later. Currently using basic
 Type type_id    (Identifier id);
-
 // TypeList   type_list_add(TypeList list, Type type);
 
 #endif
