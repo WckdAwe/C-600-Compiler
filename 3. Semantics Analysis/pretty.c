@@ -1056,7 +1056,6 @@ void AST_program_print(FILE *f, int prec, AST_program p){
     }
     fprintf(f, "Type: AST_program(\n");
     List_print(f, prec+1, p->gdcl_list, "AST_global_decl");
-    printf("After list:");
     AST_dcl_stmt_print(f, prec+1, p->dcl_stmts);
     indent(f, prec); fprintf(f, ")\n");
 }
