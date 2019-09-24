@@ -710,7 +710,7 @@ AST_expr ast_expr_incdec(char *op, AST_variable variable)
     if (strcmp("++", op))
         result->u.e_incdec.op = ast_unop_inc;
     else
-        result->u.e_unop.op = ast_unop_dec;
+        result->u.e_incdec.op = ast_unop_dec;
 
     result->lineno = lineno;
     return result;

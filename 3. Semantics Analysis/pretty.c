@@ -103,7 +103,6 @@ void Type_print(FILE *f, int prec, Type type){
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:
-            printf("%d\n", type->kind);
             internal("Invalid AST");
     } 
 }
@@ -212,6 +211,7 @@ void AST_expr_print(FILE *f, int prec, AST_expr e){
         fprintf(f, "<<NULL>>\n");
         return;
    }
+   
    switch(e->kind){
        case EXPR_unop:
             fprintf(f, "ast_expr: expr unop(\n");
@@ -235,7 +235,6 @@ void AST_expr_print(FILE *f, int prec, AST_expr e){
         // call length? 
         case EXPR_incdec:
             fprintf(f, "ast_expr: expr incdec(\n");
-            printf("...\n");
             AST_variable_print(f, prec+1, e->u.e_incdec.variable);
             AST_unop_print(f, prec+1, e->u.e_incdec.op);
             indent(f, prec); fprintf(f, ")\n");
@@ -372,7 +371,6 @@ void AST_variable_print(FILE *f, int prec, AST_variable v){
             fprintf(f, "ast_variable: variable this\n");
             break;
         default:
-            printf("%d \n",v->kind);
             internal("invalid AST");
     }
 
@@ -648,7 +646,6 @@ void AST_stmt_print(FILE *f, int prec, AST_stmt s){
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:
-            printf("%d \n", s->kind);
             internal("Invalid AST");
     }   
 }

@@ -264,7 +264,7 @@ expression:               expression T_OROP expression                          
                         | T_NOTOP expression                                                {$$ = ast_expr_unop($1, $2);}
                         | T_ADDOP expression %prec UMINUS                                   {$$ = ast_expr_unop($1, $2);}
                         | T_SIZEOP expression                                               {$$ = ast_expr_unop($1, $2);}  
-                        | T_INCDEC variable                                                 {$$ = ast_expr_incdec($1, $2);} 
+                        | T_INCDEC variable                                                 {$$ = ast_expr_incdec($1, $2);} // TODO: PRE-POST INC?
                         | variable T_INCDEC                                                 {$$ = ast_expr_incdec($2, $1);} 
                         | variable                                                          {$$ = ast_expr_variable($1);} 
                         | variable T_LPAREN expression_list T_RPAREN                        {$$ = ast_expr_func($1, $3);} // Possibly required to change?
