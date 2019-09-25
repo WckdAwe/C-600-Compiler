@@ -495,14 +495,14 @@ struct AST_parameter_tag{
     int lineno;
 };
 
-struct AST_passvar_tag{
+struct AST_passvar_tag{ // TODO: Should use structs inside union
     enum{
         PASSVAR_variable,
         PASSVAR_ref
     } kind;
     union{
         AST_variabledef variabledef;
-        Type ref;
+        Type ref; // TODO: or maybe just remove this? Is it useful?
     }u;
     int lineno;
 };

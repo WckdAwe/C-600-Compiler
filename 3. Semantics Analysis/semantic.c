@@ -38,16 +38,16 @@ bool type_eq(Type a, Type b) {
     if ( a->kind != b->kind ) return false;
 
     switch(a->kind) {
-        case TYPE_func:
+        case TYPE_func: // TODO: Verify
             return type_eq(a->u.t_func.type1, b->u.t_func.type1) &&
-                type_eq(a->u.t_func.type2, b->u.t_func.type2);
+                   type_eq(a->u.t_func.type2, b->u.t_func.type2);
         case TYPE_id:
             return strcmp(a->u.t_id.id->name, b->u.t_id.id->name) == 0;
-        case TYPE_ref:
+        case TYPE_ref: // TODO: Verify - Maybe return true immediatly?
             return type_eq(a->u.t_ref.type, b->u.t_ref.type);
-        case TYPE_array:
+        case TYPE_array: // TODO: Verify
             return type_eq(a->u.t_array.type, b->u.t_array.type) &&
-                a->u.t_array.dim == b->u.t_array.dim;
+                   a->u.t_array.dim == b->u.t_array.dim;
         default:
             return true;
     }
@@ -93,7 +93,7 @@ void AST_gdcl_traverse(List gdcl_list){
                 AST_func_traverse(gdcl->u.g_func.func_dcl);
                 break;
             default:
-                SEMANTIC_ERROR(gdcl_list, "GDCL | Kind undefined.i");
+                SEMANTIC_ERROR(gdcl_list, "GDCL | Kind undefined.");
                 exit(-1);
         }
         item = item->next;
@@ -295,6 +295,11 @@ void AST_short_func_dcl_traverse(AST_short_func_dcl short_func_dcl){
     ASSERT(short_func_dcl->func_header_start != NULL);
     ASSERT(short_func_dcl->kind == SHORT_FUNC_NO_PARAMS || 
            short_func_dcl->kind == SHORT_FUNC_WITH_PARAMS);
+    
+    if(symbol_table->currentScope->nesting == 1){ // Function declarations should only be inside classes! TODO: Verify not nested declarations inside struct/func/smthing else 
+        SEMANTIC_ERROR(short_func_dcl, "Short func dcl | Function declaration attempted in global scope. \n - This should be allowed by C++600, but we haven't implemented it yet.");
+    }
+
     SymbolEntry entry = symbol_enter(symbol_table, short_func_dcl->func_header_start->id, true);
     entry->entry_type = ENTRY_FUNCTION_DECLARATION;
     entry->e.function_declaration.result_type = short_func_dcl->func_header_start->typename;
@@ -396,10 +401,10 @@ void AST_full_func_dcl_traverse(AST_full_func_dcl full_func){
     SymbolEntry entry = NULL;
     switch(full_func->kind){
         case FFD_NOPAR: // TODO
-            entry = AST_func_header_start_traverse(full_func->u.nopar.header);
+            entry = AST_func_header_start_traverse(full_func->u.nopar.header, NULL);
             break;
         case FFD_NOPAR_CLASS:
-            entry = AST_class_func_header_start_traverse(full_func->u.nopar_class.header);
+            entry = AST_class_func_header_start_traverse(full_func->u.nopar_class.header, NULL);
             break;
         case FFD_FULL_PAR: // TODO
             entry = AST_full_par_func_header_traverse(full_func->u.full_par.header);
@@ -408,37 +413,39 @@ void AST_full_func_dcl_traverse(AST_full_func_dcl full_func){
             SEMANTIC_ERROR(full_func, "Full Function Declaration | Kind undefined.");
     }
     ASSERT(entry != NULL);
-    scope_close(symbol_table); // TODO: Make sure scope_open is called on each full_func (before parameters);
+    scope_close(symbol_table);
     // AST_dcl_stmt_traverse(full_func->statements); // TODO
 }
 
-SymbolEntry AST_func_header_start_traverse(AST_func_header_start func_header_start){ // TODO->ENTRY=> FUNCTION
+SymbolEntry AST_func_header_start_traverse(AST_func_header_start func_header_start, List parameters){ 
     if(!func_header_start) return NULL;
 
     SymbolEntry entry = symbol_enter(symbol_table, func_header_start->id, true);
     entry->entry_type = ENTRY_FUNCTION;
     entry->e.function.result_type = func_header_start->typename;
     entry->e.function.scope = scope_open(symbol_table);
-    entry->e.function.parameters = NULL;
+    entry->e.function.parameters = full_func_params_parse(parameters); // Function can accept NULL parameters.
     entry->e.function.class = NULL;
     
+    // if(parameters != NULL) check_function_parameters(func_dcl->e.function_declaration.parameters_as_types, entry->e.function.parameters); // TODO: Implement func_declaration for global funcs without class
+
     return entry;
 }
 
-SymbolEntry AST_class_func_header_start_traverse(AST_class_func_header_start class_func_header_start){ // TODO->ENTRY=> FUNCTION
+SymbolEntry AST_class_func_header_start_traverse(AST_class_func_header_start class_func_header_start, List parameters){
     if(!class_func_header_start) return NULL;
     ASSERT(class_func_header_start->class != NULL);
     ASSERT(class_func_header_start->typename != NULL);
     ASSERT(class_func_header_start->id != NULL);
     
     char func_name[256*2+2]; // TODO: Better
-    memset(func_name,0, strlen(func_name)); // TODO: Free?
+    memset(func_name,0, strlen(func_name));
     sprintf(func_name, "%s::%s", class_func_header_start->class->name, class_func_header_start->id->name);
     SymbolEntry class, func_dcl;
     SymbolEntry entry = symbol_enter(symbol_table, id_make(func_name), true);
     entry->entry_type = ENTRY_FUNCTION;
     entry->e.function.result_type = class_func_header_start->typename;
-    
+
     class = symbol_lookup(symbol_table, class_func_header_start->class, LOOKUP_ALL_SCOPES, true);
     if(class->entry_type != ENTRY_TYPE || 
       (class->entry_type == ENTRY_TYPE && class->e.type.type->kind != TYPE_class)){
@@ -469,30 +476,75 @@ SymbolEntry AST_class_func_header_start_traverse(AST_class_func_header_start cla
     }
     func_dcl->e.function_declaration.function = entry;
 
-    // TODO: Implement typecheck for each parameter ? || No params here
     entry->e.function.class = class;
     entry->e.function.scope = scope_open(symbol_table);
-    entry->e.function.parameters = NULL;
+    entry->e.function.parameters = full_func_params_parse(parameters);
     
+    if(parameters != NULL) check_function_parameters(func_dcl->e.function_declaration.parameters_as_types, entry->e.function.parameters);
+
     return entry;
 }
 
-SymbolEntry AST_full_par_func_header_traverse(AST_full_par_func_header full_par_func_header){ // TODO->ENTRY=> FUNCTION
+SymbolEntry AST_full_par_func_header_traverse(AST_full_par_func_header full_par_func_header){
     if(!full_par_func_header) return NULL;
-    
+
     SymbolEntry entry;
     switch(full_par_func_header->kind){
-        case FPF_NOCLASS: // TODO
-            entry = AST_func_header_start_traverse(full_par_func_header->u.fpf_noclass.header);
-            entry->e.function.parameters = full_par_func_header->parameters; // TODO: Verify parameters?
+        case FPF_NOCLASS:
+            entry = AST_func_header_start_traverse(full_par_func_header->u.fpf_noclass.header, full_par_func_header->parameters);
             break;
-        case FPF_CLASS: // TODO
-            entry = AST_class_func_header_start_traverse(full_par_func_header->u.fpf_class.header); // TODO: Verify parameters
-            entry->e.function.parameters = full_par_func_header->parameters;
+        case FPF_CLASS:
+            entry = AST_class_func_header_start_traverse(full_par_func_header->u.fpf_class.header, full_par_func_header->parameters);
             break;
         default:
             SEMANTIC_ERROR(full_par_func_header, "Full Par Func Header | Kind undefined. (%d)", full_par_func_header->kind);
     }
-
+    // TODO: Verify parameters
     return entry;
+}
+
+List full_func_params_parse(List parameters){ // Doesn't create new list. It justs modifies the parameters
+    List item = parameters;
+    AST_parameter param;
+    while(item != NULL){
+        param = item->data;
+        ASSERT(param->passvar != NULL);
+        ASSERT(param->typename != NULL);
+        switch(param->passvar->kind){
+            case PASSVAR_ref:
+                param->typename = type_ref(param->typename);
+                break;
+            case PASSVAR_variable:
+                AST_variabledef_traverse(param->passvar->u.variabledef, param->typename);
+                break;
+            default:
+                SEMANTIC_ERROR(param, "Parameter | Kind undefined.");
+        }
+        item = item->next;
+    }
+    return parameters;
+}
+
+void check_function_parameters(List func_dcl_params, List func_params){
+    List item_func_dcl = func_dcl_params,
+         item_func = func_params;
+    Type func_dcl_type;
+    AST_parameter func_param;
+    while(true){
+        if(item_func_dcl == NULL || item_func == NULL) break;
+
+        func_dcl_type = item_func_dcl->data;
+        func_param = item_func->data;
+
+        if(!type_eq(func_dcl_type, func_param->typename)){
+            SEMANTIC_ERROR(func_params, "Function Parameters | Function parameters do not match function declaration parameters. (1)");
+        }
+
+        item_func_dcl = item_func_dcl->next;
+        item_func = item_func->next;
+    }
+
+    if(item_func_dcl != NULL || item_func != NULL){
+        SEMANTIC_ERROR(func_params, "Function Parameters | Function parameters do not match function declaration parameters.");
+    }
 }

@@ -45,6 +45,13 @@ char* reverse_entry_type[] = {
    ------ Υλοποίηση των συναρτήσεων χειρισμού του πίνακα συμβόλων ------
    --------------------------------------------------------------------- */
 
+#define SYMBOL_ERROR(object, ...) \
+    do { \
+        lineno = object->lineno; \
+        error(__VA_ARGS__); \
+    } while(0)
+
+
 SymbolTable symbol_make (unsigned int size)
 {
     SymbolTable result = new(sizeof(struct SymbolTable_tag));
@@ -316,10 +323,14 @@ void scope_print (Scope scope, int go_deeper)
                 while(parameters != NULL){
                     AST_parameter param = parameters->data;
                     // ASSERT(param->entry_type == ENTRY_PARAMETER);
+                    ASSERT(param->passvar != NULL);
                     type = param->typename;
                     switch(type->kind){
                         case TYPE_array:
                             sprintf(str_bfr, "%s, %s", str_bfr, _print_array_type(type));
+                            break;
+                        case TYPE_id:
+                            sprintf(str_bfr, "%s, %s", str_bfr, type->u.t_id.id->name);
                             break;
                         default:
                             sprintf(str_bfr, "%s, %s", str_bfr, reverse_type_kind[type->kind]);
@@ -327,13 +338,13 @@ void scope_print (Scope scope, int go_deeper)
                     }
                     parameters = parameters->next;
                 }
-                // ASSERT(e->e.function.parent != NULL);
-                // ASSERT(e->e.function.parent->id != NULL);
                 if(str_bfr != '\0'){
                     printf(" [%s] of %s that returns %s\n", str_bfr+2, e->e.function.class ? id_name(e->e.function.class->id) : "N/A", reverse_type_kind[e->e.function.result_type->kind]);
                 }else{
                     printf(" [%s] of %s that returns %s\n", str_bfr, e->e.function.class ? id_name(e->e.function.class->id) : "N/A", reverse_type_kind[e->e.function.result_type->kind]);
                 }
+                if(go_deeper)
+                    scope_print(e->e.function.scope, go_deeper);
                 break;
             case ENTRY_FUNCTION_DECLARATION:
                 ASSERT(e->e.function_declaration.result_type != NULL);
@@ -372,12 +383,11 @@ void scope_print (Scope scope, int go_deeper)
                         ASSERT(type->u.t_ref.type != NULL);
                         printf("reference to: %s \n", reverse_type_kind[type->u.t_ref.type->kind]);
                         break;
+                    case TYPE_id:
+                        printf("%s\n", type->u.t_id.id->name);
+                        break;
                     default:
-                        if(type->kind == TYPE_id){
-                            printf("%s\n", type->u.t_id.id->name);
-                        }else{
-                            printf("%s\n", reverse_type_kind[type->kind]);
-                        }
+                        printf("%s\n", reverse_type_kind[type->kind]);
                         break;
                 }
                 break;
@@ -386,34 +396,3 @@ void scope_print (Scope scope, int go_deeper)
         }
     }
 }
-
-// EntryList entry_list_add(EntryList list, SymbolEntry entry){
-//     EntryList node = new(sizeof(struct EntryList_tag));
-//     node->entry = entry;
-//     node->next = NULL;
-
-//     if(list == NULL)
-//         return node;
-    
-//     EntryList tmp = list;
-// 	while(tmp->next != NULL){
-// 		tmp = tmp->next;
-// 	}
-//     tmp->next = node;
-	
-// 	return list;
-// }
-
-// void entry_list_reverse(EntryList *head){
-//     EntryList prev = NULL;
-//     EntryList current = *head;
-//     EntryList next = NULL;
-
-//     while(current != NULL){
-//         next = current->next;
-//         current->next = prev;
-//         prev = current;
-//         current = next;
-//     }
-//     *head = prev;
-// }

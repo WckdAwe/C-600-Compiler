@@ -44,7 +44,9 @@ void AST_init_variabledef_traverse(AST_init_variabledef init_variabledef, Type t
 void AST_variabledef_traverse(AST_variabledef variabledef, Type typename);
 void AST_func_traverse(AST_func_dcl func_dcl);
 void AST_full_func_dcl_traverse(AST_full_func_dcl full_func);
-SymbolEntry AST_func_header_start_traverse(AST_func_header_start func_header_start);
+SymbolEntry AST_func_header_start_traverse(AST_func_header_start func_header_start, List parameters);
 SymbolEntry AST_full_par_func_header_traverse(AST_full_par_func_header full_par_func_header);
-SymbolEntry AST_class_func_header_start_traverse(AST_class_func_header_start class_func_header_start);
+SymbolEntry AST_class_func_header_start_traverse(AST_class_func_header_start class_func_header_start, List parameters);
+List full_func_params_parse(List parameters);
+void check_function_parameters(List func_dcl_params, List func_params);
 #endif
