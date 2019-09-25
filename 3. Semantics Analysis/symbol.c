@@ -381,7 +381,7 @@ void scope_print (Scope scope, int go_deeper)
                         break;
                     case TYPE_ref:
                         ASSERT(type->u.t_ref.type != NULL);
-                        printf("reference to: %s \n", reverse_type_kind[type->u.t_ref.type->kind]);
+                        printf("reference to %s \n", reverse_type_kind[type->u.t_ref.type->kind]);
                         break;
                     case TYPE_id:
                         printf("%s\n", type->u.t_id.id->name);

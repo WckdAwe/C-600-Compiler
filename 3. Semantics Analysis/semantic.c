@@ -400,13 +400,13 @@ void AST_full_func_dcl_traverse(AST_full_func_dcl full_func){
     
     SymbolEntry entry = NULL;
     switch(full_func->kind){
-        case FFD_NOPAR: // TODO
+        case FFD_NOPAR:
             entry = AST_func_header_start_traverse(full_func->u.nopar.header, NULL);
             break;
         case FFD_NOPAR_CLASS:
             entry = AST_class_func_header_start_traverse(full_func->u.nopar_class.header, NULL);
             break;
-        case FFD_FULL_PAR: // TODO
+        case FFD_FULL_PAR: 
             entry = AST_full_par_func_header_traverse(full_func->u.full_par.header);
             break;
         default:
@@ -414,7 +414,7 @@ void AST_full_func_dcl_traverse(AST_full_func_dcl full_func){
     }
     ASSERT(entry != NULL);
     scope_close(symbol_table);
-    // AST_dcl_stmt_traverse(full_func->statements); // TODO
+    AST_dcl_stmt_traverse(full_func->statements); // TODO
 }
 
 SymbolEntry AST_func_header_start_traverse(AST_func_header_start func_header_start, List parameters){ 
@@ -513,6 +513,10 @@ List full_func_params_parse(List parameters){ // Doesn't create new list. It jus
         switch(param->passvar->kind){
             case PASSVAR_ref:
                 param->typename = type_ref(param->typename);
+
+                // TODO: Update this -- Risky & Complicated / buggy structure
+                AST_variabledef vardef = ast_variabledef(param->passvar->u.ref_id, NULL, NULL);
+                AST_variabledef_traverse(vardef, param->typename);
                 break;
             case PASSVAR_variable:
                 AST_variabledef_traverse(param->passvar->u.variabledef, param->typename);
@@ -537,7 +541,7 @@ void check_function_parameters(List func_dcl_params, List func_params){
         func_param = item_func->data;
 
         if(!type_eq(func_dcl_type, func_param->typename)){
-            SEMANTIC_ERROR(func_params, "Function Parameters | Function parameters do not match function declaration parameters. (1)");
+            SEMANTIC_ERROR(func_params, "Function Parameters | Function parameters do not match function declaration parameters.");
         }
 
         item_func_dcl = item_func_dcl->next;
@@ -546,5 +550,51 @@ void check_function_parameters(List func_dcl_params, List func_params){
 
     if(item_func_dcl != NULL || item_func != NULL){
         SEMANTIC_ERROR(func_params, "Function Parameters | Function parameters do not match function declaration parameters.");
+    }
+}
+
+void AST_dcl_stmt_traverse(AST_dcl_stmt dcl_stmt){
+    if(!dcl_stmt) return;
+
+    switch(dcl_stmt->kind){
+        case DCL_STMT_STMTS_DCLS: // TODO
+        case DCL_STMT_STMTS: // TODO
+        case DCL_STMT_DCLS: // TODO
+            AST_declarations_traverse(dcl_stmt->u.dcl_stmt_dcls.declares);
+            break;
+        case DCL_STMT_EMPTY:
+            return;
+        default:
+            SEMANTIC_ERROR(dcl_stmt, "Dcl stmt | Kind undefined.");
+    }
+}
+
+void AST_declarations_traverse(List dcls){
+    if(!dcls) return;
+    List item = dcls;
+    AST_declaration dcl;
+    while(item != NULL){
+        dcl = item->data;
+        AST_declaration_traverse(dcl);
+        item = item->next;
+    }
+}
+
+void AST_declaration_traverse(AST_declaration dcl){
+    if(!dcl) return;
+
+    if(dcl->is_static){
+        printf("TODO: Handle STATIC for %d\n", dcl->lineno); // TODO!! Requires stack.........
+    }
+
+    List item = dcl->list;
+    AST_variabledef variabledef;
+
+    while(item){ // TODO: MERGE with init_variabledef
+        variabledef = (AST_variabledef) item->data;
+        ASSERT(variabledef->id != NULL);
+        AST_variabledef_traverse(variabledef, dcl->typename);
+
+        item = item->next;
     }
 }

@@ -409,7 +409,8 @@ AST_passvar ast_passvar_variable(AST_variabledef variable){
 AST_passvar ast_passvar_ref(Identifier id){ // TODO: type_ref is incorrect here. ID is for scope, not reference!!?
     AST_passvar result = new(sizeof(*result));
     result->kind = PASSVAR_ref;
-    result->u.ref = type_ref(type_id(id));
+    result->u.ref_id = id;
+    // result->u.ref = type_ref(type_id(id));
     result->lineno = lineno;
     return result;
 }

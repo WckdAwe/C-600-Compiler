@@ -854,7 +854,8 @@ void AST_passvar_print(FILE *f, int prec, AST_passvar p){
             break;
         case PASSVAR_ref:
             fprintf(f, "passvar: passvar ref(\n");
-            Type_print(f, prec+1, p->u.ref);
+            // Type_print(f, prec+1, p->u.ref);
+            Identifier_print(f, prec+1, p->u.ref_id);
             indent(f, prec); fprintf(f, ")\n");
             break;
         default:

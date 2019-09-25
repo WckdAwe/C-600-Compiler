@@ -49,4 +49,7 @@ SymbolEntry AST_full_par_func_header_traverse(AST_full_par_func_header full_par_
 SymbolEntry AST_class_func_header_start_traverse(AST_class_func_header_start class_func_header_start, List parameters);
 List full_func_params_parse(List parameters);
 void check_function_parameters(List func_dcl_params, List func_params);
+void AST_dcl_stmt_traverse(AST_dcl_stmt dcl_stmt);
+void AST_declarations_traverse(List dcls);
+void AST_declaration_traverse(AST_declaration dcl);
 #endif

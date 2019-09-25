@@ -495,6 +495,7 @@ struct AST_parameter_tag{
     int lineno;
 };
 
+// TODO: Is this whole required? Maybe it should just be converted to a variabledef with type_ref?
 struct AST_passvar_tag{ // TODO: Should use structs inside union
     enum{
         PASSVAR_variable,
@@ -502,7 +503,8 @@ struct AST_passvar_tag{ // TODO: Should use structs inside union
     } kind;
     union{
         AST_variabledef variabledef;
-        Type ref; // TODO: or maybe just remove this? Is it useful?
+        Identifier ref_id;
+        // Type ref; // TODO: or maybe just remove this? Is it useful?
     }u;
     int lineno;
 };
