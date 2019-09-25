@@ -559,6 +559,8 @@ void AST_dcl_stmt_traverse(AST_dcl_stmt dcl_stmt){
     switch(dcl_stmt->kind){
         case DCL_STMT_STMTS_DCLS: // TODO
         case DCL_STMT_STMTS: // TODO
+            AST_statements_traverse(dcl_stmt->u.dcl_stmt_stmts.statements);
+            break;
         case DCL_STMT_DCLS: // TODO
             AST_declarations_traverse(dcl_stmt->u.dcl_stmt_dcls.declares);
             break;
@@ -596,5 +598,54 @@ void AST_declaration_traverse(AST_declaration dcl){
         AST_variabledef_traverse(variabledef, dcl->typename);
 
         item = item->next;
+    }
+}
+
+void AST_statements_traverse(List stmts){
+    if(!stmts) return;
+    List item = stmts;
+    AST_stmt stmt;
+    while(item != NULL){
+        stmt = item->data;
+        AST_statement_traverse(stmt);
+        item = item->next;
+    }
+}
+
+void AST_statement_traverse(AST_stmt stmt){
+    if(!stmt) return;
+
+    switch (stmt->kind){
+        case STMT_EXPR: //TODO
+            break;
+        case STMT_IF:   //TODO
+            break;
+        case STMT_WHILE: //TODO
+            break;
+        case STMT_FOR: //TODO
+            break;
+        case STMT_SWITCH: //TODO
+            break;
+        case STMT_RETURN: //TODO
+            break;
+        case STMT_INPUT: //TODO
+            break;
+        case STMT_OUTPUT: //TODO
+            io_traverse(stmt->u.io_stmt.io_list);          // is this right?
+            break;
+        case STMT_COMP: //TODO
+            AST_dcl_stmt_traverse(stmt->u.comp_stmt.dcl_stmt);
+            break;
+        case STMT_CONTINUE: //TODO
+            // do we need code here?
+            break;
+        case STMT_BREAK: //TODO
+            // do we need code here?
+            break;
+        case STMT_SEMI: //TODO
+            // do we need code here?
+            break;
+        default:
+            SEMANTIC_ERROR(stmt, "statement | Kind undefined.");
     }
 }
