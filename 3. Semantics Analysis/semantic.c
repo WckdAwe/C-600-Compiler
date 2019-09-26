@@ -615,7 +615,7 @@ void AST_statements_traverse(List stmts){
 
 void AST_statement_traverse(AST_stmt stmt){
     if(!stmt) return;
-
+    
     switch (stmt->kind){
         case STMT_EXPR: //TODO
             break;
@@ -628,29 +628,33 @@ void AST_statement_traverse(AST_stmt stmt){
         case STMT_SWITCH: //TODO
             break;
         case STMT_RETURN: //TODO
+            AST_general_expr_traverse(stmt->u.return_stmt.optexpr);
             break;
         case STMT_INPUT: //TODO
+            io_traverse(stmt->u.io_stmt.io_list);
             break;
         case STMT_OUTPUT: //TODO
-            // io_traverse(stmt->u.io_stmt.io_list);          // is this right?
+            io_traverse(stmt->u.io_stmt.io_list);          // is this right?
             break;
         case STMT_COMP: //TODO
             AST_dcl_stmt_traverse(stmt->u.comp_stmt.dcl_stmt);
             break;
         case STMT_CONTINUE: //TODO
             // do we need code here?
+            printf("STMT_CONTINUE Found. \n");
             break;
         case STMT_BREAK: //TODO
             // do we need code here?
+            printf("STMT_BREAK Found. \n");
             break;
         case STMT_SEMI: //TODO
             // do we need code here?
+            printf("STMT_SEMI Found. \n");
             break;
         default:
             SEMANTIC_ERROR(stmt, "statement | Kind undefined.");
     }
 }
-
 void AST_init_value_traverse(SymbolEntry entry, AST_init_value init_value){
     if(!init_value || !entry) return;
     ASSERT(entry->entry_type == ENTRY_CONSTANT || entry->entry_type == ENTRY_VARIABLE);
@@ -680,5 +684,119 @@ void AST_init_value_traverse(SymbolEntry entry, AST_init_value init_value){
             default:
                 SEMANTIC_ERROR(init_value, "Init value | Kind undefined.");
         }
+    }
+}
+
+
+void io_traverse(List io){
+    //?
+}
+
+void AST_general_expr_traverse(AST_general_expr gexpr){
+    switch(gexpr->kind){
+        case GEXPR_GEXPR:   
+            AST_general_expr_traverse(gexpr->u.gexpr.general_expr1);
+            AST_general_expr_traverse(gexpr->u.gexpr.general_expr2);    // is this ok?
+            break;
+        case GEXPR_ASSIGNMENT:
+            AST_assignment_traverse(gexpr->u.assignment.assignment);
+            break;
+        default:
+            SEMANTIC_ERROR(gexpr, "General expr | Kind undefined.");
+    }
+}
+
+void AST_assignment_traverse(AST_assignment assign){
+    switch(assign->kind){
+        case ASSIGNMENT_EXPR:
+            AST_expr_traverse(assign->u.expr.expr);
+            break;
+        case ASSIGNMENT_VAR: //TODO
+            break;
+        default:
+            SEMANTIC_ERROR(assign, "Assignment | Kind undefined.");
+    }
+}
+
+void AST_expr_traverse(AST_expr expr){
+    switch(expr->kind){
+        case EXPR_unop: //TODO
+            break;
+        case EXPR_binop:    //TODO
+            break;
+        case EXPR_call: //TODO
+            break;
+        case EXPR_incdec:   //TODO
+            break;
+        case EXPR_variable: //TODO
+            AST_variable_traverse(expr->u.e_variable.variable);
+            break;
+        case EXPR_constant: //TODO
+            AST_constant_traverse(expr->u.e_constant.constant);
+            break;
+        case EXPR_type:     //TODO
+            // ?
+            break;
+        case EXPR_new:  
+            AST_general_expr_traverse(expr->u.e_new.general_expr);
+            break;
+        case EXPR_general_expr: 
+            AST_general_expr_traverse(expr->u.e_general_expr.general_expr);
+            break;
+        case EXPR_list_expr:    
+            AST_exprlist_traverse(expr->u.e_listexpr.exprlist);
+            break;
+        default:
+            SEMANTIC_ERROR(expr, "expr | Kind undefined.");
+    }
+}
+
+void AST_exprlist_traverse(AST_exprlist exprlist){
+    switch(exprlist->kind){
+        case EXPRLIST_general:
+            AST_general_expr_traverse(exprlist->u.e_general.general_expr);
+        case EXPRLIST_empty:
+            printf("Exprlist empty\n");
+        default:
+            SEMANTIC_ERROR(exprlist, "exprlist | Kind undefined.");  
+    }
+}
+
+void AST_constant_traverse(AST_constant constant){
+    switch(constant->kind){
+        case CONSTANT_iconst:
+            printf("Constant value: %d\n", constant->u.c_iconst.rep);
+            break;
+        case CONSTANT_fconst:
+            printf("Constant value: %f\n", constant->u.c_fconst.rep);
+            break;
+        case CONSTANT_cconst:
+            printf("Constant value: %c\n", constant->u.c_cconst.rep);
+            break;
+        case CONSTANT_sconst:
+            printf("Constant value: %s\n", constant->u.c_sconst.rep);
+            break;
+        default:
+            SEMANTIC_ERROR(constant, "Constant | Kind undefined.");  
+    }
+}
+
+void AST_variable_traverse(AST_variable var){
+    switch(var->kind){
+        case VARIABLE_LIST:
+            AST_variable_traverse(var->u.list.variable);
+            AST_general_expr_traverse(var->u.list.general_expr);
+            break;
+        case VARIABLE_NESTED:       //TODO
+            // probably needs scope_open
+            break;
+        case VARIABLE_LISTFUNC:     //TODO
+            break;
+        case VARIABLE_DEFINITION:      //TODO
+            break;
+        case VARIABLE_THIS:         //TODO
+            break;
+        default:
+            SEMANTIC_ERROR(var, "Variable | Kind undefined.");  
     }
 }
