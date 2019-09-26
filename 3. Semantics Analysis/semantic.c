@@ -223,7 +223,6 @@ void AST_members_methods_traverse(AST_members_method members_method){
     ASSERT(members_method->mom != NULL);
 
     // TODO: If statement depending on ACCESS?
-
     AST_member_or_method_traverse(members_method->mom);
 }
 
@@ -304,7 +303,6 @@ void AST_short_func_dcl_traverse(AST_short_func_dcl short_func_dcl){
     entry->entry_type = ENTRY_FUNCTION_DECLARATION;
     entry->e.function_declaration.result_type = short_func_dcl->func_header_start->typename;
     
-    // Add parameters to function if they are defined || TODO: Verify that there are no check that need to happen!
     if(short_func_dcl->kind == SHORT_FUNC_WITH_PARAMS) entry->e.function_declaration.parameters_as_types = short_func_dcl->parameters;
 }
 
@@ -315,7 +313,7 @@ void AST_union_traverse(AST_union_dcl union_dcl){
     
     SymbolEntry entry = symbol_enter(symbol_table, union_dcl->id, true);
     entry->entry_type = ENTRY_TYPE; // TODO: Might require custom entry to do Union functions?
-    entry->e.type.scope = scope_open(symbol_table); // TODO: Possibly doesn't need to be like that
+    entry->e.type.scope = scope_open(symbol_table); 
     entry->e.type.type = type_basic(TYPE_union);
 
     AST_union_fields_traverse(union_dcl->union_fields);
@@ -332,7 +330,6 @@ void AST_global_var_traverse(AST_global_var_declaration global_var_dcl){
     AST_init_variabledef init_variabledef;
 
     while(item){
-        // TODO: Set correct type to each init variabledef.
         init_variabledef = item->data;
      
         AST_init_variabledef_traverse(init_variabledef, global_var_dcl->typename);
@@ -346,14 +343,14 @@ void AST_init_variabledef_traverse(AST_init_variabledef init_variabledef, Type t
     ASSERT(init_variabledef->variabledef != NULL);
     ASSERT(init_variabledef->init_value != NULL); // Can it be null?>
 
-    AST_variabledef_traverse(init_variabledef->variabledef, typename);
-
-    // TODO: Parse init_value!!
-    // IMPORTANT!!
+    SymbolEntry entry = AST_variabledef_traverse(init_variabledef->variabledef, typename);
+    ASSERT(entry != NULL);
+    AST_init_value_traverse(entry, init_variabledef->init_value); // TODO
 }
 
 // TODO: Merge this wherever needed
-void AST_variabledef_traverse(AST_variabledef variabledef, Type typename){
+SymbolEntry AST_variabledef_traverse(AST_variabledef variabledef, Type typename){
+    if(!variabledef || !typename) return NULL;
     SymbolEntry entry = symbol_enter(symbol_table, variabledef->id, true);
     entry->entry_type = ENTRY_VARIABLE;
 
@@ -374,16 +371,17 @@ void AST_variabledef_traverse(AST_variabledef variabledef, Type typename){
                 SEMANTIC_ERROR(variabledef, "Variabledef | Unexpected variable inner type (NULL, List or Array expected but got %d)", variabledef->type->kind);
         }
     }
+    return entry;
 }
 
 void AST_func_traverse(AST_func_dcl func_dcl){
     if(!func_dcl) return;
     
     switch(func_dcl->kind){
-        case FD_SHORT: // TODO
+        case FD_SHORT:
             AST_short_func_dcl_traverse(func_dcl->u.fd_short.func);
             break;
-        case FD_FULL: // TODO
+        case FD_FULL:
             AST_full_func_dcl_traverse(func_dcl->u.fd_full.func);
             break;
         default:
@@ -499,7 +497,7 @@ SymbolEntry AST_full_par_func_header_traverse(AST_full_par_func_header full_par_
         default:
             SEMANTIC_ERROR(full_par_func_header, "Full Par Func Header | Kind undefined. (%d)", full_par_func_header->kind);
     }
-    // TODO: Verify parameters
+
     return entry;
 }
 
@@ -558,6 +556,9 @@ void AST_dcl_stmt_traverse(AST_dcl_stmt dcl_stmt){
 
     switch(dcl_stmt->kind){
         case DCL_STMT_STMTS_DCLS: // TODO
+            // AST_statements_traverse(dcl_stmt->u.dcl_stmt_stmts_dcls.statements); // TODO
+            AST_declarations_traverse(dcl_stmt->u.dcl_stmt_stmts_dcls.declares);
+            break;
         case DCL_STMT_STMTS: // TODO
             AST_statements_traverse(dcl_stmt->u.dcl_stmt_stmts.statements);
             break;
@@ -631,7 +632,7 @@ void AST_statement_traverse(AST_stmt stmt){
         case STMT_INPUT: //TODO
             break;
         case STMT_OUTPUT: //TODO
-            io_traverse(stmt->u.io_stmt.io_list);          // is this right?
+            // io_traverse(stmt->u.io_stmt.io_list);          // is this right?
             break;
         case STMT_COMP: //TODO
             AST_dcl_stmt_traverse(stmt->u.comp_stmt.dcl_stmt);
@@ -647,5 +648,37 @@ void AST_statement_traverse(AST_stmt stmt){
             break;
         default:
             SEMANTIC_ERROR(stmt, "statement | Kind undefined.");
+    }
+}
+
+void AST_init_value_traverse(SymbolEntry entry, AST_init_value init_value){
+    if(!init_value || !entry) return;
+    ASSERT(entry->entry_type == ENTRY_CONSTANT || entry->entry_type == ENTRY_VARIABLE);
+
+    if(entry->entry_type == ENTRY_CONSTANT){ // TODO
+
+    }else if(entry->entry_type == ENTRY_VARIABLE){ // TODO
+        switch(init_value->kind){
+            case INIT_SINGLE: // TODO
+            case INIT_MULTI: // TODO
+            case INIT_DEFAULT: // TODO
+                switch(entry->e.variable.type->kind){
+                    case TYPE_int:
+                        printf("ASSIGN to %s default value of %d\n", entry->id->name, 0);
+                        break;
+                    case TYPE_float:
+                        printf("ASSIGN to %s default value of %.1f\n", entry->id->name, 0.0f);
+                        break;
+                    case TYPE_char:
+                        printf("ASSIGN to %s default value of '%c'\n", entry->id->name, '0');
+                        break;
+                    default:
+                        printf("ASSIGN to %s default value of NULL\n", entry->id->name);
+                        break;
+                }
+                break;
+            default:
+                SEMANTIC_ERROR(init_value, "Init value | Kind undefined.");
+        }
     }
 }

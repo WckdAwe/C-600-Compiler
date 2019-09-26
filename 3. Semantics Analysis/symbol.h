@@ -86,7 +86,7 @@ struct SymbolEntry_tag {
        ENTRY_FUNCTION,
        ENTRY_FUNCTION_DECLARATION,
        ENTRY_PARAMETER,
-       ENTRY_VARIABLE,
+       ENTRY_VARIABLE, 
        ENTRY_TYPE,
    } entry_type;
 

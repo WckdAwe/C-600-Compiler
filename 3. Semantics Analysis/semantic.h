@@ -41,7 +41,7 @@ void AST_short_func_dcl_traverse(AST_short_func_dcl short_func_dcl);
 void AST_union_traverse(AST_union_dcl union_dcl);
 void AST_global_var_traverse(AST_global_var_declaration global_var_dcl);
 void AST_init_variabledef_traverse(AST_init_variabledef init_variabledef, Type typename);
-void AST_variabledef_traverse(AST_variabledef variabledef, Type typename);
+SymbolEntry AST_variabledef_traverse(AST_variabledef variabledef, Type typename);
 void AST_func_traverse(AST_func_dcl func_dcl);
 void AST_full_func_dcl_traverse(AST_full_func_dcl full_func);
 SymbolEntry AST_func_header_start_traverse(AST_func_header_start func_header_start, List parameters);
@@ -52,4 +52,7 @@ void check_function_parameters(List func_dcl_params, List func_params);
 void AST_dcl_stmt_traverse(AST_dcl_stmt dcl_stmt);
 void AST_declarations_traverse(List dcls);
 void AST_declaration_traverse(AST_declaration dcl);
+void AST_statements_traverse(List stmts);
+void AST_statement_traverse(AST_stmt stmt);
+void AST_init_value_traverse(SymbolEntry entry, AST_init_value init_value);
 #endif
