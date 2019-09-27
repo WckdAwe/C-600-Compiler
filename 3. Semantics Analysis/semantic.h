@@ -64,5 +64,5 @@ void AST_general_expr_traverse(AST_general_expr gexpr);
 void AST_assignment_traverse(AST_assignment assign);
 void AST_exprlist_traverse(AST_exprlist exprlist);
 void AST_constant_traverse(AST_constant constant);
-void AST_variable_traverse(AST_variable var);
+Type AST_variable_traverse(AST_variable var);
 #endif

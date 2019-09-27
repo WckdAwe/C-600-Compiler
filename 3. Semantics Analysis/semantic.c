@@ -933,9 +933,10 @@ void AST_constant_traverse(AST_constant constant){
     }
 }
 
-void AST_variable_traverse(AST_variable var){
+Type AST_variable_traverse(AST_variable var){
+    Type res;
     switch(var->kind){
-        case VARIABLE_LIST:
+        case VARIABLE_LIST: // TODO: Not sure what to expect here...
             AST_variable_traverse(var->u.list.variable);
             AST_general_expr_traverse(var->u.list.general_expr);
             break;
@@ -946,9 +947,11 @@ void AST_variable_traverse(AST_variable var){
             break;
         case VARIABLE_DEFINITION:      //TODO
             break;
-        case VARIABLE_THIS:         //TODO
+        case VARIABLE_THIS:         //TODO - Scope remains the same, but after that i expect a scope-open
             break;
         default:
             SEMANTIC_ERROR(var, "Variable | Kind undefined.");  
     }
+    ASSERT(res != NULL);
+    return res;
 }
