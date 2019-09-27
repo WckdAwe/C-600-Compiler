@@ -114,7 +114,7 @@ struct AST_expr_tag {
             AST_binop op;
             AST_expr expr2;
         } e_binop;
-        struct{
+        struct{ // TODO: Verify this? Grigoraki mas katastrefeis...
             AST_variable variable;
             AST_exprlist list;
         } e_call;
@@ -144,6 +144,8 @@ struct AST_expr_tag {
             AST_exprlist exprlist;
         } e_listexpr;
     } u;
+
+    Type typename; // Each expression evaluates to a type in semantics (to evaluate calculations!) // TODO: Verify that it is added anywhere where it is required
     int lineno;
 }; 
 

@@ -665,8 +665,8 @@ void AST_init_value_traverse(SymbolEntry entry, AST_init_value init_value){
     }else if(entry->entry_type == ENTRY_VARIABLE){ // TODO
         switch(init_value->kind){
             case INIT_SINGLE: // TODO
-                    constant = AST_expr_traverse(init_value->u.single.expr);
-                    if(constant->kind == CONSTANT_iconst) printf("Simple constant %d\n", constant->u.c_iconst);
+                    AST_expr_traverse(init_value->u.single.expr);
+                    // if(type->kind == TYPE_int) printf("Simple constant %d\n", constant->u.c_iconst);
                 break;
             case INIT_MULTI: // TODO
                 AST_multi_expr_traverse(init_value->u.multi.list_of_exprs);
@@ -699,7 +699,7 @@ void AST_multi_expr_traverse(List exprlist){
     while(item != NULL){
         expr = item->data;
         
-        AST_constant constant = AST_expr_traverse(expr); // TODO | Calculations
+        AST_expr_traverse(expr); // TODO | Calculations
         printf("Multii\n");
         // if(constant->kind == CONSTANT_iconst) printf("Simple constant %d", constant->u.c_iconst);
         // printf("constant kind %d\n", constant->kind);
@@ -707,29 +707,136 @@ void AST_multi_expr_traverse(List exprlist){
     }
 }
 
-AST_constant AST_expr_traverse(AST_expr expr){
+Type AST_expr_traverse(AST_expr expr){
     ASSERT(expr != NULL);
-
+    Type res = type_basic(TYPE_unknown);
+    Type expr1_type, expr2_type;
     // AST_constant constant = new(malloc(sizeof(*constant)));
     switch(expr->kind){
         case EXPR_unop: // TODO
+            expr1_type = AST_expr_traverse(expr->u.e_unop.expr);
+            res = AST_expr_unop_traverse(expr, expr1_type);
+            break;
         case EXPR_binop: // TODO 
-            // switch(expr->u.e_binop.op){
-            //     case ast_binop_plus:
-            //         return expr->u.e_constant.constant->u. // TODO:
-            // }
-        case EXPR_call: // TODO
-        case EXPR_incdec: // TODO
-        case EXPR_variable: // TODO
+            expr1_type = AST_expr_traverse(expr->u.e_binop.expr1);
+            expr2_type = AST_expr_traverse(expr->u.e_binop.expr2);
+            res = AST_expr_binop_traverse(expr1_type, expr, expr2_type);
+            break;
+        // case EXPR_call: // TODO - func & length - AST needs patching...
+        //     expr->u.e_call.
+
+        // case EXPR_incdec: // TODO - AST needs patching
+        case EXPR_variable: // TODO ---
+            AST_variable_traverse(expr->u.e_variable.variable);
+            break;
         case EXPR_constant: // TODO 
-            return expr->u.e_constant.constant;
+            switch(expr->u.e_constant.constant->kind){
+                case CONSTANT_iconst:
+                    res = type_basic(TYPE_int);
+                    break;
+                case CONSTANT_fconst:
+                    res = type_basic(TYPE_float);
+                    break;
+                case CONSTANT_cconst:
+                    res = type_basic(TYPE_char);
+                    break;
+                case CONSTANT_sconst:
+                    res = type_basic(TYPE_str); // TODO: NEED TO ALLOCATE CORRECT SPACE!!
+                    break;
+                default:
+                    SEMANTIC_ERROR(expr->u.e_constant.constant, "Constant | Kind undefined.");
+            }
+            break;
         case EXPR_type: // TODO 
+            res = expr->u.e_type.type;
+            break;
         case EXPR_new: // TODO 
         case EXPR_general_expr: // TODO
         case EXPR_list_expr: // TODO
         default:
             SEMANTIC_ERROR(expr, "Expr | Kind undefined.");
     }
+    expr->typename = res;
+    return res;
+}
+
+Type AST_expr_unop_traverse(AST_expr expr, Type type){
+    switch (expr->u.e_unop.op) {
+        case ast_unop_plus:
+        case ast_unop_minus:
+            if(!type_eq(type, type_basic(TYPE_int)) || !type_eq(type, type_basic(TYPE_float)))
+                SEMANTIC_ERROR(expr, "Unop Expr | Type mismatch: Argument is not of type int or float.");
+            return type;
+
+        case ast_unop_not:
+            if (!type_check(type, TYPE_ref, true))
+                SEMANTIC_ERROR(expr, "Unop Expr | Type mismatch: Argument is not of type ref.");
+            return (expr == NULL ? NULL : type->u.t_ref.type);
+
+        default:
+            SEMANTIC_ERROR(expr, "Unop Expr | Kind undefined.");
+    }
+}
+
+Type AST_expr_binop_traverse(Type type1, AST_expr expr, Type type2) {
+    switch (expr->u.e_binop.op) {
+        case ast_binop_plus:
+        case ast_binop_minus:
+        case ast_binop_times:
+        case ast_binop_div: // TODO: div only for int? mod only for int?
+        case ast_binop_mod: // TODO: Implement different types (ex float + int, float / int)
+            if(!type_eq(type1, type2) || 
+               (type_eq(type1, type2) && !(type_eq(type1, type_basic(TYPE_int)) || type_eq(type1, type_basic(TYPE_float)))))
+                SEMANTIC_ERROR(expr, "Binop Expr | Type mismatch in the left & right operand.");
+            return type1;
+
+        case ast_binop_lt:
+        case ast_binop_gt:
+        case ast_binop_le:
+        case ast_binop_ge:
+            if(!type_eq(type1, type2) )
+                SEMANTIC_ERROR(expr, "Binop Expr | Type mismatch: Arguments must be of the same type.");
+            if(!type_eq(type1, type_basic(TYPE_char)) && !type_eq(type1, type_basic(TYPE_float)) &&
+               !type_eq(type1, type_basic(TYPE_int)))
+                SEMANTIC_ERROR(expr, "Binop Expr | Type mismatch: Arguments must be of type char, float or int.");
+            return type_basic(TYPE_int);
+
+        // TODO: case on assignment? No?
+        case ast_binop_eq:
+        case ast_binop_ne:
+            if(!type_eq(type1, type2))
+                SEMANTIC_ERROR(expr, "Binop Expr | Type mismatch: Arguments must be of the same type.");
+            if(type_check(type1, TYPE_array, false) || type_check(type2, TYPE_array, false))
+                SEMANTIC_ERROR(expr, "Binop Expr | Type mismatch: Arguments can't be of type array.");
+            if(type_check(type1, TYPE_ref, false) || type_check(type2, TYPE_ref, false))
+                SEMANTIC_ERROR(expr, "Binop Expr | Type mismatch: Arguments can't be of type function.");
+            return type_basic(TYPE_int);
+
+        case ast_binop_and:
+        case ast_binop_or:
+            if(!type_eq(type1, type_basic(TYPE_int)))
+                SEMANTIC_ERROR(expr, "Binop Expr | Type mismatch in the left argument.");
+            if(!type_eq(type2, type_basic(TYPE_int)))
+                SEMANTIC_ERROR(expr, "Binop Expr | Type mismatch in the right argument.");
+            return type_basic(TYPE_int);
+
+
+        // TODO: Check about these
+        // case ast_binop_semicolon:
+        //     return expr2;
+
+        // case ast_binop_assign:
+        //     if ( !type_check_ref(expr1,true) ) 
+        //         SEMANTIC_ERROR(e, "Type mismatch: First argument must be of type ref\n");
+        //     else if ( expr1 != NULL && !type_eq(expr1->u.t_ref.type, expr2) )
+        //         SEMANTIC_ERROR(e, "Type mismatch: The arguments of the assignment operator do not match\n");
+        //     return type_unit();
+
+        default:
+            SEMANTIC_ERROR(expr, "Binop Expr | Kind undefined.");
+    }
+
+    return NULL;
 }
 
 
