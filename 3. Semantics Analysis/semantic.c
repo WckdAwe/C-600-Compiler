@@ -659,12 +659,18 @@ void AST_init_value_traverse(SymbolEntry entry, AST_init_value init_value){
     if(!init_value || !entry) return;
     ASSERT(entry->entry_type == ENTRY_CONSTANT || entry->entry_type == ENTRY_VARIABLE);
 
+    AST_constant constant;
     if(entry->entry_type == ENTRY_CONSTANT){ // TODO
 
     }else if(entry->entry_type == ENTRY_VARIABLE){ // TODO
         switch(init_value->kind){
             case INIT_SINGLE: // TODO
+                    constant = AST_expr_traverse(init_value->u.single.expr);
+                    if(constant->kind == CONSTANT_iconst) printf("Simple constant %d\n", constant->u.c_iconst);
+                break;
             case INIT_MULTI: // TODO
+                AST_multi_expr_traverse(init_value->u.multi.list_of_exprs);
+                break;
             case INIT_DEFAULT: // TODO
                 switch(entry->e.variable.type->kind){
                     case TYPE_int:
@@ -684,6 +690,45 @@ void AST_init_value_traverse(SymbolEntry entry, AST_init_value init_value){
             default:
                 SEMANTIC_ERROR(init_value, "Init value | Kind undefined.");
         }
+    }
+}
+
+void AST_multi_expr_traverse(List exprlist){
+    List item = exprlist;
+    AST_expr expr;
+    while(item != NULL){
+        expr = item->data;
+        
+        AST_constant constant = AST_expr_traverse(expr); // TODO | Calculations
+        printf("Multii\n");
+        // if(constant->kind == CONSTANT_iconst) printf("Simple constant %d", constant->u.c_iconst);
+        // printf("constant kind %d\n", constant->kind);
+        item = item->next;
+    }
+}
+
+AST_constant AST_expr_traverse(AST_expr expr){
+    ASSERT(expr != NULL);
+
+    // AST_constant constant = new(malloc(sizeof(*constant)));
+    switch(expr->kind){
+        case EXPR_unop: // TODO
+        case EXPR_binop: // TODO 
+            // switch(expr->u.e_binop.op){
+            //     case ast_binop_plus:
+            //         return expr->u.e_constant.constant->u. // TODO:
+            // }
+        case EXPR_call: // TODO
+        case EXPR_incdec: // TODO
+        case EXPR_variable: // TODO
+        case EXPR_constant: // TODO 
+            return expr->u.e_constant.constant;
+        case EXPR_type: // TODO 
+        case EXPR_new: // TODO 
+        case EXPR_general_expr: // TODO
+        case EXPR_list_expr: // TODO
+        default:
+            SEMANTIC_ERROR(expr, "Expr | Kind undefined.");
     }
 }
 
@@ -718,38 +763,38 @@ void AST_assignment_traverse(AST_assignment assign){
     }
 }
 
-void AST_expr_traverse(AST_expr expr){
-    switch(expr->kind){
-        case EXPR_unop: //TODO
-            break;
-        case EXPR_binop:    //TODO
-            break;
-        case EXPR_call: //TODO
-            break;
-        case EXPR_incdec:   //TODO
-            break;
-        case EXPR_variable: //TODO
-            AST_variable_traverse(expr->u.e_variable.variable);
-            break;
-        case EXPR_constant: //TODO
-            AST_constant_traverse(expr->u.e_constant.constant);
-            break;
-        case EXPR_type:     //TODO
-            // ?
-            break;
-        case EXPR_new:  
-            AST_general_expr_traverse(expr->u.e_new.general_expr);
-            break;
-        case EXPR_general_expr: 
-            AST_general_expr_traverse(expr->u.e_general_expr.general_expr);
-            break;
-        case EXPR_list_expr:    
-            AST_exprlist_traverse(expr->u.e_listexpr.exprlist);
-            break;
-        default:
-            SEMANTIC_ERROR(expr, "expr | Kind undefined.");
-    }
-}
+// void AST_expr_traverse(AST_expr expr){
+//     switch(expr->kind){
+//         case EXPR_unop: //TODO
+//             break;
+//         case EXPR_binop:    //TODO
+//             break;
+//         case EXPR_call: //TODO
+//             break;
+//         case EXPR_incdec:   //TODO
+//             break;
+//         case EXPR_variable: //TODO
+//             AST_variable_traverse(expr->u.e_variable.variable);
+//             break;
+//         case EXPR_constant: //TODO
+//             AST_constant_traverse(expr->u.e_constant.constant);
+//             break;
+//         case EXPR_type:     //TODO
+//             // ?
+//             break;
+//         case EXPR_new:  
+//             AST_general_expr_traverse(expr->u.e_new.general_expr);
+//             break;
+//         case EXPR_general_expr: 
+//             AST_general_expr_traverse(expr->u.e_general_expr.general_expr);
+//             break;
+//         case EXPR_list_expr:    
+//             AST_exprlist_traverse(expr->u.e_listexpr.exprlist);
+//             break;
+//         default:
+//             SEMANTIC_ERROR(expr, "expr | Kind undefined.");
+//     }
+// }
 
 void AST_exprlist_traverse(AST_exprlist exprlist){
     switch(exprlist->kind){

@@ -55,4 +55,12 @@ void AST_declaration_traverse(AST_declaration dcl);
 void AST_statements_traverse(List stmts);
 void AST_statement_traverse(AST_stmt stmt);
 void AST_init_value_traverse(SymbolEntry entry, AST_init_value init_value);
+void AST_multi_expr_traverse(List exprlist);
+AST_constant AST_expr_traverse(AST_expr expr);
+void io_traverse(List io);
+void AST_general_expr_traverse(AST_general_expr gexpr);
+void AST_assignment_traverse(AST_assignment assign);
+void AST_exprlist_traverse(AST_exprlist exprlist);
+void AST_constant_traverse(AST_constant constant);
+void AST_variable_traverse(AST_variable var);
 #endif
