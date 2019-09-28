@@ -575,6 +575,7 @@ AST_func_dcl ast_func_dcl_short(AST_short_func_dcl s){
     result->lineno = lineno;
     return result;
 }
+
 AST_func_dcl ast_func_dcl_full(AST_full_func_dcl f){
     AST_func_dcl result = new(sizeof(*result));
     result->kind = FD_FULL;
@@ -582,7 +583,6 @@ AST_func_dcl ast_func_dcl_full(AST_full_func_dcl f){
     result->lineno = lineno;
     return result;
 }
-
 
 AST_expr ast_expr_new_binop_AND(AST_expr exp1, AST_expr exp2)
 {   

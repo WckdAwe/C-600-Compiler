@@ -48,6 +48,8 @@ bool type_eq(Type a, Type b) {
         case TYPE_array: // TODO: Verify
             return type_eq(a->u.t_array.type, b->u.t_array.type) &&
                    a->u.t_array.dim == b->u.t_array.dim;
+        case TYPE_list:
+            return type_eq(a->u.t_list.type, b->u.t_list.type);
         default:
             return true;
     }
@@ -302,7 +304,8 @@ void AST_short_func_dcl_traverse(AST_short_func_dcl short_func_dcl){
     SymbolEntry entry = symbol_enter(symbol_table, short_func_dcl->func_header_start->id, true);
     entry->entry_type = ENTRY_FUNCTION_DECLARATION;
     entry->e.function_declaration.result_type = short_func_dcl->func_header_start->typename;
-    
+    entry->e.function_declaration.function = NULL;
+    entry->e.function_declaration.parameters_as_types = NULL;
     if(short_func_dcl->kind == SHORT_FUNC_WITH_PARAMS) entry->e.function_declaration.parameters_as_types = short_func_dcl->parameters;
 }
 
@@ -371,6 +374,7 @@ SymbolEntry AST_variabledef_traverse(AST_variabledef variabledef, Type typename)
                 SEMANTIC_ERROR(variabledef, "Variabledef | Unexpected variable inner type (NULL, List or Array expected but got %d)", variabledef->type->kind);
         }
     }
+    ASSERT(typename != NULL);
     return entry;
 }
 
@@ -411,8 +415,8 @@ void AST_full_func_dcl_traverse(AST_full_func_dcl full_func){
             SEMANTIC_ERROR(full_func, "Full Function Declaration | Kind undefined.");
     }
     ASSERT(entry != NULL);
-    scope_close(symbol_table);
     AST_dcl_stmt_traverse(full_func->statements); // TODO
+    scope_close(symbol_table);
 }
 
 SymbolEntry AST_func_header_start_traverse(AST_func_header_start func_header_start, List parameters){ 
@@ -424,7 +428,7 @@ SymbolEntry AST_func_header_start_traverse(AST_func_header_start func_header_sta
     entry->e.function.scope = scope_open(symbol_table);
     entry->e.function.parameters = full_func_params_parse(parameters); // Function can accept NULL parameters.
     entry->e.function.class = NULL;
-    
+
     // if(parameters != NULL) check_function_parameters(func_dcl->e.function_declaration.parameters_as_types, entry->e.function.parameters); // TODO: Implement func_declaration for global funcs without class
 
     return entry;
@@ -469,8 +473,8 @@ SymbolEntry AST_class_func_header_start_traverse(AST_class_func_header_start cla
     // Check if function has been redefined
     if(func_dcl->e.function_declaration.function != NULL){
         SEMANTIC_ERROR(class_func_header_start, 
-                      "Class Func Header Start | Function \"%s\" redefinition.", 
-                       class_func_header_start->id->name, class->id->name);    
+                      "Class Func Header Start | Function \"%s\" redefinition. %s", 
+                       class_func_header_start->id->name);    
     }
     func_dcl->e.function_declaration.function = entry;
 
@@ -478,7 +482,8 @@ SymbolEntry AST_class_func_header_start_traverse(AST_class_func_header_start cla
     entry->e.function.scope = scope_open(symbol_table);
     entry->e.function.parameters = full_func_params_parse(parameters);
     
-    if(parameters != NULL) check_function_parameters(func_dcl->e.function_declaration.parameters_as_types, entry->e.function.parameters);
+    // check_function_parameters(func_dcl->e.function_declaration.parameters_as_types, entry->e.function.parameters);
+    check_function(func_dcl, entry);
 
     return entry;
 }
@@ -504,6 +509,7 @@ SymbolEntry AST_full_par_func_header_traverse(AST_full_par_func_header full_par_
 List full_func_params_parse(List parameters){ // Doesn't create new list. It justs modifies the parameters
     List item = parameters;
     AST_parameter param;
+    SymbolEntry entry;
     while(item != NULL){
         param = item->data;
         ASSERT(param->passvar != NULL);
@@ -517,7 +523,8 @@ List full_func_params_parse(List parameters){ // Doesn't create new list. It jus
                 AST_variabledef_traverse(vardef, param->typename);
                 break;
             case PASSVAR_variable:
-                AST_variabledef_traverse(param->passvar->u.variabledef, param->typename);
+                entry = AST_variabledef_traverse(param->passvar->u.variabledef, param->typename);
+                param->typename = entry->e.parameter.type;
                 break;
             default:
                 SEMANTIC_ERROR(param, "Parameter | Kind undefined.");
@@ -527,11 +534,18 @@ List full_func_params_parse(List parameters){ // Doesn't create new list. It jus
     return parameters;
 }
 
-void check_function_parameters(List func_dcl_params, List func_params){
-    List item_func_dcl = func_dcl_params,
-         item_func = func_params;
+bool check_function(SymbolEntry func_dcl, SymbolEntry func){
+    List item_func_dcl = func_dcl->e.function_declaration.parameters_as_types,
+         item_func = func->e.function.parameters;
     Type func_dcl_type;
     AST_parameter func_param;
+
+    if(!type_eq(func_dcl->e.function_declaration.result_type, func->e.function.result_type)){
+        error("Function | Function's \"%s\" return type do not match.", func->id->name);
+    }
+
+    if(item_func_dcl == NULL && item_func == NULL) return true;
+
     while(true){
         if(item_func_dcl == NULL || item_func == NULL) break;
 
@@ -539,16 +553,22 @@ void check_function_parameters(List func_dcl_params, List func_params){
         func_param = item_func->data;
 
         if(!type_eq(func_dcl_type, func_param->typename)){
-            SEMANTIC_ERROR(func_params, "Function Parameters | Function parameters do not match function declaration parameters.");
+            SEMANTIC_ERROR(item_func, "Function Parameters | Function parameters do not match function declaration parameters.");
         }
 
         item_func_dcl = item_func_dcl->next;
         item_func = item_func->next;
     }
 
-    if(item_func_dcl != NULL || item_func != NULL){
-        SEMANTIC_ERROR(func_params, "Function Parameters | Function parameters do not match function declaration parameters.");
+    if(item_func_dcl != NULL){
+        SEMANTIC_ERROR(item_func_dcl, "Function Declaration Parameters | Function parameters do not match function declaration parameters.");
     }
+
+    if(item_func != NULL){
+        func_param = item_func->data;
+        SEMANTIC_ERROR(item_func, "Function Parameters | Function parameters do not match function declaration parameters.");
+    }
+    return true;
 }
 
 void AST_dcl_stmt_traverse(AST_dcl_stmt dcl_stmt){
@@ -556,7 +576,7 @@ void AST_dcl_stmt_traverse(AST_dcl_stmt dcl_stmt){
 
     switch(dcl_stmt->kind){
         case DCL_STMT_STMTS_DCLS: // TODO
-            // AST_statements_traverse(dcl_stmt->u.dcl_stmt_stmts_dcls.statements); // TODO
+            AST_statements_traverse(dcl_stmt->u.dcl_stmt_stmts.statements);
             AST_declarations_traverse(dcl_stmt->u.dcl_stmt_stmts_dcls.declares);
             break;
         case DCL_STMT_STMTS: // TODO
@@ -700,7 +720,6 @@ void AST_multi_expr_traverse(List exprlist){
         expr = item->data;
         
         AST_expr_traverse(expr); // TODO | Calculations
-        printf("Multii\n");
         // if(constant->kind == CONSTANT_iconst) printf("Simple constant %d", constant->u.c_iconst);
         // printf("constant kind %d\n", constant->kind);
         item = item->next;
@@ -713,23 +732,26 @@ Type AST_expr_traverse(AST_expr expr){
     Type expr1_type, expr2_type;
     // AST_constant constant = new(malloc(sizeof(*constant)));
     switch(expr->kind){
-        case EXPR_unop: // TODO
+        case EXPR_unop:
             expr1_type = AST_expr_traverse(expr->u.e_unop.expr);
             res = AST_expr_unop_traverse(expr, expr1_type);
             break;
-        case EXPR_binop: // TODO 
+        case EXPR_binop:
             expr1_type = AST_expr_traverse(expr->u.e_binop.expr1);
             expr2_type = AST_expr_traverse(expr->u.e_binop.expr2);
             res = AST_expr_binop_traverse(expr1_type, expr, expr2_type);
             break;
-        // case EXPR_call: // TODO - func & length - AST needs patching...
-        //     expr->u.e_call.
-
-        // case EXPR_incdec: // TODO - AST needs patching
-        case EXPR_variable: // TODO ---
-            AST_variable_traverse(expr->u.e_variable.variable);
+        case EXPR_call: // TODO - func & length - AST needs patching... & Maybe custom function for length?
+            res = AST_expr_function_call_traverse(expr->u.e_call.variable, expr->u.e_call.list);
             break;
-        case EXPR_constant: // TODO 
+        case EXPR_incdec: // TODO - AST needs patching
+            expr1_type = AST_variable_traverse(expr->u.e_incdec.variable);
+            res = AST_expr_incdec_traverse(expr1_type, expr->u.e_incdec.variable);
+            break;
+        case EXPR_variable: // TODO ---
+            res = AST_variable_traverse(expr->u.e_variable.variable);
+            break;
+        case EXPR_constant:
             switch(expr->u.e_constant.constant->kind){
                 case CONSTANT_iconst:
                     res = type_basic(TYPE_int);
@@ -747,7 +769,7 @@ Type AST_expr_traverse(AST_expr expr){
                     SEMANTIC_ERROR(expr->u.e_constant.constant, "Constant | Kind undefined.");
             }
             break;
-        case EXPR_type: // TODO 
+        case EXPR_type:
             res = expr->u.e_type.type;
             break;
         case EXPR_new: // TODO 
@@ -839,12 +861,38 @@ Type AST_expr_binop_traverse(Type type1, AST_expr expr, Type type2) {
     return NULL;
 }
 
+Type AST_expr_incdec_traverse(Type typename, AST_variable variable){
+    if(!type_eq(typename, type_basic(TYPE_int))){ // ++, -- allowed only on integer values.
+        SEMANTIC_ERROR(variable, "Variable | Type mismatch in the incdec argument.");
+    }
+
+    return typename;
+}
+
+
+Type AST_expr_function_call_traverse(AST_variable variable, AST_exprlist exprlist_parameters){ // TODO - ALL
+    // SymbolEntry entry = symbol_lookup(symbol_table, e->u.e_call.id, LOOKUP_ALL_SCOPES, 1);
+
+    // if  ( entry->entry_type != ENTRY_FUNCTION )
+    //     SEMANTIC_ERROR(e, "'%s' is not a function\n", e->u.e_call.id->name);
+
+    // expr1_type = AST_expr_list_traverse(e->u.e_call.list);
+
+    // if ( !type_eq(expr1_type, entry->e.function.type->u.t_func.type1) )
+    //     SEMANTIC_ERROR(e, "The types of the arguments of function '%s' do "
+    //             "not match the definition\n", e->u.e_call.id->name);
+
+    // e->entry = entry; /* προσθήκη στον κόμβο ενός δείκτη στο symbol
+    //                         entry της συνάρτησης που καλούμε */
+    // res = entry->e.function.result_type;
+    return type_basic(TYPE_unknown);
+}
 
 void io_traverse(List io){
     //?
 }
 
-void AST_general_expr_traverse(AST_general_expr gexpr){
+Type AST_general_expr_traverse(AST_general_expr gexpr){
     switch(gexpr->kind){
         case GEXPR_GEXPR:   
             AST_general_expr_traverse(gexpr->u.gexpr.general_expr1);
@@ -858,7 +906,7 @@ void AST_general_expr_traverse(AST_general_expr gexpr){
     }
 }
 
-void AST_assignment_traverse(AST_assignment assign){
+Type AST_assignment_traverse(AST_assignment assign){
     switch(assign->kind){
         case ASSIGNMENT_EXPR:
             AST_expr_traverse(assign->u.expr.expr);
@@ -869,39 +917,6 @@ void AST_assignment_traverse(AST_assignment assign){
             SEMANTIC_ERROR(assign, "Assignment | Kind undefined.");
     }
 }
-
-// void AST_expr_traverse(AST_expr expr){
-//     switch(expr->kind){
-//         case EXPR_unop: //TODO
-//             break;
-//         case EXPR_binop:    //TODO
-//             break;
-//         case EXPR_call: //TODO
-//             break;
-//         case EXPR_incdec:   //TODO
-//             break;
-//         case EXPR_variable: //TODO
-//             AST_variable_traverse(expr->u.e_variable.variable);
-//             break;
-//         case EXPR_constant: //TODO
-//             AST_constant_traverse(expr->u.e_constant.constant);
-//             break;
-//         case EXPR_type:     //TODO
-//             // ?
-//             break;
-//         case EXPR_new:  
-//             AST_general_expr_traverse(expr->u.e_new.general_expr);
-//             break;
-//         case EXPR_general_expr: 
-//             AST_general_expr_traverse(expr->u.e_general_expr.general_expr);
-//             break;
-//         case EXPR_list_expr:    
-//             AST_exprlist_traverse(expr->u.e_listexpr.exprlist);
-//             break;
-//         default:
-//             SEMANTIC_ERROR(expr, "expr | Kind undefined.");
-//     }
-// }
 
 void AST_exprlist_traverse(AST_exprlist exprlist){
     switch(exprlist->kind){
@@ -934,7 +949,8 @@ void AST_constant_traverse(AST_constant constant){
 }
 
 Type AST_variable_traverse(AST_variable var){
-    Type res;
+    SymbolEntry entry = NULL;
+    Type res = NULL;
     switch(var->kind){
         case VARIABLE_LIST: // TODO: Not sure what to expect here...
             AST_variable_traverse(var->u.list.variable);
@@ -942,12 +958,22 @@ Type AST_variable_traverse(AST_variable var){
             break;
         case VARIABLE_NESTED:       //TODO
             // probably needs scope_open
+            AST_variable_traverse(var->u.nested.variable);
+            entry = symbol_lookup(symbol_table, var->u.nested.id, LOOKUP_ALL_SCOPES, 1);
+            if(entry->entry_type != ENTRY_VARIABLE){ // TODO: Or (and) maybe function?
+                SEMANTIC_ERROR(var, "Variable | Nested variable expected VAR. Instead got %s.", reverse_entry_type[ENTRY_VARIABLE]); 
+            }
+            res = entry->e.variable.type;
             break;
-        case VARIABLE_LISTFUNC:     //TODO
+        case VARIABLE_LISTFUNC:     //TODO - IDK what to do here yet.
             break;
-        case VARIABLE_DEFINITION:      //TODO
+        case VARIABLE_DEFINITION: //TODO - Find usecase to understand actual use.
+            entry = symbol_enter(symbol_table, var->u.definition.id, true); // TODO: Verify
+            entry->entry_type = ENTRY_VARIABLE;
+            entry->e.variable.type = type_basic(TYPE_unknown);
+            res = entry->e.variable.type;
             break;
-        case VARIABLE_THIS:         //TODO - Scope remains the same, but after that i expect a scope-open
+        case VARIABLE_THIS: //TODO - Scope remains the same, but after that i expect a scope-open
             break;
         default:
             SEMANTIC_ERROR(var, "Variable | Kind undefined.");  

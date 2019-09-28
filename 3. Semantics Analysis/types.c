@@ -6,7 +6,7 @@
 #include "error.h"
 #include <stdio.h>
 
-char* reverse_type_kind[] = {
+char* reverse_type_kind[] = { // TODO: Should export reverse kinds into functions to avoid overflows! Security Risks...
 	"UNKNOWN", "INT", "FLOAT", "CHAR", "STR", "VOID", 
 	"ARRAY", "ENUM", "UNION", "LIST", "CLASS", "FUNC", "ID", "REF"    
 };
@@ -32,7 +32,8 @@ Type type_basic (int kind_id)
 			result->kind = kind_id;
 			break;
 		default:
-			ASSERT(result->kind == TYPE_unknown);
+			
+			ASSERT(kind_id == TYPE_unknown);
 			result->kind = TYPE_unknown;
 	};
    	return result;
