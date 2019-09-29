@@ -79,7 +79,9 @@ See the [open issues][issues-url] for a list of proposed features (and known iss
 
 Please read [CONTRIBUTING.md][CONTRIBUTING] for details on our code of conduct, and the process for submitting pull requests to us.
 
-
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 <!-- Authors -->
 
