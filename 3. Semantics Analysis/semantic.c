@@ -743,7 +743,7 @@ Type AST_expr_traverse(AST_expr expr){
     ASSERT(expr != NULL);
     Type res = type_basic(TYPE_unknown);
     Type expr1_type, expr2_type;
-    // AST_constant constant = new(malloc(sizeof(*constant)));
+
     switch(expr->kind){
         case EXPR_unop:
             expr1_type = AST_expr_traverse(expr->u.e_unop.expr);
@@ -916,10 +916,15 @@ void io_traverse(List io){
 }
 
 Type AST_general_expr_traverse(AST_general_expr gexpr){
+    Type type1, type2;
     switch(gexpr->kind){
         case GEXPR_GEXPR:   
-            AST_general_expr_traverse(gexpr->u.gexpr.general_expr1);
-            AST_general_expr_traverse(gexpr->u.gexpr.general_expr2);    // is this ok?
+            type1 = AST_general_expr_traverse(gexpr->u.gexpr.general_expr1);
+            type2 = AST_general_expr_traverse(gexpr->u.gexpr.general_expr2);    // is this ok?
+            
+            if(!type_eq(type1, type2)){
+                SEMANTIC_ERROR(gexpr, "General expr | GExpr types do not match.")
+            }
             break;
         case GEXPR_ASSIGNMENT:
             AST_assignment_traverse(gexpr->u.assignment.assignment);
@@ -979,24 +984,33 @@ Type AST_variable_traverse(AST_variable var){
             AST_variable_traverse(var->u.list.variable);
             AST_general_expr_traverse(var->u.list.general_expr);
             break;
-        case VARIABLE_NESTED:       //TODO
-            // probably needs scope_open
+        case VARIABLE_NESTED:
             AST_variable_traverse(var->u.nested.variable);
-            entry = symbol_lookup(symbol_table, var->u.nested.id, LOOKUP_ALL_SCOPES, 1);
+            entry = symbol_lookup(symbol_table, var->u.nested.id, LOOKUP_CURRENT_SCOPE, 1);
             if(entry->entry_type != ENTRY_VARIABLE){ // TODO: Or (and) maybe function?
                 SEMANTIC_ERROR(var, "Variable | Nested variable expected VAR. Instead got %s.", reverse_entry_type[ENTRY_VARIABLE]); 
             }
             res = entry->e.variable.type;
             break;
-        case VARIABLE_LISTFUNC:     //TODO - IDK what to do here yet.
+        case VARIABLE_LISTFUNC:     //TODO - Page 19 C++600.pdf
+            res = AST_general_expr_traverse(var->u.listfunc.general_expr);
+            if(res->kind != TYPE_list){ // Cannot use type_eq, since there we are checking also the inner list type.
+                SEMANTIC_ERROR(var, "Variable | LISTFUNC needs to have a list as a parameter.");
+            }
+            // TODO: Return appropriate result - Address or Value?
+            res = type_basic(TYPE_unknown);
             break;
         case VARIABLE_DEFINITION: //TODO - Find usecase to understand actual use.
-            entry = symbol_enter(symbol_table, var->u.definition.id, true); // TODO: Verify
-            entry->entry_type = ENTRY_VARIABLE;
-            entry->e.variable.type = type_basic(TYPE_unknown);
+            // entry = symbol_enter(symbol_table, var->u.definition.id, true); // TODO: Verify -- ΜΑΥΒΕ ΒΟΤΗ?? enter & lookup?
+            // entry->entry_type = ENTRY_VARIABLE;
+            // entry->e.variable.type = type_basic(TYPE_unknown);
+            // res = entry->e.variable.type;
+            entry = symbol_lookup(symbol_table, var->u.definition.id, LOOKUP_ALL_SCOPES, true);
+            ASSERT(entry->entry_type == ENTRY_VARIABLE); // Can we accept other than variables?
             res = entry->e.variable.type;
             break;
         case VARIABLE_THIS: //TODO - Scope remains the same, but after that i expect a scope-open
+            // Do nothing here || TODO: Maybe do something here?
             break;
         default:
             SEMANTIC_ERROR(var, "Variable | Kind undefined.");  

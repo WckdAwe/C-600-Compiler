@@ -8,7 +8,7 @@ enum days { monday=1, tuesday, wednesday, thursday, friday };
 enum enum_verify { monday=1, tuesday=7, wednesday, thursday=32, friday };
 class t {
 private:
-   float a,b; // double a,b;
+   float a,b;
    int list al;
    days d;
 public:
@@ -29,47 +29,36 @@ union u {
    days dd;
 };
 
+// arz d; TODO: Verify that non existing ids get SEMANTIC_ERRROR
 
 void zz(){}
-void __try_it(int& n, days list d){}
+// void __try_it(int& n, days list d, int z){}
 float t2::za(int & a, ar test){}
-void t2::z2(){}
-void test();
+float t2::z2(int& a, ar test){}
+// void test();
 
-
-// int g[3];
 int g[3][2];
+int i_1;
+float f_1;
+char c_1;
+string s_1;
 
-int main(){
+int expr_test = 3 + 5;
 
+class mystery_class : t {
+   void __try_it(int&,days list);
+};
+
+
+void mystery_class::__try_it(int& a, days list b) {
+   ar z;
+   static t x;
+   char str[100];
+   str = "another \n\
+\tstring!";
+   //x.i[0] = u.a = 0x33202036;
+   u.a = 0x33202036;
 }
-
-// typedef char ar[100];
-// enum days { monday=1, tuesday, wednesday, thursday, friday };
-// class t {
-// private:
-//    float a,b; // double a,b;
-//    int list al;
-//    days d;
-// public:
-//    float zz(int&,ar);
-//    union {
-//       int i[2];
-//       float f[2];
-//    };
-// };
-// int g[3];
-// int g[3][2];
-// float x = 5e-24;
-// int g[3][2] = {{0X1A00,0X30F0},0X18D0,0XA030};
-// union u {
-//    int a;
-//    char b[4];
-//    days dd;
-// };
-// int e = 3;
-// days list dl[10];
-// string str = "string!";
 // void mystery_class::__try_it() {
 // /*
 // ** no comment
@@ -87,13 +76,5 @@ int main(){
 //    x.i[0] = u.a = 0x33202036;
 //    x.i[1] = 0o2762.3;
 // }
-// int main() {
-// int z,j; string y[100];
-// y[z] = !x && !ar[10][x[j]] || (z == k*3);
-// all(-y[x[i]],x[y[x[j]]]);
-// if (b && (x > a[i%k])) k();
-// for (x=1;(x<x[10,g[y+x]])&&(length(y)<x);x++)
-//    cin >> x[i] >> i >> x[i] >> y[i];
-// y = !x[i*sizeof(char)];
-// u.b[3] = '\n';
-// }
+
+int main(){}

@@ -138,7 +138,7 @@ Hats off to any person whom contributed to this Project, formally or informally.
 - Github project [PASC320](https://github.com/nikolaskostakis/Pasc320-Compiler) by [nikolaskostakis](https://github.com/nikolaskostakis)
 - Github project [Llama Compiler](https://github.com/ychatz/compiler) by [ychatz](https://github.com/ychatz)
 
-
+We have borrowed a-freaking-lot of ideas & code from the above guys to make our stuff kinda work. Make sure to check their individual projects out! :heart:
 
 
 

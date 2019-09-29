@@ -54,7 +54,8 @@ y[z] = !x && !g[10][y[j]] || (z == k*3);
 dl = new(days.tuesday);
 dl = dl + [days.friday, days.tuesday];
 all(-y[w[i]],w[y[w[j]]]);
-switch(w[k]-y[j]) case 0: case 1: if (i == 0) i++;
+switch(w[k]-y[j]) case 0: case 1: if (i == 0) 
+i++;
 if (b && (x > a[i%k])) mm.__try_it(k,dl);
 for (x=1;(x<a[10,g[y[i]+x][k]])&&(length(y[x])<x);x++)
    cin >> y[x] >> x >> w[x] >> y[x];

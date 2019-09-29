@@ -1,0 +1,782 @@
+Type: AST_program(
+ list(
+  AST_global_decl: typedef(
+   Type: AST_typedef(
+    Identifier: "a"
+    Type: int
+   )
+  )
+  list(
+   AST_global_decl: typedef(
+    Type: AST_typedef(
+     Identifier: "wckd"
+     Type: id(
+      Identifier: "a"
+     )
+    )
+   )
+   list(
+    AST_global_decl: typedef(
+     Type: AST_typedef(
+      Identifier: "wckdawe"
+      Type: array(
+       dim = 300
+       Type: id(
+        Identifier: "wckd"
+       )
+      )
+     )
+    )
+    list(
+     AST_global_decl: typedef(
+      Type: AST_typedef(
+       Identifier: "vasil500"
+       Type: array(
+        dim = 500
+        Type: id(
+         Identifier: "wckdawe"
+        )
+       )
+      )
+     )
+     list(
+      AST_global_decl: typedef(
+       Type: AST_typedef(
+        Identifier: "ar"
+        Type: array(
+         dim = 100
+         Type: char
+        )
+       )
+      )
+      list(
+       AST_global_decl: typedef(
+        Type: AST_typedef(
+         Identifier: "multi_lvl"
+         Type: array(
+          dim = 500
+          Type: array(
+           dim = 200
+           Type: array(
+            dim = 100
+            Type: array(
+             dim = 50
+             Type: char
+            )
+           )
+          )
+         )
+        )
+       )
+       list(
+        AST_global_decl: enum(
+         Type: ast_enum_dcl(
+          Identifier: "days"
+          list(
+           Type: ast_id(
+            Identifier: "monday"
+            ast_init_value: init single(
+             ast_expr: epxr constant(
+              constant: iconst(
+               1
+              )
+             )
+            )
+           )
+           list(
+            Type: ast_id(
+             Identifier: "tuesday"
+             ast_init_value: init default
+            )
+            list(
+             Type: ast_id(
+              Identifier: "wednesday"
+              ast_init_value: init default
+             )
+             list(
+              Type: ast_id(
+               Identifier: "thursday"
+               ast_init_value: init default
+              )
+              list(
+               Type: ast_id(
+                Identifier: "friday"
+                ast_init_value: init default
+               )
+               <<NULL>>
+              )
+             )
+            )
+           )
+          )
+         )
+        )
+        list(
+         AST_global_decl: enum(
+          Type: ast_enum_dcl(
+           Identifier: "enum_verify"
+           list(
+            Type: ast_id(
+             Identifier: "monday"
+             ast_init_value: init single(
+              ast_expr: epxr constant(
+               constant: iconst(
+                1
+               )
+              )
+             )
+            )
+            list(
+             Type: ast_id(
+              Identifier: "tuesday"
+              ast_init_value: init single(
+               ast_expr: epxr constant(
+                constant: iconst(
+                 7
+                )
+               )
+              )
+             )
+             list(
+              Type: ast_id(
+               Identifier: "wednesday"
+               ast_init_value: init default
+              )
+              list(
+               Type: ast_id(
+                Identifier: "thursday"
+                ast_init_value: init single(
+                 ast_expr: epxr constant(
+                  constant: iconst(
+                   32
+                  )
+                 )
+                )
+               )
+               list(
+                Type: ast_id(
+                 Identifier: "friday"
+                 ast_init_value: init default
+                )
+                <<NULL>>
+               )
+              )
+             )
+            )
+           )
+          )
+         )
+         list(
+          AST_global_decl: class(
+           Type: AST_class_dcl(
+            Identifier: "t"
+            Type: AST_class_body(
+             <<NULL>>
+             list(
+              Type: AST_members_method(
+               Access private
+               AST_member_or_method: mom mebmer(
+                AST_member: member variable(
+                 Type: AST var declaration(
+                  Type: float
+                  list(
+                   Type: AST_variabledef(
+                    Identifier: "a"
+                    <<NULL>>
+                   )
+                   list(
+                    Type: AST_variabledef(
+                     Identifier: "b"
+                     <<NULL>>
+                    )
+                    <<NULL>>
+                   )
+                  )
+                 )
+                )
+               )
+              )
+              list(
+               Type: AST_members_method(
+                Access default
+                AST_member_or_method: mom mebmer(
+                 AST_member: member variable(
+                  Type: AST var declaration(
+                   Type: int
+                   list(
+                    Type: AST_variabledef(
+                     Identifier: "al"
+                     Type: list(
+                      Type: unknown
+                     )
+                    )
+                    <<NULL>>
+                   )
+                  )
+                 )
+                )
+               )
+               list(
+                Type: AST_members_method(
+                 Access default
+                 AST_member_or_method: mom mebmer(
+                  AST_member: member variable(
+                   Type: AST var declaration(
+                    Type: id(
+                     Identifier: "days"
+                    )
+                    list(
+                     Type: AST_variabledef(
+                      Identifier: "d"
+                      <<NULL>>
+                     )
+                     <<NULL>>
+                    )
+                   )
+                  )
+                 )
+                )
+                list(
+                 Type: AST_members_method(
+                  Access public
+                  AST_member_or_method: mom method(
+                   short_func_dcl: short func with params(
+                    Type: AST_class_func_header_start(
+                     Identifier: "zz"
+                     Type: float
+                    )
+                    list(
+                     list(
+                      <<NULL>>
+                     )
+                    )
+                   )
+                  )
+                 )
+                 list(
+                  Type: AST_members_method(
+                   Access default
+                   AST_member_or_method: mom mebmer(
+                    AST_member: member anon union(
+                     list(
+                      Type: AST var declaration(
+                       Type: int
+                       list(
+                        Type: AST_variabledef(
+                         Identifier: "i"
+                         Type: array(
+                          dim = 2
+                          Type: unknown
+                         )
+                        )
+                        <<NULL>>
+                       )
+                      )
+                      list(
+                       Type: AST var declaration(
+                        Type: float
+                        list(
+                         Type: AST_variabledef(
+                          Identifier: "f"
+                          Type: array(
+                           dim = 2
+                           Type: unknown
+                          )
+                         )
+                         <<NULL>>
+                        )
+                       )
+                       <<NULL>>
+                      )
+                     )
+                    )
+                   )
+                  )
+                  <<NULL>>
+                 )
+                )
+               )
+              )
+             )
+            )
+           )
+          )
+          list(
+           AST_global_decl: class(
+            Type: AST_class_dcl(
+             Identifier: "t2"
+             Type: AST_class_body(
+              <<NULL>>
+              list(
+               Type: AST_members_method(
+                Access public
+                AST_member_or_method: mom method(
+                 short_func_dcl: short func with params(
+                  Type: AST_class_func_header_start(
+                   Identifier: "za"
+                   Type: float
+                  )
+                  list(
+                   list(
+                    <<NULL>>
+                   )
+                  )
+                 )
+                )
+               )
+               list(
+                Type: AST_members_method(
+                 Access default
+                 AST_member_or_method: mom method(
+                  short_func_dcl: short func with params(
+                   Type: AST_class_func_header_start(
+                    Identifier: "z2"
+                    Type: float
+                   )
+                   list(
+                    list(
+                     <<NULL>>
+                    )
+                   )
+                  )
+                 )
+                )
+                <<NULL>>
+               )
+              )
+             )
+            )
+           )
+           list(
+             AST_global_decl: union(
+             Type: AST_union_dcl(
+              Identifier: "u"
+              list(
+               Type: AST var declaration(
+                Type: int
+                list(
+                 Type: AST_variabledef(
+                  Identifier: "a"
+                  <<NULL>>
+                 )
+                 <<NULL>>
+                )
+               )
+               list(
+                Type: AST var declaration(
+                 Type: char
+                 list(
+                  Type: AST_variabledef(
+                   Identifier: "b"
+                   Type: array(
+                    dim = 4
+                    Type: unknown
+                   )
+                  )
+                  <<NULL>>
+                 )
+                )
+                list(
+                 Type: AST var declaration(
+                  Type: id(
+                   Identifier: "days"
+                  )
+                  list(
+                   Type: AST_variabledef(
+                    Identifier: "dd"
+                    <<NULL>>
+                   )
+                   <<NULL>>
+                  )
+                 )
+                 <<NULL>>
+                )
+               )
+              )
+             )
+            )
+            list(
+             AST_global_decl: func(
+              AST_func_dcl: dcl fd full(
+               AST_full_func_dcl: ffd nopar(
+                Type: AST_class_func_header_start(
+                 Identifier: "zz"
+                 Type: void
+                )
+                AST_dcl_stmt: empty
+               )
+              )
+             )
+             list(
+              AST_global_decl: func(
+               AST_func_dcl: dcl fd full(
+                AST_full_func_dcl: ffd full par(
+                 AST_full_par_func_header: fpf class(
+                  Type: class_func_header_start(
+                   Type: float
+                   Identifier: "za"
+                   Identifier: "t2"
+                  )
+                  list(
+                   Type: AST parameter(
+                    Type: int
+                    passvar: passvar ref(
+                     Identifier: "a"
+                    )
+                   )
+                   list(
+                    Type: AST parameter(
+                     Type: id(
+                      Identifier: "ar"
+                     )
+                     passvar: passvar variable(
+                      Type: AST_variabledef(
+                       Identifier: "test"
+                       <<NULL>>
+                      )
+                     )
+                    )
+                    <<NULL>>
+                   )
+                  )
+                 )
+                 AST_dcl_stmt: empty
+                )
+               )
+              )
+              list(
+               AST_global_decl: func(
+                AST_func_dcl: dcl fd full(
+                 AST_full_func_dcl: ffd full par(
+                  AST_full_par_func_header: fpf class(
+                   Type: class_func_header_start(
+                    Type: float
+                    Identifier: "z2"
+                    Identifier: "t2"
+                   )
+                   list(
+                    Type: AST parameter(
+                     Type: int
+                     passvar: passvar ref(
+                      Identifier: "a"
+                     )
+                    )
+                    list(
+                     Type: AST parameter(
+                      Type: id(
+                       Identifier: "ar"
+                      )
+                      passvar: passvar variable(
+                       Type: AST_variabledef(
+                        Identifier: "test"
+                        <<NULL>>
+                       )
+                      )
+                     )
+                     <<NULL>>
+                    )
+                   )
+                  )
+                  AST_dcl_stmt: empty
+                 )
+                )
+               )
+               list(
+                AST_global_decl: global var(
+                 Type: ast_global_var_declaration
+                  Type: int
+                  list(
+                   Type: ast_init_variabledef(
+                    Type: AST_variabledef(
+                     Identifier: "g"
+                     Type: array(
+                      dim = 3
+                      Type: array(
+                       dim = 2
+                       Type: unknown
+                      )
+                     )
+                    )
+                    ast_init_value: init default
+                   )
+                   <<NULL>>
+                  )
+                 )
+                )
+                list(
+                 AST_global_decl: global var(
+                  Type: ast_global_var_declaration
+                   Type: int
+                   list(
+                    Type: ast_init_variabledef(
+                     Type: AST_variabledef(
+                      Identifier: "i_1"
+                      <<NULL>>
+                     )
+                     ast_init_value: init default
+                    )
+                    <<NULL>>
+                   )
+                  )
+                 )
+                 list(
+                  AST_global_decl: global var(
+                   Type: ast_global_var_declaration
+                    Type: float
+                    list(
+                     Type: ast_init_variabledef(
+                      Type: AST_variabledef(
+                       Identifier: "f_1"
+                       <<NULL>>
+                      )
+                      ast_init_value: init default
+                     )
+                     <<NULL>>
+                    )
+                   )
+                  )
+                  list(
+                   AST_global_decl: global var(
+                    Type: ast_global_var_declaration
+                     Type: char
+                     list(
+                      Type: ast_init_variabledef(
+                       Type: AST_variabledef(
+                        Identifier: "c_1"
+                        <<NULL>>
+                       )
+                       ast_init_value: init default
+                      )
+                      <<NULL>>
+                     )
+                    )
+                   )
+                   list(
+                    AST_global_decl: global var(
+                     Type: ast_global_var_declaration
+                      Type: str
+                      list(
+                       Type: ast_init_variabledef(
+                        Type: AST_variabledef(
+                         Identifier: "s_1"
+                         <<NULL>>
+                        )
+                        ast_init_value: init default
+                       )
+                       <<NULL>>
+                      )
+                     )
+                    )
+                    list(
+                     AST_global_decl: global var(
+                      Type: ast_global_var_declaration
+                       Type: int
+                       list(
+                        Type: ast_init_variabledef(
+                         Type: AST_variabledef(
+                          Identifier: "expr_test"
+                          <<NULL>>
+                         )
+                         ast_init_value: init single(
+                          ast_expr: expr binop(
+                           ast_expr: epxr constant(
+                            constant: iconst(
+                             3
+                            )
+                           )
+                           ast_binop_minus
+                           ast_expr: epxr constant(
+                            constant: iconst(
+                             5
+                            )
+                           )
+                          )
+                         )
+                        )
+                        <<NULL>>
+                       )
+                      )
+                     )
+                     list(
+                      AST_global_decl: class(
+                       Type: AST_class_dcl(
+                        Identifier: "mystery_class"
+                        Type: AST_class_body(
+                         Identifier: "t"
+                         list(
+                          Type: AST_members_method(
+                           Access default
+                           AST_member_or_method: mom method(
+                            short_func_dcl: short func with params(
+                             Type: AST_class_func_header_start(
+                              Identifier: "__try_it"
+                              Type: void
+                             )
+                             list(
+                              list(
+                               <<NULL>>
+                              )
+                             )
+                            )
+                           )
+                          )
+                          <<NULL>>
+                         )
+                        )
+                       )
+                      )
+                      list(
+                       AST_global_decl: func(
+                        AST_func_dcl: dcl fd full(
+                         AST_full_func_dcl: ffd full par(
+                          AST_full_par_func_header: fpf class(
+                           Type: class_func_header_start(
+                            Type: void
+                            Identifier: "__try_it"
+                            Identifier: "mystery_class"
+                           )
+                           list(
+                            Type: AST parameter(
+                             Type: int
+                             passvar: passvar ref(
+                              Identifier: "a"
+                             )
+                            )
+                            list(
+                             Type: AST parameter(
+                              Type: id(
+                               Identifier: "days"
+                              )
+                              passvar: passvar variable(
+                               Type: AST_variabledef(
+                                Identifier: "b"
+                                Type: list(
+                                 Type: unknown
+                                )
+                               )
+                              )
+                             )
+                             <<NULL>>
+                            )
+                           )
+                          )
+                          AST_dcl_stmt: dcl stmt stmts dcls(
+                           list(
+                            AST_stmt: stmt expr(
+                             AST_general_expr: gexpr assingment(
+                              ast_assingment: assingment var(
+                               ast_variable: variable definition(
+                                0
+                                Identifier: "str"
+                               )
+                               ast_assingment: assingment expr(
+                                ast_expr: epxr constant(
+                                 constant: sconst(
+                                  another 
+	string!
+                                 )
+                                )
+                               )
+                              )
+                             )
+                            )
+                            list(
+                             AST_stmt: stmt expr(
+                              AST_general_expr: gexpr assingment(
+                               ast_assingment: assingment var(
+                                ast_variable: variable nested(
+                                 ast_variable: variable definition(
+                                  0
+                                  Identifier: "u"
+                                 )
+                                 Identifier: "a"
+                                )
+                                ast_assingment: assingment expr(
+                                 ast_expr: epxr constant(
+                                  constant: iconst(
+                                   857743414
+                                  )
+                                 )
+                                )
+                               )
+                              )
+                             )
+                             <<NULL>>
+                            )
+                           )
+                           list(
+                            Type: AST_declaration(
+                             Type: id(
+                              Identifier: "ar"
+                             )
+                             0
+                             list(
+                              Type: AST_variabledef(
+                               Identifier: "z"
+                               <<NULL>>
+                              )
+                              <<NULL>>
+                             )
+                            )
+                            list(
+                             Type: AST_declaration(
+                              Type: id(
+                               Identifier: "t"
+                              )
+                              1
+                              list(
+                               Type: AST_variabledef(
+                                Identifier: "x"
+                                <<NULL>>
+                               )
+                               <<NULL>>
+                              )
+                             )
+                             list(
+                              Type: AST_declaration(
+                               Type: char
+                               0
+                               list(
+                                Type: AST_variabledef(
+                                 Identifier: "str"
+                                 Type: array(
+                                  dim = 100
+                                  Type: unknown
+                                 )
+                                )
+                                <<NULL>>
+                               )
+                              )
+                              <<NULL>>
+                             )
+                            )
+                           )
+                          )
+                         )
+                        )
+                       )
+                       <<NULL>>
+                      )
+                     )
+                    )
+                   )
+                  )
+                 )
+                )
+               )
+              )
+             )
+            )
+           )
+          )
+         )
+        )
+       )
+      )
+     )
+    )
+   )
+  )
+ )
+ AST_dcl_stmt: empty
+)
