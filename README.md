@@ -23,12 +23,13 @@
   - [Built with](#built-with)
 - [Getting Started](#getting-started)
 - [Roadmap](#roadmap)
-- [Contributing](#contributing)
+- [Contributing ✨](#contributing-%e2%9c%a8)
 - [Authors](#authors)
 - [License](#license)
 - [Disclaimer](#disclaimer)
 - [Security](#security)
 - [Acknowledgements](#acknowledgements)
+- [Contributors ✨](#contributors-%e2%9c%a8)
 
 
 
@@ -76,10 +77,11 @@ See the [open issues][issues-url] for a list of proposed features (and known iss
 
 <!-- Contributing -->
 
-## Contributing
+## Contributing ✨
 
 Please read [CONTRIBUTING.md][CONTRIBUTING] for details on our code of conduct, and the process for submitting pull requests to us.
 
+Thanks goes to these wonderful people ✨:
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
 <table>
@@ -87,7 +89,6 @@ Please read [CONTRIBUTING.md][CONTRIBUTING] for details on our code of conduct, 
     <td align="center"><a href="https://github.com/TheNotoriousCS"><img src="https://avatars0.githubusercontent.com/u/31367091?v=4" width="100px;" alt="TheNotoriousCS"/><br /><sub><b>TheNotoriousCS</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=TheNotoriousCS" title="Code">💻</a> <a href="#content-TheNotoriousCS" title="Content">🖋</a></td>
   </tr>
 </table>
-
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 <!-- Authors -->
