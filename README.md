@@ -1,5 +1,5 @@
 ﻿[![Contributors][contributors-shield]][contributors-url]
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors)
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
@@ -86,8 +86,9 @@ Thanks goes to these wonderful people ✨:
 <!-- prettier-ignore -->
 <table>
   <tr>
-    <td align="center"><a href="http://wckdawe.com"><img src="https://avatars0.githubusercontent.com/u/35025427?v=4" width="100px;" alt="WICKEĐ"/><br /><sub><b>WICKEĐ</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=WckdAwe" title="Code">💻</a> <a href="#content-WckdAwe" title="Content">🖋</a> <a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=WckdAwe" title="Tests">⚠️</a> <a href="https://github.com/WckdAwe/C-600-Compiler/issues?q=author%3AWckdAwe" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/TheFamousFurious"><img src="https://avatars1.githubusercontent.com/u/44675773?v=4" width="100px;" alt="TheFamousFurious"/><br /><sub><b>TheFamousFurious</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=TheFamousFurious" title="Code">💻</a> <a href="#content-TheFamousFurious" title="Content">🖋</a></td>
+    <td align="center"><a href="http://wckdawe.com"><img src="https://avatars0.githubusercontent.com/u/35025427?v=4" width="100px;" alt="WICKEĐ"/><br /><sub><b>WICKEĐ</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=WckdAwe" title="Code">💻</a> <a href="#content-WckdAwe" title="Content">🖋</a> <a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=WckdAwe" title="Tests">⚠️</a> <a href="https://github.com/WckdAwe/C-600-Compiler/issues?q=author%3AWckdAwe" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/TheNotoriousCS"><img src="https://avatars0.githubusercontent.com/u/31367091?v=4" width="100px;" alt="TheNotoriousCS"/><br /><sub><b>TheNotoriousCS</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=TheNotoriousCS" title="Code">💻</a> <a href="#content-TheNotoriousCS" title="Content">🖋</a> <a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=TheNotoriousCS" title="Tests">⚠️</a> <a href="https://github.com/WckdAwe/C-600-Compiler/issues?q=author%3ATheNotoriousCS" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
