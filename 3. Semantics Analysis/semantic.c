@@ -888,8 +888,18 @@ Type AST_expr_function_call_traverse(AST_variable variable, AST_exprlist exprlis
     return type_basic(TYPE_unknown);
 }
 
+//return AST_variable ? 
 void io_traverse(List io){
-    //?
+        //variable? TODO: check that one 
+    AST_variable var;
+    List item = io;
+
+    while(item != NULL){
+        var = item->data;
+        AST_variable_traverse(var);
+        item = item->next;
+    }
+    // return ? 
 }
 
 Type AST_general_expr_traverse(AST_general_expr gexpr){
