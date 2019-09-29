@@ -1,4 +1,5 @@
 ﻿[![Contributors][contributors-shield]][contributors-url]
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
@@ -81,6 +82,12 @@ Please read [CONTRIBUTING.md][CONTRIBUTING] for details on our code of conduct, 
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/TheNotoriousCS"><img src="https://avatars0.githubusercontent.com/u/31367091?v=4" width="100px;" alt="TheNotoriousCS"/><br /><sub><b>TheNotoriousCS</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=TheNotoriousCS" title="Code">💻</a></td>
+  </tr>
+</table>
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 <!-- Authors -->
@@ -165,3 +172,12 @@ Hats off to any person whom contributed to this Project, formally or informally.
 [issues-url]: https://github.com/WckdAwe/C-600-Compiler/issues
 [license-shield]: https://img.shields.io/github/license/WckdAwe/C-600-Compiler.svg?style=flat-square
 [license-url]: https://github.com/WckdAwe/C-600-Compiler/blob/master/LICENSE.md
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
