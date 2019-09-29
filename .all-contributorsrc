@@ -12,7 +12,9 @@
       "profile": "https://github.com/TheNotoriousCS",
       "contributions": [
         "code",
-        "content"
+        "content",
+        "test",
+        "bug"
       ]
     }
   ],
