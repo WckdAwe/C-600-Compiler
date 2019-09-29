@@ -87,6 +87,7 @@ Thanks goes to these wonderful people ✨:
 <table>
   <tr>
     <td align="center"><a href="http://wckdawe.com"><img src="https://avatars0.githubusercontent.com/u/35025427?v=4" width="100px;" alt="WICKEĐ"/><br /><sub><b>WICKEĐ</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=WckdAwe" title="Code">💻</a> <a href="#content-WckdAwe" title="Content">🖋</a> <a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=WckdAwe" title="Tests">⚠️</a> <a href="https://github.com/WckdAwe/C-600-Compiler/issues?q=author%3AWckdAwe" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/TheFamousFurious"><img src="https://avatars1.githubusercontent.com/u/44675773?v=4" width="100px;" alt="TheFamousFurious"/><br /><sub><b>TheFamousFurious</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=TheFamousFurious" title="Code">💻</a> <a href="#content-TheFamousFurious" title="Content">🖋</a></td>
   </tr>
 </table>
 
