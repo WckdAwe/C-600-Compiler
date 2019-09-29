@@ -84,7 +84,7 @@ Please read [CONTRIBUTING.md][CONTRIBUTING] for details on our code of conduct, 
 <!-- prettier-ignore -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/TheNotoriousCS"><img src="https://avatars0.githubusercontent.com/u/31367091?v=4" width="100px;" alt="TheNotoriousCS"/><br /><sub><b>TheNotoriousCS</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=TheNotoriousCS" title="Code">💻</a> <a href="#content-TheNotoriousCS" title="Content">🖋</a></td>
+    <td align="center"><a href="https://github.com/TheNotoriousCS"><img src="https://avatars0.githubusercontent.com/u/31367091?v=4" width="100px;" alt="TheNotoriousCS"/><br /><sub><b>TheNotoriousCS</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=TheNotoriousCS" title="Code">💻</a> <a href="#content-TheNotoriousCS" title="Content">🖋</a> <a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=TheNotoriousCS" title="Tests">⚠️</a> <a href="https://github.com/WckdAwe/C-600-Compiler/issues?q=author%3ATheNotoriousCS" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
