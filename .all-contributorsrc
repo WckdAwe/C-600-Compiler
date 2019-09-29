@@ -1,0 +1,48 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "TheFamousFurious",
+      "name": "TheFamousFurious",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/44675773?v=4",
+      "profile": "https://github.com/TheFamousFurious",
+      "contributions": [
+        "code",
+        "content"
+      ]
+    },
+    {
+      "login": "WckdAwe",
+      "name": "WICKEĐ",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/35025427?v=4",
+      "profile": "http://wckdawe.com",
+      "contributions": [
+        "code",
+        "content",
+        "test",
+        "bug"
+      ]
+    },
+    {
+      "login": "TheNotoriousCS",
+      "name": "TheNotoriousCS",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/31367091?v=4",
+      "profile": "https://github.com/TheNotoriousCS",
+      "contributions": [
+        "code",
+        "content",
+        "test",
+        "bug"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "C-600-Compiler",
+  "projectOwner": "WckdAwe",
+  "repoType": "github",
+  "repoHost": "https://github.com"
+}
