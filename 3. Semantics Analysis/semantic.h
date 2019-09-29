@@ -67,4 +67,10 @@ Type AST_expr_function_call_traverse(AST_variable variable, AST_exprlist paramet
 void AST_exprlist_traverse(AST_exprlist exprlist);
 void AST_constant_traverse(AST_constant constant);
 Type AST_variable_traverse(AST_variable var);
+void AST_stmts_traverse(List stmts);
+void AST_stmt_traverse(AST_stmt stmt);
+void AST_switch_tail_traverse(AST_switch_tail tail);
+void AST_casestmt_traverse(AST_casestmt casestmt);
+void AST_decl_cases_traverse(AST_decl_cases dcas);
+void AST_casestmts_traverse(List casestmts);
 #endif

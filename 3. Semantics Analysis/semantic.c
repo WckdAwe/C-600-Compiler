@@ -576,11 +576,11 @@ void AST_dcl_stmt_traverse(AST_dcl_stmt dcl_stmt){
 
     switch(dcl_stmt->kind){
         case DCL_STMT_STMTS_DCLS: // TODO
-            AST_statements_traverse(dcl_stmt->u.dcl_stmt_stmts.statements);
+            AST_stmts_traverse(dcl_stmt->u.dcl_stmt_stmts.statements);
             AST_declarations_traverse(dcl_stmt->u.dcl_stmt_stmts_dcls.declares);
             break;
         case DCL_STMT_STMTS: // TODO
-            AST_statements_traverse(dcl_stmt->u.dcl_stmt_stmts.statements);
+            AST_stmts_traverse(dcl_stmt->u.dcl_stmt_stmts.statements);
             break;
         case DCL_STMT_DCLS: // TODO
             AST_declarations_traverse(dcl_stmt->u.dcl_stmt_dcls.declares);
@@ -622,30 +622,43 @@ void AST_declaration_traverse(AST_declaration dcl){
     }
 }
 
-void AST_statements_traverse(List stmts){
+void AST_stmts_traverse(List stmts){
     if(!stmts) return;
     List item = stmts;
     AST_stmt stmt;
     while(item != NULL){
         stmt = item->data;
-        AST_statement_traverse(stmt);
+        AST_stmt_traverse(stmt);
         item = item->next;
     }
 }
 
-void AST_statement_traverse(AST_stmt stmt){
+void AST_stmt_traverse(AST_stmt stmt){
     if(!stmt) return;
     
     switch (stmt->kind){
         case STMT_EXPR: //TODO
+            AST_general_expr_traverse(stmt->u.general_expr.general_expr);
             break;
         case STMT_IF:   //TODO
+            AST_general_expr_traverse(stmt->u.if_stmt.general_expr);
+            AST_stmt_traverse(stmt->u.if_stmt.stmt);
+            AST_stmt_traverse(stmt->u.if_stmt.if_tail); // open_scope ? 
             break;
         case STMT_WHILE: //TODO
+            AST_general_expr_traverse(stmt->u.while_stmt.general_expr);
+            AST_stmt_traverse(stmt->u.while_stmt.stmt);
             break;
         case STMT_FOR: //TODO
+            AST_general_expr_traverse(stmt->u.for_stmt.optexpr1);
+            AST_general_expr_traverse(stmt->u.for_stmt.optexpr2);
+            AST_general_expr_traverse(stmt->u.for_stmt.optexpr3);
+            AST_stmt_traverse(stmt->u.for_stmt.stmt);
             break;
         case STMT_SWITCH: //TODO
+            //return something?
+            AST_general_expr_traverse(stmt->u.switch_stmt.general_expr);
+            AST_switch_tail_traverse(stmt->u.switch_stmt.switch_tail);  
             break;
         case STMT_RETURN: //TODO
             AST_general_expr_traverse(stmt->u.return_stmt.optexpr);
@@ -888,9 +901,9 @@ Type AST_expr_function_call_traverse(AST_variable variable, AST_exprlist exprlis
     return type_basic(TYPE_unknown);
 }
 
-//return AST_variable ? 
+//return something else ? 
 void io_traverse(List io){
-        //variable? TODO: check that one 
+    //variable? TODO: check that one 
     AST_variable var;
     List item = io;
 
@@ -990,4 +1003,72 @@ Type AST_variable_traverse(AST_variable var){
     }
     ASSERT(res != NULL);
     return res;
+}
+
+void AST_switch_tail_traverse(AST_switch_tail tail){
+    // Scope_open ? 
+    switch(tail->kind){
+        case SWITCH_SINGLE_CASE:
+            AST_casestmt_traverse(tail->u.single_case.casestmt);    //TODO
+            break;
+        case SWITCH_DECL_CASES:
+            AST_decl_cases_traverse(tail->u.decl_cases.decl_cases); //TODO
+            break;
+        default:
+            SEMANTIC_ERROR(tail, "Switch tail | Kind undefined."); 
+    } 
+}
+
+void AST_casestmt_traverse(AST_casestmt casestmt){
+    switch(casestmt->kind){
+        case CASE_DEFAULT:  //TODO
+           AST_stmts_traverse(casestmt->u.c_default.stmts);
+           break;
+        case CASE_NEXTCASE:     //TODO
+            AST_constant_traverse(casestmt->u.c_nextcase.constant);
+            AST_casestmt_traverse(casestmt->u.c_nextcase.casestmt);
+            break;
+        case CASE_SINGLE_STMT:  //TODO
+            AST_constant_traverse(casestmt->u.c_single_stmt.constant);
+            AST_stmt_traverse(casestmt->u.c_single_stmt.stmt);
+            break;
+        case CASE_MULTI_STMT:   //TODO
+            AST_constant_traverse(casestmt->u.c_multi_stmt.constant);
+            AST_stmts_traverse(casestmt->u.c_multi_stmt.stmts);
+            break;
+        default:
+            SEMANTIC_ERROR(casestmt, "Casestmt | Kind undefined."); 
+    }
+}
+
+void AST_decl_cases_traverse(AST_decl_cases dcas){
+    switch(dcas->kind){
+        case DC_BOTH:   //TODO
+            AST_declarations_traverse(dcas->u.both.declarations);
+            AST_casestmts_traverse(dcas->u.both.casestmts);
+            break;
+        case DC_DECLARATION_ONLY:   //TODO
+            //check if declaration
+            //AST_declaration_traverse(dcas->u.single.dcls_or_stmts);
+            break;
+        case DC_CASE_ONLY:  //TODO
+            //check if stmt
+            //AST_casestmt_traverse(dcas->u.single.dcls_or_stmts);
+            break;
+        case DC_EMPTY:  //TODO
+            printf("EMPTY decl_case found at %d\n", dcas->lineno);
+            break;
+        default:
+            SEMANTIC_ERROR(dcas, "Decl cases | Kind undefined."); 
+    }
+}   
+
+void AST_casestmts_traverse(List casestmts){
+    List item = casestmts;
+    AST_casestmt casestmt;
+    while(item != NULL){
+        casestmt = item->data;
+        AST_casestmt_traverse(casestmt);
+        item = item->next;
+    }
 }
