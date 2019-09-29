@@ -29,7 +29,6 @@
 - [Disclaimer](#disclaimer)
 - [Security](#security)
 - [Acknowledgements](#acknowledgements)
-- [Contributors ✨](#contributors-%e2%9c%a8)
 
 
 
@@ -133,7 +132,7 @@ For security related issues please read [SECURITY.md][SECURITY].
 
 Hats off to any person whom contributed to this Project, formally or informally. This couldn't be possible without the assistance of these people.
 
-- Professors [G. Dimitriou][GDIMITRIOU] and G. Floros
+- Professors [G. Dimitriou][GDIMITRIOU] and [G. Floros][GFLOROS]
 - Professor [Nikolas Papaspirou](https://www.ece.ntua.gr/gr/staff/71) for providing a more helpful Scope Library (Used in Stage 3)
 - Github project [PASC320](https://github.com/nikolaskostakis/Pasc320-Compiler) by [nikolaskostakis](https://github.com/nikolaskostakis)
 - Github project [Llama Compiler](https://github.com/ychatz/compiler) by [ychatz](https://github.com/ychatz)
@@ -162,7 +161,8 @@ We have borrowed a-freaking-lot of ideas & code from the above guys to make our 
 
 <!-- Helpful Links & People -->
 [CSUTH]: http://cs.uth.gr/
-[GDIMITRIOU]: https://www.e-ce.uth.gr/department/faculty/dimitriu/
+[GDIMITRIOU]: https://www.e-ce.uth.gr/department/faculty/dimitriu/?lang=en
+[GFLOROS]: https://www.e-ce.uth.gr/department/faculty/gefloros/?lang=en
 [C++600.pdf]: https://github.com/WckdAwe/C-600-Compiler/blob/master/c%2B%2B600.pdf
 
 <!-- othneildrew's Best-README-Template -->
@@ -176,12 +176,3 @@ We have borrowed a-freaking-lot of ideas & code from the above guys to make our 
 [issues-url]: https://github.com/WckdAwe/C-600-Compiler/issues
 [license-shield]: https://img.shields.io/github/license/WckdAwe/C-600-Compiler.svg?style=flat-square
 [license-url]: https://github.com/WckdAwe/C-600-Compiler/blob/master/LICENSE.md
-## Contributors ✨
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore -->
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
