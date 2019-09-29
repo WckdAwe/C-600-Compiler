@@ -86,9 +86,10 @@ Thanks goes to these wonderful people ✨:
 <!-- prettier-ignore -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/TheNotoriousCS"><img src="https://avatars0.githubusercontent.com/u/31367091?v=4" width="100px;" alt="TheNotoriousCS"/><br /><sub><b>TheNotoriousCS</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=TheNotoriousCS" title="Code">💻</a> <a href="#content-TheNotoriousCS" title="Content">🖋</a></td>
+    <td align="center"><a href="http://wckdawe.com"><img src="https://avatars0.githubusercontent.com/u/35025427?v=4" width="100px;" alt="WICKEĐ"/><br /><sub><b>WICKEĐ</b></sub></a><br /><a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=WckdAwe" title="Code">💻</a> <a href="#content-WckdAwe" title="Content">🖋</a> <a href="https://github.com/WckdAwe/C-600-Compiler/commits?author=WckdAwe" title="Tests">⚠️</a> <a href="https://github.com/WckdAwe/C-600-Compiler/issues?q=author%3AWckdAwe" title="Bug reports">🐛</a></td>
   </tr>
 </table>
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 <!-- Authors -->
