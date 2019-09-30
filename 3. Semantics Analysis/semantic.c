@@ -923,7 +923,7 @@ Type AST_general_expr_traverse(AST_general_expr gexpr){
             type2 = AST_general_expr_traverse(gexpr->u.gexpr.general_expr2);    // is this ok?
             
             if(!type_eq(type1, type2)){
-                SEMANTIC_ERROR(gexpr, "General expr | GExpr types do not match.")
+                SEMANTIC_ERROR(gexpr, "General expr | GExpr types do not match.");
             }
             break;
         case GEXPR_ASSIGNMENT:
