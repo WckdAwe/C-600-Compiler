@@ -14,10 +14,10 @@
 
 
 /* ---------------------------------------------------------------------
-   ------------------------- Ορισμός τύπων -----------------------------
+   ------------------------- Type definitions --------------------------
    --------------------------------------------------------------------- */
 
-/* Δηλώσεις */
+/* AST statements */
 typedef struct AST_program_tag                  * AST_program;
 typedef struct AST_global_decl_tag              * AST_global_decl;
 typedef struct AST_variable_tag                 * AST_variable;
@@ -114,7 +114,7 @@ struct AST_expr_tag {
             AST_binop op;
             AST_expr expr2;
         } e_binop;
-        struct{ // TODO: Verify this? Grigoraki mas katastrefeis...
+        struct{ // TODO: Verify this? Grigoraki mas katastrefeis...  ||English translation : Grigoraki you let us down||
             AST_variable variable;
             AST_exprlist list;
         } e_call;
@@ -196,7 +196,7 @@ struct AST_global_decl_tag{
 };
 
 
-/* Απαριθμήσεις τελεστών */
+/* Operators */
 struct AST_variable_tag{
     // ABSTRACT
     enum{

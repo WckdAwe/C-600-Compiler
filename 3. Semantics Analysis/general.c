@@ -18,7 +18,7 @@ int lineno;
 bool flagVerbose = true;
 
 /* ---------------------------------------------------------------------
-   ------------ Συνάρτηση κατακερματισμού για αναγνωριστικά ------------
+   ------------------- Hash function for ids ---------------------------
    --------------------------------------------------------------------- */
 
 typedef unsigned long int HashType;
@@ -49,7 +49,7 @@ static HashType PJW_hash (const char * key)
 
 
 /* ---------------------------------------------------------------------
-   --------------------------- Αναγνωριστικά ---------------------------
+   --------------------------- Ids -------------------------------------
    --------------------------------------------------------------------- */
 
 static Identifier id_make_new (const char * name, Identifier next)
@@ -62,13 +62,15 @@ static Identifier id_make_new (const char * name, Identifier next)
     return result;
 }
 
-/* Το μέγεθος του πίνακα κατακερματισμού πρέπει να είναι πρώτος αριθμός */
+/* Hash table size must be a prime number*/
 
 #define SIZE 193
 
-/* Εκμεταλλευόμαστε το γεγονός ότι οι (static) global μεταβλητές
-   αρχικοποιούνται: αρχικά θα έχουμε hashtable[i] == NULL για κάθε i.
-   Για την επαναρχικοποίησή του μπορεί να χρησιμοποιηθεί η id_reset. */
+
+/* We use the fact that (static) global variables must be initialized:
+   first we have hashtable[i] == NULL for every i. To re-initialize them
+   we can use the id_reset function 
+ */
 
 static Identifier hashtable [SIZE];
 
@@ -92,8 +94,10 @@ const char * id_name (Identifier id)
     return id->name;
 }
 
-/* ΠΡΟΣΟΧΗ: Κλήση της παρακάτω συνάρτησης αν ακόμα βρίσκονται αναγνωριστικά σε
-   χρήση θα έχει απρόβλεπτες συνέπειες. */
+
+/* WARNING: by calling the next function while ids are in use will cause 
+   unpredictable concequenses
+ */
 
 void id_reset ()
 {
@@ -104,7 +108,7 @@ void id_reset ()
 }
 
 /* ---------------------------------------------------------------------
-   ------------- Ελεγχόμενος τερματισμός του μεταγλωττιστή -------------
+   ------------- Controlled termination of the compiler ----------------
    --------------------------------------------------------------------- */
 
 // void terminate(int code)
