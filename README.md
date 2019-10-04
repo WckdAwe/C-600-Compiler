@@ -58,7 +58,7 @@ We have separated our workload into 3 stages. Each stage contains execution inst
 See:
  - [Stage 1 - Lexical Analysis][STAGE1]
  - [Stage 2 - Syntax Analysis][STAGE2]
- - [Stage 3 - Semantics Analysis][STAGE3]
+ - [Stage 3 - Semantics Analysis][STAGE3] - (45% Complete... But you'll get the idea!)
 
 But **before proceeding to these steps**, make sure to have installed any dependencies such as **Flex** and **Bison**
 
